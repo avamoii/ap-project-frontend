@@ -16,7 +16,8 @@ public class SignupController {
 
     @FXML
     private PasswordField passwordField;
-
+@FXML
+private TextField emailField;
     @FXML
     private TextField usernameField;
 
@@ -39,9 +40,10 @@ public class SignupController {
     @FXML
     void handleSignup(ActionEvent event) {
         String username = usernameField.getText();
+        String email = emailField.getText();
         String password = passwordField.getText();
 
-        if (username.isEmpty() || password.isEmpty()) {
+        if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
 
             System.out.println("پر کردن هر دو فیلد الزامی است!");
             return;
@@ -50,6 +52,7 @@ public class SignupController {
 
         // پاک کردن فیلدها پس از موفقیت
         usernameField.clear();
+        emailField.clear();
         passwordField.clear();
     }
 

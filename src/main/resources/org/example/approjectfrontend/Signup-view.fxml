@@ -15,6 +15,7 @@
 
    <Label text="Sign up" />
    <TextField fx:id="usernameField" prefHeight="27.0" prefWidth="453.0" promptText="username" />
+   <TextField fx:id="emailField" prefHeight="27.0" prefWidth="453.0" promptText="email" />
    <PasswordField fx:id="passwordField" promptText="password" />
    <Button mnemonicParsing="false" onAction="#handleSignup" text="Sign up" />
    <Hyperlink onAction="#gotoLogin" text="go to login" />
