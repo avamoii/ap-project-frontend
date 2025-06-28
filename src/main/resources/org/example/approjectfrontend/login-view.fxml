@@ -1,20 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" spacing="20" xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.approjectfrontend.LoginController">
-    <padding>
-        <Insets top="20" left="20" right="20" bottom="20"/>
-    </padding>
-
-    <Label text="Login"/>
-    <TextField fx:id="usernameField" promptText="Username"/>
-    <PasswordField fx:id="passwordField" promptText="Password"/>
-    <Button text="LOGIN" onAction="#handleLogin"/>
-    <Hyperlink text="go to sign up" onAction="#goToSignUp"/>
-    <Label fx:id="errorLabel" textFill="red"/>
-</VBox>
+<HBox prefHeight="400.0" prefWidth="727.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.LoginController">
+   <children>
+      <ImageView fitHeight="440.0" fitWidth="327.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../../../../../../../Downloads/1000048034.jpg" />
+         </image>
+      </ImageView>
+      <VBox alignment="CENTER" prefHeight="400.0" prefWidth="531.0" spacing="20">
+          <padding>
+              <Insets bottom="20" left="20" right="20" top="20" />
+          </padding>
+      
+          <Label prefHeight="68.0" prefWidth="110.0" text="LOGIN" textFill="#a94b4b">
+            <font>
+               <Font name="Yu Gothic UI Semilight" size="34.0" />
+            </font>
+         </Label>
+          <TextField fx:id="usernameField" promptText="Username">
+            <font>
+               <Font size="16.0" />
+            </font>
+         </TextField>
+          <PasswordField fx:id="passwordField" promptText="Password">
+            <font>
+               <Font size="16.0" />
+            </font>
+         </PasswordField>
+          <Button onAction="#handleLogin" text="LOGIN" />
+         <Label prefHeight="19.0" prefWidth="134.0" text="Don't have an account?" />
+          <Hyperlink onAction="#goToSignUp" text="go to sign up" textFill="#dc6868" />
+          <Label fx:id="errorLabel" textFill="red" />
+      </VBox>
+   </children>
+</HBox>
