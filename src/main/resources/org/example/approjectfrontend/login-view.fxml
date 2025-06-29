@@ -42,7 +42,7 @@
           <Button onAction="#handleLogin" text="LOGIN" />
          <Label prefHeight="19.0" prefWidth="134.0" text="Don't have an account?" />
           <Hyperlink onAction="#goToSignUp" text="go to sign up" textFill="#dc6868" />
-          <Label fx:id="errorLabel" textFill="red" />
+          <Label fx:id="messageLabel" textFill="red" />
       </VBox>
    </children>
 </HBox>

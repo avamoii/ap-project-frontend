@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 public class SignupApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
+        DatabaseHelper.initialize();
         FXMLLoader fxmlLoader = new FXMLLoader(SignupApplication.class.getResource("Signup-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Sign Up :>");

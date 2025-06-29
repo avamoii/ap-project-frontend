@@ -10,16 +10,19 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
 
 
 public class SignupController {
 
     @FXML
     private PasswordField passwordField;
-@FXML
-private TextField emailField;
+    @FXML
+    private TextField emailField;
     @FXML
     private TextField usernameField;
+    @FXML
+    private Label messageLabel;
 
     @FXML
     void gotoLogin(ActionEvent event) {
@@ -39,21 +42,27 @@ private TextField emailField;
 
     @FXML
     void handleSignup(ActionEvent event) {
-        String username = usernameField.getText();
-        String email = emailField.getText();
-        String password = passwordField.getText();
+        String username = usernameField.getText().trim();
+        String email = emailField.getText().trim();
+        String password = passwordField.getText().trim();
 
         if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
 
-            System.out.println("پر کردن هر دو فیلد الزامی است!");
+            messageLabel.setText("پر کردن هر دو فیلد الزامی است!");
             return;
         }
+        if (!email.matches(".+@.+\\..+")) {
+            messageLabel.setText("ایمیل معتبر وارد کنید.");
+            return;
+        }
+        boolean success = DatabaseHelper.registerUser(username, password, email);
+        if (success) {
+            messageLabel.setText("ثبت نام با موفقیت انجام شد!");
 
+        } else {
+            messageLabel.setText("خطا: نام کاربری یا ایمیل قبلاً استفاده شده است.");
+        }
 
-        // پاک کردن فیلدها پس از موفقیت
-        usernameField.clear();
-        emailField.clear();
-        passwordField.clear();
     }
 
 }

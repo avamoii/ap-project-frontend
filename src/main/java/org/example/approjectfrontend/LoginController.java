@@ -10,7 +10,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import java.io.IOException;
-
+import javafx.scene.control.Label;
 
 public class LoginController {
 
@@ -19,6 +19,8 @@ public class LoginController {
 
     @FXML
     private TextField usernameField;
+    @FXML
+    private Label messageLabel;
 
     @FXML
     void goToSignUp(ActionEvent event) {
@@ -36,19 +38,21 @@ public class LoginController {
 
     @FXML
     void handleLogin(ActionEvent event) {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
+        String username = usernameField.getText().trim();
+        String password = passwordField.getText().trim();
 
         if (username.isEmpty() || password.isEmpty()) {
 
-            System.out.println("پر کردن هر دو فیلد الزامی است!");
+           messageLabel.setText("پر کردن هر دو فیلد الزامی است!");
+            return;
+        }
+         if (!DatabaseHelper.checkLogin(username, password)) {
+            messageLabel.setText("نام کاربری یا رمز عبور غلط است.");
             return;
         }
 
 
-        // پاک کردن فیلدها پس از موفقیت
-        usernameField.clear();
-        passwordField.clear();
+
     }
 
 }
