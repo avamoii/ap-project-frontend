@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.RadioButton;
 import javafx.stage.Stage;
 import java.io.IOException;
 import javafx.scene.control.PasswordField;
@@ -22,12 +23,20 @@ public class SignupController {
     @FXML
     private TextField usernameField;
     @FXML
+    private TextField phoneField;
+    @FXML
     private Label messageLabel;
+    @FXML
+    private RadioButton buyerRadio;
+    @FXML
+    private RadioButton sellerRadio;
+    @FXML
+    private RadioButton courierRadio;
 
     @FXML
     void gotoLogin(ActionEvent event) {
       try {
-          FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/login-view.fxml"));
+          FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/Login-view.fxml"));
 
         Parent loginRoot = loader.load();
         Scene loginScene = new Scene(loginRoot);
@@ -45,24 +54,60 @@ public class SignupController {
         String username = usernameField.getText().trim();
         String email = emailField.getText().trim();
         String password = passwordField.getText().trim();
-
-        if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-
-            messageLabel.setText("پر کردن هر دو فیلد الزامی است!");
+        String phone = phoneField.getText();
+        String role = null;
+        if (buyerRadio.isSelected()) {
+            role = "buyer";
+        } else if (sellerRadio.isSelected()) {
+            role = "seller";
+        } else if (courierRadio.isSelected()) {
+            role = "courier";
+        }
+        if (role == null) {
+            messageLabel.setText("لطفاً یکی از نقش‌ها را انتخاب کنید.");
             return;
         }
-        if (!email.matches(".+@.+\\..+")) {
+
+        if (username.isEmpty() || password.isEmpty() || phone.isEmpty()) {
+
+            messageLabel.setText("ورود اطلاعات(بجز ایمیل) اجباری است.");
+            return;
+        }
+        if (!phone.matches("^09\\d{9}$")) {
+            messageLabel.setText("شماره تماس را صحیح وارد نمایید. (مانند 09111111111)");
+            return;
+        }
+        if ( !email.isEmpty() &&  !email.matches(".+@.+\\..+")) {
             messageLabel.setText("ایمیل معتبر وارد کنید.");
             return;
         }
-        boolean success = DatabaseHelper.registerUser(username, password, email);
+        boolean success = DatabaseHelper.registerUser(username, password, email, phone,role);
         if (success) {
-            messageLabel.setText("ثبت نام با موفقیت انجام شد!");
+            if (role.equals("buyer") || role.equals("seller")) {
+                // انتقال به صفحه وارد کردن آدرس
+                gotoAddressPage(event, username);
+            } else {
+                messageLabel.setText("ثبت نام با موفقیت انجام شد!");
+
+            }
 
         } else {
-            messageLabel.setText("خطا: نام کاربری یا ایمیل قبلاً استفاده شده است.");
+            messageLabel.setText("خطا: اطلاعات قبلاً استفاده شده است.");
         }
 
     }
+    private void gotoAddressPage(ActionEvent event, String username) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/Address-view.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }

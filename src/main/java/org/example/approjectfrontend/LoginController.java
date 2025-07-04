@@ -50,9 +50,33 @@ public class LoginController {
             messageLabel.setText("نام کاربری یا رمز عبور غلط است.");
             return;
         }
+        String role = DatabaseHelper.getUserRole(username);
+        if (role == null) {
+            messageLabel.setText("خطا در دریافت نقش کاربر!");
+            return;
+        }
+
+        // نقش بر اساس دیتابیس تعیین می‌شود؛ باید ریدایرکت صورت بگیرد
+        if (role.equals("buyer") || role.equals("seller")) {
+            gotoAddressPage(event, username);
+        }
 
 
+    }
+    private void gotoAddressPage(ActionEvent event, String username) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/Address-view.fxml"));
+            Parent root = loader.load();
+            // اختیاری: ارسال username به کنترلر مقصد
+            // org.example.approjectfrontend.AddressController controller = loader.getController();
+            // controller.setUsername(username);
 
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

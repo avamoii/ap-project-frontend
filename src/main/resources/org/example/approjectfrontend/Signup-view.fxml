@@ -5,50 +5,45 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<VBox xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.approjectfrontend.SignupController"
+      alignment="CENTER" spacing="16"
+      style="-fx-background-color: #f3f6fa; -fx-min-height: 100vh;">
 
-<HBox xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.SignupController">
-   <children>
-      <ImageView fitHeight="511.0" fitWidth="353.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../../../../../../../Downloads/1000048034.jpg" />
-         </image>
-      </ImageView>
-      <VBox fx:id="messageLable" alignment="CENTER" prefHeight="286.0" prefWidth="401.0" spacing="20.0" style="-fx-background-insets: 90;">
-      
-         <Label text="SIGN UP" textFill="#a15050">
-            <font>
-               <Font name="Yu Gothic UI Semilight" size="33.0" />
-            </font>
-         </Label>
-         <TextField fx:id="usernameField" prefHeight="27.0" prefWidth="453.0" promptText="username">
-            <font>
-               <Font name="Yu Gothic UI Semilight" size="16.0" />
-            </font>
-         </TextField>
-         <TextField fx:id="emailField" prefHeight="27.0" prefWidth="453.0" promptText="email">
-            <font>
-               <Font size="16.0" />
-            </font>
-         </TextField>
-         <PasswordField fx:id="passwordField" promptText="password">
-            <font>
-               <Font size="16.0" />
-            </font>
-         </PasswordField>
-         <Button mnemonicParsing="false" onAction="#handleSignup" text="Sign up" />
-         <Label text="Already have an account?" />
-         <Hyperlink onAction="#gotoLogin" text="go to login" textFill="#df6767" />
-         <Label fx:id="messageLabel" />
-         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding>
+   <VBox alignment="CENTER" spacing="12"
+         style="-fx-background-color: white; -fx-padding: 34; -fx-border-radius: 18px; -fx-background-radius: 18px; -fx-effect: dropshadow(three-pass-box, #bbb, 16, 0.28, 0, 3);">
+
+      <Label text="ایجاد حساب کاربری" textFill="#a94b4b"
+             style="-fx-font-size: 30px; -fx-font-family: 'Yu Gothic UI Semilight'; -fx-font-weight: bold;" />
+
+      <TextField fx:id="usernameField" promptText="نام کاربری" style="-fx-font-size: 16px;"/>
+      <TextField fx:id="emailField" promptText="ایمیل (اختیاری)" style="-fx-font-size: 16px;"/>
+      <PasswordField fx:id="passwordField" promptText="رمز عبور" style="-fx-font-size: 16px;"/>
+      <TextField fx:id="phoneField" promptText="شماره تلفن" style="-fx-font-size: 16px;"/>
+
+      <Label text="نقش خود را انتخاب کنید:"/>
+      <VBox spacing="6">
+         <RadioButton fx:id="buyerRadio" text="خریدار">
+            <toggleGroup>
+               <ToggleGroup fx:id="roleGroup" />
+            </toggleGroup>
+         </RadioButton>
+         <RadioButton fx:id="sellerRadio" text="فروشنده" toggleGroup="$roleGroup"/>
+         <RadioButton fx:id="courierRadio" text="پیک" toggleGroup="$roleGroup"/>
       </VBox>
-   </children>
-</HBox>
+
+      <Button mnemonicParsing="false" onAction="#handleSignup" text="ثبت‌نام"
+              style="-fx-background-color: #a94b4b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8px; -fx-font-size: 15px;" prefWidth="130"/>
+
+      <Label text="حساب کاربری دارید؟"/>
+      <Hyperlink onAction="#gotoLogin" text="وارد شوید" textFill="#df6767" style="-fx-font-size: 15px;"/>
+      <Label fx:id="messageLabel" textFill="red" />
+
+   </VBox>
+</VBox>
