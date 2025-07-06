@@ -68,46 +68,23 @@ public class SignupController {
             return;
         }
 
-        if (username.isEmpty() || password.isEmpty() || phone.isEmpty()) {
+       else if (username.isEmpty() || password.isEmpty() || phone.isEmpty()) {
 
             messageLabel.setText("ورود اطلاعات(بجز ایمیل) اجباری است.");
             return;
         }
-        if (!phone.matches("^09\\d{9}$")) {
+        else if (!phone.matches("^09\\d{9}$")) {
             messageLabel.setText("شماره تماس را صحیح وارد نمایید. (مانند 09111111111)");
             return;
         }
-        if ( !email.isEmpty() &&  !email.matches(".+@.+\\..+")) {
+       else if ( !email.isEmpty() &&  !email.matches(".+@.+\\..+")) {
             messageLabel.setText("ایمیل معتبر وارد کنید.");
             return;
         }
-        boolean success = DatabaseHelper.registerUser(username, password, email, phone,role);
-        if (success) {
-            if (role.equals("buyer") || role.equals("seller")) {
-                // انتقال به صفحه وارد کردن آدرس
-                gotoAddressPage(event, username);
-            } else {
-                messageLabel.setText("ثبت نام با موفقیت انجام شد!");
-
-            }
-
-        } else {
-            messageLabel.setText("خطا: اطلاعات قبلاً استفاده شده است.");
+       else{
+           messageLabel.setText("ثبت نام موفقیت امیز بود.");
         }
 
     }
-    private void gotoAddressPage(ActionEvent event, String username) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/Address-view.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
 }
