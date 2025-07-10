@@ -29,6 +29,8 @@ public class ProfileController {
     private Button saveButton;
     @FXML
     private Label messageLabel;
+    @FXML
+    private Button goToHomeButton;
 
     private File selectedImageFile = null;
 
@@ -85,4 +87,5 @@ public class ProfileController {
         // اگر نیاز داری عکس هم ذخیره شود می‌تونی selectedImageFile را به backend ارسال کنی
         // اگر کاربر عکسی انتخاب نکرده بود، selectedImageFile هنوز null هست (موردی ندارد)
     }
+
 }

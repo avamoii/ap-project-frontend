@@ -5,6 +5,8 @@ module org.example.approjectfrontend {
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
+    requires java.net.http;
+
 
     opens org.example.approjectfrontend to javafx.fxml;
     exports org.example.approjectfrontend;

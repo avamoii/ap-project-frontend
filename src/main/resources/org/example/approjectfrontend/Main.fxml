@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+
+
+<BorderPane xmlns="http://javafx.com/javafx/23.0.1"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.approjectfrontend.MainController">
+    <center>
+        <AnchorPane fx:id="contentArea" />
+    </center>
+</BorderPane>

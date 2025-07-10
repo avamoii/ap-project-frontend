@@ -19,7 +19,7 @@
         <Label text="ورود به حساب" textFill="#388e3c"
                style="-fx-font-size: 30px; -fx-font-family: 'Vazirmatn', 'Yu Gothic UI Semilight'; -fx-font-weight: bold;" />
 
-        <TextField fx:id="usernameField" promptText="نام کاربری" style="-fx-font-size: 16px;"/>
+        <TextField fx:id="phonenumberField" promptText="شماره تماس" style="-fx-font-size: 16px;"/>
         <PasswordField fx:id="passwordField" promptText="رمز عبور" style="-fx-font-size: 16px;"/>
 
         <Button onAction="#handleLogin" text="ورود"

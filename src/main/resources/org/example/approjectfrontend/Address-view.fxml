@@ -7,6 +7,7 @@
 <?import javafx.geometry.Insets?>
 
 <VBox xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.approjectfrontend.AddressController"
       alignment="CENTER" spacing="20.0" prefWidth="400" prefHeight="280"
       style="-fx-background-color: #f7f7fa; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, #cccccc, 10, 0.5, 0, 4);">
    <children>
@@ -15,8 +16,9 @@
       <TextField fx:id="addressField" promptText="مثلاً: تهران، خیابان... "
                  style="-fx-font-size: 14px; -fx-padding: 8 10 8 10;  -fx-background-radius:8;"/>
 
-      <Button text="ثبت آدرس"
-              style="-fx-background-color: #44c767; -fx-text-fill: white; -fx-font-size: 15px; -fx-background-radius: 10;"/>
+      <Button  fx:id="submitButton" text="ثبت آدرس"
+              style="-fx-background-color: #44c767; -fx-text-fill: white; -fx-font-size: 15px; -fx-background-radius: 10;" onAction="#handleSubmit"/>
+      <Label fx:id="messageLabel" style="-fx-text-fill: #e74c3c; -fx-font-size: 14px;"/>
    </children>
    <padding>
       <Insets top="35" right="30" bottom="35" left="30"/>
