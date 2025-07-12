@@ -7,6 +7,6 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.approjectfrontend.MainController">
     <center>
-        <AnchorPane fx:id="contentArea" />
+        <AnchorPane fx:id="contentArea" prefWidth="400.0" prefHeight="600.0" />
     </center>
 </BorderPane>

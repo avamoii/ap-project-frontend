@@ -1,4 +1,4 @@
 package org.example.approjectfrontend;
 
-public class OrderHistoryController {
+public class BuyerHomeController {
 }

@@ -14,6 +14,8 @@ public class MainApplication extends Application {
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("snapfood");
         stage.setScene(scene);
+        stage.setWidth(400);
+        stage.setHeight(600);
         stage.show();
     }
 

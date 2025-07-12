@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.control.Label?>
-<VBox alignment="CENTER" prefHeight="550" prefWidth="400" spacing="20" style="-fx-background-color: #f6fff6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.ProfileController">
+<VBox alignment="CENTER" prefHeight="550" prefWidth="400" spacing="20" style="-fx-background-color: #f6fff6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.CourierProfileController">
     <padding>
         <Insets bottom="32" left="32" right="32" top="32" />
     </padding>
@@ -16,14 +16,11 @@
 
     <Button fx:id="uploadButton" style="-fx-background-color: #54C16E; -fx-text-fill: white; -fx-background-radius: 20;" text="انتخاب عکس" />
 
-    <TextField fx:id="addressField" promptText="آدرس" style="-fx-background-radius: 10;" />
-
+    <TextField fx:id="usernameField" promptText="نام کاربری" style="-fx-background-radius: 10;" />
+    <TextField fx:id="emailField" promptText="ایمیل" style="-fx-background-radius: 10;" />
     <TextField fx:id="phoneField" promptText="شماره تماس" style="-fx-background-radius: 10;" />
-
     <TextField fx:id="bankNameField" promptText="نام بانک" style="-fx-background-radius: 10;" />
-
-    <TextField fx:id="bankAccountField" promptText="شماره حساب" style="-fx-background-radius: 10;" />
-
+    <TextField fx:id="accountNumberField" promptText="شماره اکانت" style="-fx-background-radius: 10;" />
     <Button fx:id="saveButton" style="-fx-background-color: #54C16E; -fx-text-fill: white; -fx-background-radius: 20;" text="ذخیره پروفایل" />
     <Label fx:id="messageLabel" textFill="green" />
 
