@@ -22,6 +22,9 @@ public class CourierProfileController implements Initializable {
     @FXML
     private Button saveButton;
     @FXML
+    private Button logoutButton;
+
+    @FXML
     private Label messageLabel;
 
     private File profileImageFile = null;
@@ -30,6 +33,22 @@ public class CourierProfileController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         uploadButton.setOnAction(event -> chooseProfileImage());
         saveButton.setOnAction(event -> handleSaveProfile());
+        logoutButton.setOnAction(event -> handleLogout());
+    }
+    private void handleLogout() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("Login-view.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            javafx.stage.Stage stage = (javafx.stage.Stage) logoutButton.getScene().getWindow();
+
+            javafx.scene.Scene scene = new javafx.scene.Scene(root);
+
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void chooseProfileImage() {

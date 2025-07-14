@@ -1,12 +1,18 @@
 package org.example.approjectfrontend;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 
+import javafx.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -22,6 +28,14 @@ public class SellerProfileController implements Initializable {
     @FXML
     private Button saveButton;
     @FXML
+    private Button logoutButton;
+    @FXML
+    private Button homeButton;
+    @FXML
+    private Button myRestaurantButton;
+    @FXML
+    private Button profileButton;
+    @FXML
     private Label messageLabel;
 
     private File profileImageFile = null;
@@ -31,7 +45,25 @@ public class SellerProfileController implements Initializable {
 
         uploadButton.setOnAction(event -> chooseProfileImage());
         saveButton.setOnAction(event -> handleSaveProfile());
+        logoutButton.setOnAction(event -> handleLogout());
     }
+    private void handleLogout() {
+        try {
+
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("Login-view.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            javafx.stage.Stage stage = (javafx.stage.Stage) logoutButton.getScene().getWindow();
+
+            javafx.scene.Scene scene = new javafx.scene.Scene(root);
+
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void chooseProfileImage() {
         FileChooser fileChooser = new FileChooser();
@@ -103,6 +135,19 @@ public class SellerProfileController implements Initializable {
                 messageLabel.setText("خطای ناشناخته.");
         }
     }
+    @FXML
+    private void goToHome(ActionEvent event) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("SellerHome-view.fxml"));
+        Scene scene = ((Node) event.getSource()).getScene();
+        scene.setRoot(root);
+    }
+
+    @FXML
+    private void goToMyRestaurant(ActionEvent event) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("RegisterRestaurant-view.fxml"));
+        Scene scene = ((Node) event.getSource()).getScene();
+        scene.setRoot(root);
+    }
 
     // تابع mock شبیه‌ساز پاسخ سرور
     private int mockSaveProfileToBackend(String username, String email, String address, String phone,
@@ -121,4 +166,6 @@ public class SellerProfileController implements Initializable {
 
         return 200;
     }
+
+
 }
