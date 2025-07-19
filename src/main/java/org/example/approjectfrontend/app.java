@@ -9,7 +9,7 @@ import java.io.IOException;
 public class app extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("RestaurantMenu-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("RegisterRestaurant-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("snap");
         stage.setScene(scene);

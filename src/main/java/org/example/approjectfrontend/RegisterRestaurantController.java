@@ -31,9 +31,12 @@ public class RegisterRestaurantController implements Initializable {
     private Button chooseLogoButton, registerButton;
     @FXML
     private Label messageLabel;
-
+    private Restaurant restaurant;
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
+        // اینجا می‌تونی اطلاعات را load or show کنی
+    }
     private File logoFile = null; // فایل لوگو
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         chooseLogoButton.setOnAction(event -> chooseLogo());
@@ -58,26 +61,26 @@ public class RegisterRestaurantController implements Initializable {
         String address = addressField.getText().trim();
         String phone = phoneField.getText().trim();
 
-        // اعتبارسنجی اولیه
-        if (name.isEmpty() || address.isEmpty() || phone.isEmpty()) {
-            handleApiResponse(400);
-            return;
-        }
-
         // قسمت موک: کاملاً تصادفی - یا با توجه به مقدار خاصی
         // مثلاً اگه نام با "A" شروع بشه بگو موفق بود!، اگه با "X" شروع بشه بگو خطا
         int statusCode = mockStatusCode(name);
 
         handleApiResponse(statusCode);
+        if (statusCode == 201) {
+            Image logo = logoImageView.getImage(); // اگر لوگو داری
+            Restaurant newRestaurant = new Restaurant(name, logo);
+            DataManager.restaurants.add(newRestaurant);
+
+        }
     }
 
     // فانکشن موک انتخاب کد وضعیت (برای تست)
     private int mockStatusCode(String name) {
-        if (name.startsWith("A")) return 201; // موفق
+        if (name.startsWith("A")) return 401;
         if (name.startsWith("X")) return 500; // سرور
         if (name.startsWith("E")) return 401; // دسترسی
         if (name.length() < 2) return 409;    // تکراری
-return 400;
+return 201;
     }
 
     private void handleApiResponse(int statusCode) {

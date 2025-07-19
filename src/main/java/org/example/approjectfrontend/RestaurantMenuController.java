@@ -21,7 +21,11 @@ public class RestaurantMenuController {
     @FXML private TextField itemNameField, itemDescField, itemPriceField, itemSupplyField, itemKeywordsField;
     @FXML private Button chooseImageBtn, addItemBtn;
     @FXML private ImageView itemImageView;
-
+    private Restaurant restaurant;
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
+        // اینجا می‌تونی اطلاعات را load or show کنی
+    }
     private ObservableList<RestaurantMenuItem> menuItems = FXCollections.observableArrayList();
     private RestaurantMenuItem editingItem = null;
     private Image selectedImage = null; // عکس انتخابی موقت
