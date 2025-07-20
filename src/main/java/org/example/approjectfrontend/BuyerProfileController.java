@@ -1,10 +1,14 @@
 package org.example.approjectfrontend;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.net.URL;
@@ -24,7 +28,10 @@ public class BuyerProfileController implements Initializable {
     private Button logoutButton;
     @FXML
     private Label messageLabel;
-
+    @FXML private Button profileBtn;
+    @FXML private Button homeBtn;
+    @FXML
+    private Button historyBtn;
     private File profileImageFile = null;
 
     @Override
@@ -32,6 +39,29 @@ public class BuyerProfileController implements Initializable {
         uploadButton.setOnAction(event -> chooseProfileImage());
         saveButton.setOnAction(event -> handleSaveProfile());
         logoutButton.setOnAction(event -> handleLogout());
+        homeBtn.setOnAction(e -> goToHome());
+        historyBtn.setOnAction(e -> goToHistory());
+        profileBtn.setDisable(true);
+    }    private void goToHome() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("BuyerHome-view.fxml"));
+            // فرض: دستیابی به stage از طریق یک کامپوننت صفحه فعلی
+            Stage stage = (Stage) profileBtn.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace(); // برای رفع خطاها
+        }
+    }
+
+    private void goToHistory() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("BuyerHistory-view.fxml"));
+            // فرض: دستیابی به stage از طریق یک کامپوننت صفحه فعلی
+            Stage stage = (Stage) profileBtn.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace(); // برای رفع خطاها
+        }
     }
     private void handleLogout() {
         try {

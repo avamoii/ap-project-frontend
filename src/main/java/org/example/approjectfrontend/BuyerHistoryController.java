@@ -7,7 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
-public class BuyerHomeController {
+public class BuyerHistoryController {
     @FXML private Button profileBtn;
     @FXML private Button homeBtn;
     @FXML
@@ -16,8 +16,8 @@ public class BuyerHomeController {
     @FXML
     public void initialize() {
         profileBtn.setOnAction(e -> goToProfile());
-        historyBtn.setOnAction(e -> goToHistory());
-        homeBtn.setDisable(true);
+        homeBtn.setOnAction(e -> goToHome());
+        historyBtn.setDisable(true);
     }
 
     private void goToProfile() {
@@ -31,9 +31,9 @@ public class BuyerHomeController {
         }
     }
 
-    private void goToHistory() {
+    private void goToHome() {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("BuyerHistory-view.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("BuyerHome-view.fxml"));
             // فرض: دستیابی به stage از طریق یک کامپوننت صفحه فعلی
             Stage stage = (Stage) profileBtn.getScene().getWindow();
             stage.setScene(new Scene(root));
