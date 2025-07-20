@@ -19,7 +19,7 @@ public class RestaurantMenuController {
     @FXML private TableColumn<RestaurantMenuItem, Void> colDelete;
 
     @FXML private TextField itemNameField, itemDescField, itemPriceField, itemSupplyField, itemKeywordsField;
-    @FXML private Button chooseImageBtn, addItemBtn;
+    @FXML private Button chooseImageBtn, addItemBtn,clearMenuBtn;
     @FXML private ImageView itemImageView;
     private Restaurant restaurant;
     public void setRestaurant(Restaurant restaurant) {
@@ -59,6 +59,7 @@ public class RestaurantMenuController {
         colName.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getName()));
         colPrice.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getPrice()));
         colSupply.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getSupply()));
+        clearMenuBtn.setOnAction(e -> handleClearMenu());
 
         addEditButtonToTable();
         addDeleteButtonToTable();
@@ -66,6 +67,20 @@ public class RestaurantMenuController {
         addItemBtn.setOnAction(e -> handleAddOrEditItem());
         chooseImageBtn.setOnAction(e -> handleChooseImage());
     }
+    private void handleClearMenu() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "آیا از حذف کل آیتم‌های منو مطمئن هستید؟", ButtonType.YES, ButtonType.NO);
+        alert.setHeaderText(null);
+        alert.showAndWait();
+        if (alert.getResult() == ButtonType.YES) {
+            menuItems.clear();
+            menuTable.refresh();
+            showAlert("تمام آیتم‌های منو حذف شدند.", Alert.AlertType.INFORMATION);
+            clearFields();
+            editingItem = null;
+            addItemBtn.setText("افزودن آیتم");
+        }
+    }
+
 
     private void addEditButtonToTable() {
         colEdit.setCellFactory(param -> new TableCell<>() {

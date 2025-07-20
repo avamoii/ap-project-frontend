@@ -27,6 +27,7 @@
             <HBox spacing="10">
                 <Button fx:id="chooseImageBtn" onAction="#handleChooseImage" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="انتخاب عکس" />
                 <Button fx:id="addItemBtn" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="افزودن آیتم" />
+                <Button fx:id="clearMenuBtn" style="-fx-background-color: #d9534f; -fx-text-fill: white;" text="حذف کل منو" />
             </HBox>
          <ImageView  fx:id="itemImageView" fitHeight="76.0" fitWidth="86.0" pickOnBounds="true" preserveRatio="true" />
         </VBox>

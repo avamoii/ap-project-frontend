@@ -85,6 +85,7 @@ return 201;
 
     private void handleApiResponse(int statusCode) {
         switch (statusCode) {
+            case 200:
             case 201:
                 showMessage("رستوران با موفقیت ثبت شد!", "green");
                 break;
