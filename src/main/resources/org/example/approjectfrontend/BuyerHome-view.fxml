@@ -4,7 +4,21 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.BuyerHomeController">
+    <TextField fx:id="searchField"
+               promptText="جستجو..."
+               AnchorPane.topAnchor="20.0"
+               AnchorPane.leftAnchor="50.0"
+               AnchorPane.rightAnchor="50.0"
+               prefHeight="36.0"/>
+
+    <!-- لیست رستوران‌ها -->
+    <ScrollPane fitToWidth="true" AnchorPane.topAnchor="70.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.bottomAnchor="70.0">
+        <VBox fx:id="restaurantListVBox" spacing="10" style="-fx-padding:10;" />
+    </ScrollPane>
     <HBox alignment="CENTER" layoutX="164.0" layoutY="360.0" prefHeight="14.0" prefWidth="273.0" spacing="0" style="-fx-background-color: #27ae60;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="164.0" AnchorPane.rightAnchor="163.20000000000005">
         <Button fx:id="profileBtn" prefHeight="40.0" prefWidth="142.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-pref-width: 180px;" text="پروفایل" />
         <Button fx:id="homeBtn" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-pref-width: 180px;" text="خانه" />
