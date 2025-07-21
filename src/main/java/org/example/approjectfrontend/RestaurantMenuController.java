@@ -1,4 +1,5 @@
 package org.example.approjectfrontend;
+import org.example.approjectfrontend.RestaurantMenuItem;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,28 +31,6 @@ public class RestaurantMenuController {
     private RestaurantMenuItem editingItem = null;
     private Image selectedImage = null; // عکس انتخابی موقت
 
-    public static class RestaurantMenuItem {
-        public String name, desc, price, supply, keywords;
-        public Image image;
-        public RestaurantMenuItem(String name, String desc, String price, String supply, String keywords, Image image) {
-            this.name = name;
-            this.desc = desc;
-            this.price = price;
-            this.supply = supply;
-            this.keywords = keywords;
-            this.image = image;
-        }
-        public RestaurantMenuItem(String name, String desc, String price, String supply, String keywords) {
-            this(name, desc, price, supply, keywords, null);
-        }
-        public String getName() { return name; }
-        public String getPrice() { return price; }
-        public String getSupply() { return supply; }
-        public String getDesc() { return desc; }
-        public String getKeywords() { return keywords; }
-        public Image getImage() { return image; }
-        public void setImage(Image image) { this.image = image; }
-    }
 
     @FXML
     private void initialize() {
@@ -160,20 +139,16 @@ public class RestaurantMenuController {
         String supply = itemSupplyField.getText().trim();
         String keywords = itemKeywordsField.getText().trim();
 
-        if (name.isEmpty() || price.isEmpty() || supply.isEmpty()) {
-            showAlert("همه فیلدهای ضروری باید پر شوند.", Alert.AlertType.WARNING);
-            return;
-        }
 
         if (editingItem != null) { // حالت ویرایش
-            editingItem.name = name;
-            editingItem.desc = desc;
-            editingItem.price = price;
-            editingItem.supply = supply;
-            editingItem.keywords = keywords;
-            // اگر عکس جدید انتخاب شده، جایگزین شود، وگرنه همان قبلی می‌ماند
+            editingItem.setName(name);
+            editingItem.setDesc(desc);
+            editingItem.setPrice(price);
+            editingItem.setSupply(supply);
+            editingItem.setKeywords(keywords);
+            // اگر عکس جدید انتخاب شده، جایگزین شود
             if (selectedImage != null) {
-                editingItem.image = selectedImage;
+                editingItem.setImage(selectedImage);
             }
             menuTable.refresh();
             showAlert("تغییرات آیتم ذخیره شد.", Alert.AlertType.INFORMATION);

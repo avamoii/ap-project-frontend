@@ -14,6 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.net.URL;
 import java.util.List;
 
 public class BuyerHomeController {
@@ -25,6 +26,31 @@ public class BuyerHomeController {
     @FXML private VBox restaurantListVBox;
     @FXML
     public void initialize() {
+        if (DataManager.restaurants.isEmpty()) {
+            // ساخت آیتم‌های فهرست غذا
+            RestaurantMenuItem item1 = new RestaurantMenuItem(
+                    "کباب کوبیده",
+                    "کوبیده گوشت گوسفندی داغ برنجی",
+                    "135000",    // قیمت
+                    "15",        // موجودی
+                    "کباب،برنج"
+            );
+            RestaurantMenuItem item2 = new RestaurantMenuItem(
+                    "زرشک‌پلو با مرغ",
+                    "مرغ سرخ‌شده با برنج و زرشک ویژه",
+                    "145000",
+                    "12",
+                    "مرغ،زرشک،برنج"
+            );
+            // سازنده رستوران (با یا بدون لوگو)
+            Restaurant rest = new Restaurant("کترینگ تستی", null);
+            rest.setMenuItems(List.of(item1, item2));
+
+            DataManager.restaurants.add(rest); // به لیست اضافه می‌شود
+        }
+
+        loadRestaurants(DataManager.restaurants);
+
         loadRestaurants(DataManager.restaurants);
         profileBtn.setOnAction(e -> goToProfile());
         historyBtn.setOnAction(e -> goToHistory());
@@ -49,8 +75,6 @@ public class BuyerHomeController {
         ImageView logoView = new ImageView();
         if (restaurant.getLogo() != null) {
             logoView.setImage(restaurant.getLogo());
-        } else {
-            logoView.setImage(new Image("file:nologo.png")); // عکس پیش‌فرض
         }
         logoView.setFitHeight(40);
         logoView.setFitWidth(40);
@@ -60,8 +84,32 @@ public class BuyerHomeController {
         Label nameLabel = new Label(restaurant.getName());
         nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         box.getChildren().addAll(logoView, nameLabel);
+        box.setOnMouseClicked(e -> openRestaurantPage(restaurant));
+        //  کمی استایل برای روشن شدن هنگام هاور:
+        box.setOnMouseEntered(e -> box.setStyle("-fx-background-color: #ddd; -fx-padding: 10 15 10 15; -fx-background-radius: 8;"));
+        box.setOnMouseExited(e -> box.setStyle("-fx-background-color: #eee; -fx-padding: 10 15 10 15; -fx-background-radius: 8;"));
 
         return box;
+    }
+    private void openRestaurantPage(Restaurant restaurant) {
+        try {
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("RestaurantPage-view.fxml"));
+            Parent root = loader.load();
+
+            // گرفتن کنترلر صفحه دوم
+            RestaurantPageController controller = loader.getController();
+            controller.setRestaurant(restaurant);
+
+            // بازکردن در یک Stage جدید (پنجره جدید):
+            Stage stage = new Stage();
+            stage.setTitle(restaurant.getName());
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
