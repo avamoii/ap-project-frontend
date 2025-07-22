@@ -1,5 +1,6 @@
 package org.example.approjectfrontend;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import org.example.approjectfrontend.Restaurant;
@@ -20,9 +21,17 @@ public class RestaurantPageController {
     private ListView<String> menuListView;
     @FXML
     private TextField addressField;
+    @FXML
+    private Label totalPriceLabel;
+
     public void initialize() {
         // فعال کردن انتخاب چندتایی
         menuListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        // Listener برای جمع مبلغ کل هر بار که انتخاب تغییر کرد
+        menuListView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<String>) change -> {
+            updateTotalPrice();
+        });
     }
     @FXML
     private void handleOrderButton() {
@@ -63,6 +72,23 @@ public class RestaurantPageController {
         alert.setHeaderText(null);
         alert.setContentText("سفارش شما ثبت شد!");
         alert.showAndWait();
+    }
+    private void updateTotalPrice() {
+        int total = 0;
+        for (String itemStr : menuListView.getSelectionModel().getSelectedItems()) {
+            // فرض: آیتم به فرمت "name - price تومان"
+            try {
+                String[] parts = itemStr.split("-");
+                if (parts.length >= 2) {
+                    String pricePart = parts[1].trim().replace("تومان", "").trim();
+                    int price = Integer.parseInt(pricePart);
+                    total += price;
+                }
+            } catch (Exception e) {
+                // نادیده گرفتن خطاهای تبدیل
+            }
+        }
+        totalPriceLabel.setText("هزینه کل: " + total + " تومان");
     }
 
     // این متد برای گرفتن رستوران و نمایش اطلاعاتش

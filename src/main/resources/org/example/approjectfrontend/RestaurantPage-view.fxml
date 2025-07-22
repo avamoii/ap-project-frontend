@@ -32,7 +32,7 @@
         <TextField fx:id="addressField" promptText="آدرس خود را وارد کنید..."
                    prefWidth="320"
                    style="-fx-background-color: #f3fff3; -fx-background-radius: 4;"/>
-
+        <Label fx:id="totalPriceLabel" text="هزینه کل: ۰ تومان" />
         <!-- دکمه ثبت سفارش -->
         <Button fx:id="orderButton" text="ثبت سفارش"
                 maxWidth="160"
