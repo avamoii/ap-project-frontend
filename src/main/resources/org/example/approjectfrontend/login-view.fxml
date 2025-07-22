@@ -1,32 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Hyperlink?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import java.net.URL?>
 
+<StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.approjectfrontend.LoginController"
+           prefHeight="750.0" prefWidth="500.0"> <stylesheets>
+    <URL value="@styles.css"/>
+</stylesheets>
 
-<VBox xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.approjectfrontend.LoginController"
-      alignment="CENTER" spacing="18"
-      style="-fx-background-color: #f3f6fa; -fx-min-height: 100vh;">
+    <ImageView fitHeight="750.0" fitWidth="500.0" pickOnBounds="true">
+        <image>
+            <Image url="@A.jpeg"/>
+        </image>
+    </ImageView>
 
-    <VBox alignment="CENTER" spacing="15"
-          style="-fx-background-color: white; -fx-padding: 32 32 32 32; -fx-border-radius: 18px; -fx-background-radius: 18px; -fx-effect: dropshadow(three-pass-box, #bbb, 14, 0.37, 0, 3);">
+    <VBox alignment="CENTER" spacing="20" styleClass="form-container-card" maxWidth="350">
 
-        <Label text="ورود به حساب" textFill="#388e3c"
-               style="-fx-font-size: 30px; -fx-font-family: 'Vazirmatn', 'Yu Gothic UI Semilight'; -fx-font-weight: bold;" />
+        <ImageView fitHeight="100" fitWidth="100">
+            <image>
+                <Image url="@logo.jpeg"/>
+            </image>
+        </ImageView>
 
-        <TextField fx:id="phonenumberField" promptText="شماره تماس" style="-fx-font-size: 16px;"/>
-        <PasswordField fx:id="passwordField" promptText="رمز عبور" style="-fx-font-size: 16px;"/>
+        <Label text="Log In" styleClass="page-title"/>
 
-        <Button onAction="#handleLogin" text="ورود"
-                style="-fx-background-color: #388e3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px; -fx-background-radius: 8px;" prefWidth="120"/>
+        <TextField fx:id="phonenumberField" promptText="Phone Number" styleClass="rounded-field"/>
+        <PasswordField fx:id="passwordField" promptText="Password" styleClass="rounded-field"/>
 
-        <Label text="حساب کاربری ندارید؟" style="-fx-text-fill: #868686;"/>
-        <Hyperlink onAction="#goToSignUp" text="ثبت‌نام کنید" textFill="#388e3c" style="-fx-font-size: 15px;"/>
-        <Label fx:id="messageLabel" textFill="green" />
+        <Button onAction="#handleLogin" text="Log In" styleClass="action-button"/>
+
+        <Hyperlink onAction="#goToSignUp" text="Don't have an account? Sign Up"/>
+        <Label fx:id="messageLabel" styleClass="message-label"/>
     </VBox>
-</VBox>
+</StackPane>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import java.net.URL?>
+
+<StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.example.approjectfrontend.WelcomeController"
+           prefHeight="750.0" prefWidth="500.0">
+    <stylesheets>
+        <URL value="@styles.css"/>
+    </stylesheets>
+
+    <ImageView fitHeight="750.0" fitWidth="500.0" pickOnBounds="true">
+        <image>
+            <Image url="@A.jpeg"/>
+        </image>
+    </ImageView>
+
+    <VBox alignment="CENTER" spacing="20">
+        <Label text="banana" styleClass="welcome-title"/>
+        <Button text="Welcome" onAction="#goToLogin" styleClass="welcome-button"/>
+    </VBox>
+</StackPane>

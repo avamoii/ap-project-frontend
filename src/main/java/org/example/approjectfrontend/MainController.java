@@ -9,7 +9,6 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.io.IOException;
 
-
 public class MainController implements Initializable {
     @FXML
     private AnchorPane contentArea;
@@ -17,13 +16,12 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            Parent pane = FXMLLoader.load(getClass().getResource("/org/example/approjectfrontend/Signup-view.fxml"));
+            // فقط این خط تغییر می‌کند:
+            // به جای Signup-view.fxml، فایل Welcome-view.fxml را بارگذاری می‌کنیم.
+            Parent pane = FXMLLoader.load(getClass().getResource("/org/example/approjectfrontend/Welcome-view.fxml"));
             contentArea.getChildren().setAll(pane);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-
 }
-

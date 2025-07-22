@@ -1,0 +1,90 @@
+.root {
+    -fx-font-family: "Vazirmatn", "Arial";
+}
+
+/* =================================
+   صفحه خوش‌آمدگویی
+   ================================= */
+.welcome-title {
+    /* مرحله ۲: نام فونت جدید را اینجا بنویسید */
+    -fx-font-family: "A";
+    -fx-font-size: 200px; /* می‌توانید اندازه را هم بزرگتر کنید */
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFD700;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 20, 0, 0, 5);
+}
+
+
+.welcome-button {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-background-color: #FFD700;
+    -fx-text-fill: #333;
+    -fx-background-radius: 50px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 5);
+
+    /* برای تغییر ابعاد دکمه Welcome، این دو مقدار را تغییر دهید */
+    -fx-pref-width: 250px;  /* عرض دکمه */
+    -fx-pref-height: 80px; /* ارتفاع دکمه */
+}
+
+.welcome-button:hover {
+    -fx-background-color: #FFF700;
+}
+
+/* =================================
+   صفحات ورود و ثبت‌نام
+   ================================= */
+.form-container-card {
+    -fx-background-color: rgba(255, 255, 255, 0.88);
+    -fx-background-radius: 25px;
+    -fx-padding: 30px;
+    -fx-max-width: 380px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 0, 0);
+}
+
+.page-title, .rounded-field, .action-button, .message-label, .hyperlink, .radio-button {
+    -fx-font-family: "Vazirmatn";
+}
+
+.page-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.rounded-field {
+    -fx-background-radius: 30px;
+    -fx-border-radius: 30px;
+    -fx-border-color: #ccc;
+    -fx-padding: 10px 15px;
+    -fx-font-size: 14px;
+    -fx-pref-width: 280px;
+}
+
+.rounded-field:focused {
+    -fx-border-color: #007aff;
+    -fx-border-width: 1.5px;
+}
+
+.action-button {
+    -fx-background-color: #007aff;
+    -fx-text-fill: white;
+    -fx-background-radius: 30px;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+
+    /* برای تغییر ابعاد دکمه‌های Login و Signup، این دو مقدار را تغییر دهید */
+    -fx-pref-width: 280px; /* عرض دکمه */
+    -fx-padding: 12px;     /* ارتفاع دکمه (از طریق پدینگ داخلی) */
+}
+
+.action-button:hover {
+    -fx-background-color: derive(#007aff, -15%);
+}
+
+.message-label {
+    -fx-font-size: 14px;
+}
