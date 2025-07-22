@@ -1,19 +1,29 @@
 package org.example.approjectfrontend;
+
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import org.example.approjectfrontend.api.*;
+import org.example.approjectfrontend.util.SessionManager;
 
-import javafx.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.util.Base64;
+import javafx.stage.Stage;
 import java.util.ResourceBundle;
 
 public class SellerProfileController implements Initializable {
@@ -28,13 +38,7 @@ public class SellerProfileController implements Initializable {
     @FXML
     private Button saveButton;
     @FXML
-    private Button logoutButton;
-    @FXML
-    private Button homeButton;
-    @FXML
-    private Button myRestaurantButton;
-    @FXML
-    private Button profileButton;
+    private Button logoutButton, homeButton, myRestaurantButton, profileButton;
     @FXML
     private Label messageLabel;
 
@@ -42,99 +46,89 @@ public class SellerProfileController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
         uploadButton.setOnAction(event -> chooseProfileImage());
         saveButton.setOnAction(event -> handleSaveProfile());
         logoutButton.setOnAction(event -> handleLogout());
-    }
-    private void handleLogout() {
-        try {
-
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("Login-view.fxml"));
-            javafx.scene.Parent root = loader.load();
-
-            javafx.stage.Stage stage = (javafx.stage.Stage) logoutButton.getScene().getWindow();
-
-            javafx.scene.Scene scene = new javafx.scene.Scene(root);
-
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        profileButton.setDisable(true);
+        populateUserData();
     }
 
+    private void populateUserData() {
+        UserDTO currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            usernameField.setText(currentUser.getFullName());
+            phoneField.setText(currentUser.getPhoneNumber());
+            if (currentUser.getEmail() != null) emailField.setText(currentUser.getEmail());
+            if (currentUser.getAddress() != null) addressField.setText(currentUser.getAddress());
 
-    private void chooseProfileImage() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("انتخاب عکس پروفایل");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("عکس", "*.png", "*.jpg", "*.jpeg")
-        );
-        File file = fileChooser.showOpenDialog(uploadButton.getScene().getWindow());
-        if (file != null) {
-            profileImageFile = file;
-            profileImageView.setImage(new Image(file.toURI().toString()));
+            BankInfoDTO bankInfo = currentUser.getBankInfo();
+            if (bankInfo != null) {
+                if (bankInfo.getBankName() != null) bankNameField.setText(bankInfo.getBankName());
+                if (bankInfo.getAccountNumber() != null) accountNumberField.setText(bankInfo.getAccountNumber());
+            }
         }
     }
 
     private void handleSaveProfile() {
-        String username = usernameField.getText().trim();
-        String email = emailField.getText().trim();
-        String address = addressField.getText().trim();
-        String phone = phoneField.getText().trim();
-        String bankName = bankNameField.getText().trim();
-        String accountNumber = accountNumberField.getText().trim();
-        String brandName = brandNameField.getText().trim();
-        String additionalInfo = additionalInformationField.getText().trim();
+        UpdateProfileRequest updateData = new UpdateProfileRequest();
+        updateData.setFullName(usernameField.getText().trim());
+        updateData.setPhone(phoneField.getText().trim());
+        updateData.setEmail(emailField.getText().trim());
+        updateData.setAddress(addressField.getText().trim());
 
+        BankInfoDTO bankInfo = new BankInfoDTO();
+        bankInfo.setBankName(bankNameField.getText().trim());
+        bankInfo.setAccountNumber(accountNumberField.getText().trim());
+        updateData.setBankInfo(bankInfo);
 
-
-        int statusCode = mockSaveProfileToBackend(username, email, address, phone,
-                bankName, accountNumber, brandName, additionalInfo, profileImageFile);
-
-        switch (statusCode) {
-            case 200:
-                messageLabel.setStyle("-fx-text-fill: green;");
-                messageLabel.setText("پروفایل با موفقیت ذخیره شد!");
-                break;
-            case 400:
-                messageLabel.setStyle("-fx-text-fill: orange;");
-                messageLabel.setText("ورودی نامعتبر است.");
-                break;
-            case 401:
+        if (profileImageFile != null) {
+            try {
+                byte[] fileContent = Files.readAllBytes(profileImageFile.toPath());
+                updateData.setProfileImageBase64(Base64.getEncoder().encodeToString(fileContent));
+            } catch (IOException e) {
+                e.printStackTrace();
                 messageLabel.setStyle("-fx-text-fill: red;");
-                messageLabel.setText("شما مجاز به ثبت تغییرات نیستید.");
-                break;
-            case 403:
-                messageLabel.setStyle("-fx-text-fill: #ff4c4c;");
-                messageLabel.setText("دسترسی غیرمجاز.");
-                break;
-            case 404:
-                messageLabel.setStyle("-fx-text-fill: blue;");
-                messageLabel.setText("سرویس پیدا نشد.");
-                break;
-            case 409:
-                messageLabel.setStyle("-fx-text-fill: #ffa500;");
-                messageLabel.setText("تداخل اطلاعات یا شماره تکراری.");
-                break;
-            case 415:
-                messageLabel.setStyle("-fx-text-fill: #d2691e;");
-                messageLabel.setText("فرمت فایل پشتیبانی نمی‌شود.");
-                break;
-            case 429:
-                messageLabel.setStyle("-fx-text-fill: purple;");
-                messageLabel.setText("درخواست بیش از حد مجاز. لطفاً بعداً امتحان کنید.");
-                break;
-            case 500:
-                messageLabel.setStyle("-fx-text-fill: #888;");
-                messageLabel.setText("خطای سرور.");
-                break;
-            default:
-                messageLabel.setStyle("-fx-text-fill: black;");
-                messageLabel.setText("خطای ناشناخته.");
+                messageLabel.setText("خطا در پردازش عکس.");
+                return;
+            }
+        }
+
+        new Thread(() -> {
+            ApiResponse response = ApiService.updateProfile(updateData);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    messageLabel.setStyle("-fx-text-fill: green;");
+                    messageLabel.setText("پروفایل با موفقیت آپدیت شد!");
+                } else {
+                    messageLabel.setStyle("-fx-text-fill: red;");
+                    messageLabel.setText("خطا: " + response.getBody());
+                }
+            });
+        }).start();
+    }
+
+    private void handleLogout() {
+        SessionManager.getInstance().clear();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/org/example/approjectfrontend/Login-view.fxml"));
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+
+    private void chooseProfileImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg"));
+        File selectedFile = fileChooser.showOpenDialog(saveButton.getScene().getWindow());
+        if (selectedFile != null) {
+            profileImageFile = selectedFile;
+            profileImageView.setImage(new Image(selectedFile.toURI().toString()));
+        }
+    }
+
     @FXML
     private void goToHome(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("SellerHome-view.fxml"));
@@ -148,24 +142,4 @@ public class SellerProfileController implements Initializable {
         Scene scene = ((Node) event.getSource()).getScene();
         scene.setRoot(root);
     }
-
-    // تابع mock شبیه‌ساز پاسخ سرور
-    private int mockSaveProfileToBackend(String username, String email, String address, String phone,
-                                         String bankName, String accountNumber, String brandName,
-                                         String additionalInfo, File imgFile) {
-        if (username.equals("bad")) return 400;
-        if (phone.equals("401")) return 401;
-        if (phone.equals("403")) return 403;
-        if (phone.equals("404")) return 404;
-        if (phone.equals("409")) return 409;
-        if (imgFile != null && !(imgFile.getName().endsWith("png") || imgFile.getName().endsWith("jpg") || imgFile.getName().endsWith("jpeg"))) return 415;
-        if (phone.equals("429")) return 429;
-        if (phone.equals("500")) return 500;
-
-
-
-        return 200;
-    }
-
-
 }
