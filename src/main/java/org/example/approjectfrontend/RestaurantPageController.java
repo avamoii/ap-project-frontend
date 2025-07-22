@@ -1,15 +1,11 @@
 package org.example.approjectfrontend;
+
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.scene.control.*;
-import org.example.approjectfrontend.Restaurant;
-import org.example.approjectfrontend.RestaurantMenuItem;
-
-
-import javafx.fxml.FXML;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
+import javafx.fxml.FXML;
+import javafx.scene.layout.HBox;
+import javafx.geometry.Pos;
 
 public class RestaurantPageController {
 
@@ -18,107 +14,116 @@ public class RestaurantPageController {
     @FXML
     private ImageView logoView;
     @FXML
-    private ListView<String> menuListView;
+    private ListView<RestaurantMenuItem> menuListView;
     @FXML
     private TextField addressField;
     @FXML
     private Label totalPriceLabel;
 
     public void initialize() {
-        // فعال کردن انتخاب چندتایی
-        menuListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        // سلول سفارشی برای انتخاب تعداد هر آیتم
+        menuListView.setCellFactory(list -> new ListCell<>() {
+            private final Label nameAndPrice = new Label();
+            private final Spinner<Integer> spinner = new Spinner<>(0, 20, 0);
+            private final HBox box = new HBox(10, nameAndPrice, spinner);
 
-        // Listener برای جمع مبلغ کل هر بار که انتخاب تغییر کرد
-        menuListView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<String>) change -> {
-            updateTotalPrice();
+            {
+                spinner.setPrefWidth(60);
+                box.setAlignment(Pos.CENTER_LEFT);
+
+                spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
+                    if (getItem() != null) {
+                        getItem().setOrderCount(newVal);
+                        updateTotalPrice();
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(RestaurantMenuItem item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    nameAndPrice.setText(item.getName() + " - " + item.getPrice() + " تومان");
+                    spinner.getValueFactory().setValue(item.getOrderCount());
+                    setGraphic(box);
+                }
+            }
         });
+
+        // مقدار اولیه مجموع هزینه
+        updateTotalPrice();
     }
+
     @FXML
     private void handleOrderButton() {
-        // دریافت آیتم‌های انتخاب شده
-        ObservableList<String> selectedItems = menuListView.getSelectionModel().getSelectedItems();
+        String address = addressField.getText();
 
-        // دریافت آدرس
-        String address = addressField.getText(); // مطمئن شوید که addressField تعریف شده و @FXML بهش اضافه شده
+        // فیلتر آیتم‌هایی که تعدادشان > 0 است
+        var orderedItems = menuListView.getItems().filtered(item -> item.getOrderCount() > 0);
 
-        // بررسی اینکه کاربر یک یا چند آیتم را انتخاب کرده است
-        if (selectedItems.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("خطا");
-            alert.setHeaderText(null);
-            alert.setContentText("لطفاً حداقل یک آیتم از منو را انتخاب کنید.");
-            alert.showAndWait();
+        if (orderedItems.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "خطا", null, "لطفاً حداقل یک آیتم از منو را انتخاب کنید.");
             return;
         }
 
-        // بررسی آدرس
         if (address == null || address.trim().isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("خطا");
-            alert.setHeaderText(null);
-            alert.setContentText("لطفاً آدرس را وارد کنید.");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.WARNING, "خطا", null, "لطفاً آدرس را وارد کنید.");
             return;
         }
 
         System.out.println("سفارش شما به این صورت است:");
         System.out.println("آدرس: " + address);
-        System.out.println("آیتم‌های انتخاب شده:");
-        selectedItems.forEach(System.out::println);
+        System.out.println("آیتم‌های سفارش داده‌شده:");
+        orderedItems.forEach(item ->
+                System.out.println(item.getName() + " × " + item.getOrderCount() +
+                        " = " + (Integer.parseInt(item.getPrice()) * item.getOrderCount()) + " تومان"));
 
-        // بازخورد به کاربر بعد از ثبت موفق
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("موفقیت");
-        alert.setHeaderText(null);
-        alert.setContentText("سفارش شما ثبت شد!");
-        alert.showAndWait();
+
+        showAlert(Alert.AlertType.INFORMATION, "موفقیت", null, "سفارش شما ثبت شد!");
+
+        // (اختیاری) ریست فرم:
+        // menuListView.getItems().forEach(item -> item.setOrderCount(0));
+        // menuListView.refresh();
+        // addressField.clear();
+        // updateTotalPrice();
     }
+
     private void updateTotalPrice() {
-        int total = 0;
-        for (String itemStr : menuListView.getSelectionModel().getSelectedItems()) {
-            // فرض: آیتم به فرمت "name - price تومان"
-            try {
-                String[] parts = itemStr.split("-");
-                if (parts.length >= 2) {
-                    String pricePart = parts[1].trim().replace("تومان", "").trim();
-                    int price = Integer.parseInt(pricePart);
-                    total += price;
-                }
-            } catch (Exception e) {
-                // نادیده گرفتن خطاهای تبدیل
-            }
-        }
+        int total = menuListView.getItems().stream()
+                .mapToInt(item -> item.getOrderCount() * Integer.parseInt(item.getPrice()))
+
+                .sum();
         totalPriceLabel.setText("هزینه کل: " + total + " تومان");
     }
 
-    // این متد برای گرفتن رستوران و نمایش اطلاعاتش
+    // متد دریافت رستوران و ست کردن محتوا
     public void setRestaurant(Restaurant restaurant) {
         if (restaurant == null) return;
-        // نمایش نام رستوران
+
         nameLabel.setText(restaurant.getName());
-        // نمایش لوگو
-        if (restaurant.getLogo() != null) {
+        if (restaurant.getLogo() != null)
             logoView.setImage(restaurant.getLogo());
-        }
-        // پاک‌کردن آیتم‌های قبلی (اگه قبلا ست شده)
-        menuListView.getItems().clear();
-        // ساختن لیست منو
-        if (restaurant.getMenuItems() != null) {
-            menuListView.setItems(FXCollections.observableArrayList(
-                    restaurant.getMenuItems() // فرض بر این که getMenuItems() لیستی از RestaurantMenuItem می‌دهد
-                            .stream()
-                            .map(item -> item.getName() + " - " + item.getPrice() + " تومان")
-                            .toList()
-            ));
-        }
+        else
+            logoView.setImage(null);
+
+        // پر کردن منو با خود آبجکت‌ها (نه رشته)
+        menuListView.setItems(FXCollections.observableArrayList(restaurant.getMenuItems()));
+
+        // ریست کردن تعداد سفارش
+        menuListView.getItems().forEach(item -> item.setOrderCount(0));
+        menuListView.refresh();
+
+        updateTotalPrice();
     }
 
-    // متد کمکی برای ساختن هر آیتم از منو به طور دلخواه خودت
-    private VBox buildMenuItemRow(RestaurantMenuItem item) {
-        Label itemName = new Label(item.getName() + " - " + item.getPrice() + " تومان");
-        itemName.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
-        VBox vBox = new VBox(itemName);
-        // هر عنصر UI دیگه‌ای خواستی اینجا اضافه کن
-        return vBox;
+    // نمایش پیام
+    private void showAlert(Alert.AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

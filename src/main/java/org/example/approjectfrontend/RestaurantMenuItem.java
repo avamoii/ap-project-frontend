@@ -9,7 +9,7 @@ public class RestaurantMenuItem {
     private String supply;  // اگر عددی می‌خواهی، بهتر است int باشد
     private String keywords;
     private Image image;
-
+    private int orderCount;
     // سازنده با عکس
     public RestaurantMenuItem(String name, String desc, String price, String supply, String keywords, Image image) {
         this.name = name;
@@ -32,8 +32,8 @@ public class RestaurantMenuItem {
     public String getSupply() { return supply; }
     public String getKeywords() { return keywords; }
     public Image getImage() { return image; }
-
-    // Setters
+    public int getOrderCount() { return orderCount; }
+    public void setOrderCount(int orderCount) { this.orderCount = orderCount; }
     public void setName(String name) { this.name = name; }
     public void setDesc(String desc) { this.desc = desc; }
     public void setPrice(String price) { this.price = price; }
