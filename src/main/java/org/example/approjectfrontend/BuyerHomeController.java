@@ -4,10 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -16,6 +13,7 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 public class BuyerHomeController {
     @FXML private Button profileBtn;
@@ -53,7 +51,7 @@ public class BuyerHomeController {
 
         loadRestaurants(DataManager.restaurants);
         profileBtn.setOnAction(e -> goToProfile());
-        historyBtn.setOnAction(e -> goToHistory());
+        historyBtn.setOnAction(e -> handleHistoryClick());
         searchField.setOnAction(e -> doSearch());
     }
     // این متد، لیست را داینامیک می‌سازد:
@@ -124,16 +122,48 @@ public class BuyerHomeController {
         }
     }
 
-    private void goToHistory() {
+    private void handleHistoryClick() {
+        // ساخت یک دیالوگ با دو گزینه
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("انتخاب نوع تاریخچه");
+        alert.setHeaderText("کدام تاریخچه را می‌خواهید مشاهده کنید؟");
+
+        ButtonType ordersBtn = new ButtonType("تاریخچه سفارشات");
+        ButtonType transactionsBtn = new ButtonType("تاریخچه تراکنش‌ها");
+        ButtonType cancelBtn = new ButtonType("انصراف", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(ordersBtn, transactionsBtn, cancelBtn);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent()) {
+            if (result.get() == ordersBtn) {
+                goToOrderHistory();
+            } else if (result.get() == transactionsBtn) {
+                goToTransactionHistory();
+            }
+        }
+    }
+    private void goToOrderHistory() {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("BuyerHistory-view.fxml"));
-            // فرض: دستیابی به stage از طریق یک کامپوننت صفحه فعلی
+            Parent root = FXMLLoader.load(getClass().getResource("OrderHistory-view.fxml"));
             Stage stage = (Stage) profileBtn.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {
-            e.printStackTrace(); // برای رفع خطاها
+            e.printStackTrace();
         }
     }
+
+    private void goToTransactionHistory() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("TransactionHistory-view.fxml"));
+            Stage stage = (Stage) profileBtn.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void doSearch() {
         String query = searchField.getText();
         // اینجا کار مورد نظر برای سرچ را انجام بده
