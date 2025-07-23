@@ -44,7 +44,8 @@ public class SignupController {
     @FXML
     void gotoLogin(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/Login-view.fxml"));
+            // --- اصلاحیه اصلی اینجاست ---
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/login-view.fxml")); // 'L' به 'l' تغییر کرد
             Parent loginRoot = loader.load();
             Scene loginScene = new Scene(loginRoot);
             Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -53,6 +54,8 @@ public class SignupController {
             e.printStackTrace();
         }
     }
+
+    // ... بقیه متدهای کلاس شما بدون تغییر باقی می‌مانند ...
 
     @FXML
     void handleSignup(ActionEvent event) {
@@ -100,7 +103,6 @@ public class SignupController {
                         JsonObject userJson = resBody.getAsJsonObject("user");
                         UserDTO user = gson.fromJson(userJson, UserDTO.class);
 
-                        // ذخیره توکن و اطلاعات کاربر در SessionManager
                         SessionManager.getInstance().setToken(receivedToken);
                         SessionManager.getInstance().setCurrentUser(user);
 
@@ -144,10 +146,10 @@ public class SignupController {
                 messageLabel.setText("نقش کاربر نامشخص!");
                 return;
         }
-        goToProfile(fxmlPath);
+        goToPage(fxmlPath);
     }
 
-    private void goToProfile(String fxmlPath) {
+    private void goToPage(String fxmlPath) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
             Stage window = (Stage) usernameField.getScene().getWindow();

@@ -1,14 +1,14 @@
 package org.example.approjectfrontend;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class BuyerProfileController implements Initializable {
@@ -100,14 +101,24 @@ public class BuyerProfileController implements Initializable {
     }
 
     private void handleLogout() {
-        SessionManager.getInstance().clear();
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("Login-view.fxml"));
-            Stage stage = (Stage) logoutButton.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("خروج از حساب");
+        alert.setHeaderText("آیا برای خروج از حساب کاربری خود مطمئن هستید؟");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            new Thread(() -> ApiService.logout()).start();
+
+            SessionManager.getInstance().clear();
+
+            try {
+                Parent root = FXMLLoader.load(getClass().getResource("/org/example/approjectfrontend/login-view.fxml"));
+                Stage stage = (Stage) logoutButton.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

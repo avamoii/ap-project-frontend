@@ -1,15 +1,12 @@
 package org.example.approjectfrontend;
 
-import com.google.gson.Gson;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
@@ -22,6 +19,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class CourierProfileController implements Initializable {
@@ -93,15 +91,6 @@ public class CourierProfileController implements Initializable {
                 if (response.getStatusCode() == 200) {
                     messageLabel.setStyle("-fx-text-fill: green;");
                     messageLabel.setText("پروفایل با موفقیت آپدیت شد!");
-
-                    // **مهم:** آپدیت کردن اطلاعات کاربر در SessionManager
-                    UserDTO currentUser = SessionManager.getInstance().getCurrentUser();
-                    if(currentUser != null) {
-                        // برای آپدیت کامل، باید پاسخ سرور را پارس کنیم یا به صورت دستی آپدیت کنیم
-                        // در اینجا به صورت دستی آپدیت می‌کنیم
-                        currentUser.setBankInfo(bankInfo); // این متد را باید به UserDTO اضافه کنید
-                    }
-
                 } else {
                     messageLabel.setStyle("-fx-text-fill: red;");
                     messageLabel.setText("خطا: " + response.getBody());
@@ -111,14 +100,24 @@ public class CourierProfileController implements Initializable {
     }
 
     private void handleLogout() {
-        SessionManager.getInstance().clear();
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("Login-view.fxml"));
-            Stage stage = (Stage) logoutButton.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("خروج از حساب");
+        alert.setHeaderText("آیا برای خروج از حساب کاربری خود مطمئن هستید؟");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            new Thread(() -> ApiService.logout()).start();
+
+            SessionManager.getInstance().clear();
+
+            try {
+                Parent root = FXMLLoader.load(getClass().getResource("/org/example/approjectfrontend/login-view.fxml"));
+                Stage stage = (Stage) logoutButton.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

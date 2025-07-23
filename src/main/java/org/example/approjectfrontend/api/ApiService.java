@@ -10,6 +10,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+/**
+ * این کلاس مسئول تمام ارتباطات با بک‌اند (API) است.
+ * هر متد در این کلاس با یکی از اندپوینت‌های سرور صحبت می‌کند.
+ */
 public class ApiService {
 
     private static final String API_BASE_URL = "http://localhost:1214";
@@ -19,6 +23,11 @@ public class ApiService {
             .build();
     private static final Gson gson = new Gson();
 
+    /**
+     * متد برای ارسال درخواست ثبت‌نام کاربر جدید به سرور.
+     * @param requestData آبجکتی از نوع RegisterRequest که حاوی تمام اطلاعات ثبت‌نام است.
+     * @return یک آبجکت ApiResponse که شامل کد وضعیت و بدنه پاسخ سرور است.
+     */
     public static ApiResponse register(RegisterRequest requestData) {
         try {
             String jsonBody = gson.toJson(requestData);
@@ -35,6 +44,12 @@ public class ApiService {
         }
     }
 
+    /**
+     * متد برای ارسال درخواست ورود (login) به سرور.
+     * @param phone شماره تلفن کاربر
+     * @param password رمز عبور کاربر
+     * @return پاسخ سرور
+     */
     public static ApiResponse login(String phone, String password) {
         try {
             LoginRequest loginData = new LoginRequest(phone, password);
@@ -53,7 +68,8 @@ public class ApiService {
     }
 
     /**
-     * متد جدید برای آپدیت پروفایل کاربر
+     * متد برای آپدیت پروفایل کاربر.
+     * این متد توکن احراز هویت را از SessionManager گرفته و در هدر درخواست ارسال می‌کند.
      * @param profileData اطلاعات جدید پروفایل برای ارسال
      * @return پاسخ سرور
      */
@@ -73,6 +89,51 @@ public class ApiService {
                     .build();
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+    public static ApiResponse logout() {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            // اگر کاربر از قبل لاگین نکرده باشد، نیازی به لاگ‌اوت نیست
+            return new ApiResponse(200, "{\"message\":\"Already logged out.\"}");
+        }
+
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/auth/logout"))
+                    .header("Authorization", "Bearer " + token)
+                    .POST(HttpRequest.BodyPublishers.noBody()) // این درخواست بدنه‌ای ندارد
+                    .build();
+
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+    // این متد را به کلاس ApiService.java اضافه کنید
+
+    public static ApiResponse getProfile() {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/auth/profile"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET() // متد GET
+                    .build();
+
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+
         } catch (Exception e) {
             e.printStackTrace();
             return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
