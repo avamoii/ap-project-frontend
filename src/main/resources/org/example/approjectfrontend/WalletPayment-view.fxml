@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="18" alignment="CENTER" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.approjectfrontend.WalletPaymentController">
+    <Label text="پرداخت با کیف پول"/>
+    <Label fx:id="walletBalanceLabel" style="-fx-font-weight:bold;"/>
+    <Button text="تایید پرداخت" onAction="#handleConfirmPayment"    style="-fx-background-color: linear-gradient(to left, #51eaea 0%, #6b0ac9 100%);
+               -fx-text-fill: white;
+               -fx-font-size: 17px;
+               -fx-font-weight: bold;
+               -fx-background-radius: 15;
+               -fx-pref-width: 140px;
+               -fx-pref-height: 40px;
+               -fx-cursor: hand;"/>
+    <Label fx:id="statusLabel" style="-fx-text-fill:red"/>
+</VBox>
