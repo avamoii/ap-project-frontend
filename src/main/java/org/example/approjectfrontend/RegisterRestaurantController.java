@@ -14,6 +14,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.example.approjectfrontend.api.*;
 
 import java.io.ByteArrayInputStream;
@@ -25,8 +26,6 @@ import java.util.Base64;
 import java.util.ResourceBundle;
 
 public class RegisterRestaurantController implements Initializable {
-    @FXML
-    private Button homeButton, myRestaurantButton, profileButton;
     @FXML
     private TextField nameField, addressField, phoneField, taxFeeField, additionalFeeField;
     @FXML
@@ -67,78 +66,83 @@ public class RegisterRestaurantController implements Initializable {
     }
 
     @FXML
-    private void handleRegisterOrUpdate() {
+    private void handleRegisterOrUpdate(ActionEvent event) {
+        System.out.println("DEBUG: handleRegisterOrUpdate method entered.");
         if (editingRestaurant != null) {
-            handleUpdate();
+            handleUpdate(event);
         } else {
-            handleRegister();
+            handleRegister(event);
         }
     }
 
-    private void handleUpdate() {
-        UpdateRestaurantRequest updateData = new UpdateRestaurantRequest();
-        updateData.setName(nameField.getText().trim());
-        updateData.setAddress(addressField.getText().trim());
-        updateData.setPhone(phoneField.getText().trim());
-        try {
-            if (!taxFeeField.getText().trim().isEmpty()) updateData.setTaxFee(Integer.parseInt(taxFeeField.getText().trim()));
-            if (!additionalFeeField.getText().trim().isEmpty()) updateData.setAdditionalFee(Integer.parseInt(additionalFeeField.getText().trim()));
-        } catch (NumberFormatException e) {
-            showMessage("مالیات و هزینه اضافی باید عدد باشند.", "red");
+    private void handleUpdate(ActionEvent event) {
+        // این بخش بعداً تکمیل می‌شود
+        System.out.println("DEBUG: handleUpdate method called.");
+        showMessage("منطق ویرایش هنوز پیاده‌سازی نشده است.", "blue");
+    }
+
+    private void handleRegister(ActionEvent event) {
+        System.out.println("DEBUG: handleRegister method entered.");
+
+        String name = nameField.getText().trim();
+        String address = addressField.getText().trim();
+        String phone = phoneField.getText().trim();
+
+        if (name.isEmpty() || address.isEmpty() || phone.isEmpty()) {
+            System.out.println("DEBUG: Validation failed: Required fields are empty.");
+            showMessage("نام، آدرس و تلفن رستوران اجباری هستند.", "red");
             return;
         }
 
-        if (logoFile != null) {
-            try {
-                byte[] fileContent = Files.readAllBytes(logoFile.toPath());
-                updateData.setLogoBase64(Base64.getEncoder().encodeToString(fileContent));
-            } catch (IOException e) {
-                showMessage("خطا در پردازش فایل لوگو.", "red");
-                return;
-            }
-        }
-
-        new Thread(() -> {
-            ApiResponse response = ApiService.updateRestaurant(editingRestaurant.getId(), updateData);
-            Platform.runLater(() -> {
-                if (response.getStatusCode() == 200) {
-                    showMessage("رستوران با موفقیت آپدیت شد!", "green");
-                } else {
-                    showMessage("خطا در آپدیت رستوران: " + response.getBody(), "red");
-                }
-            });
-        }).start();
-    }
-
-    private void handleRegister() {
+        System.out.println("DEBUG: Basic validation passed.");
         CreateRestaurantRequest requestData = new CreateRestaurantRequest();
-        requestData.setName(nameField.getText().trim());
-        requestData.setAddress(addressField.getText().trim());
-        requestData.setPhone(phoneField.getText().trim());
+        requestData.setName(name);
+        requestData.setAddress(address);
+        requestData.setPhone(phone);
+
         try {
-            if (!taxFeeField.getText().trim().isEmpty()) requestData.setTaxFee(Integer.parseInt(taxFeeField.getText().trim()));
-            if (!additionalFeeField.getText().trim().isEmpty()) requestData.setAdditionalFee(Integer.parseInt(additionalFeeField.getText().trim()));
+            if (!taxFeeField.getText().trim().isEmpty()) {
+                requestData.setTaxFee(Integer.parseInt(taxFeeField.getText().trim()));
+            }
+            if (!additionalFeeField.getText().trim().isEmpty()) {
+                requestData.setAdditionalFee(Integer.parseInt(additionalFeeField.getText().trim()));
+            }
         } catch (NumberFormatException e) {
+            System.out.println("DEBUG: Validation failed: Fees are not numbers.");
             showMessage("مالیات و هزینه اضافی باید عدد باشند.", "red");
             return;
         }
 
         if (logoFile != null) {
             try {
+                System.out.println("DEBUG: Processing logo file...");
                 byte[] fileContent = Files.readAllBytes(logoFile.toPath());
                 requestData.setLogoBase64(Base64.getEncoder().encodeToString(fileContent));
             } catch (IOException e) {
+                e.printStackTrace();
                 showMessage("خطا در پردازش فایل لوگو.", "red");
                 return;
             }
         }
 
+        System.out.println("DEBUG: All data collected. Starting API call thread...");
         new Thread(() -> {
+            System.out.println("DEBUG: API call thread started.");
             ApiResponse response = ApiService.createRestaurant(requestData);
+            System.out.println("DEBUG: API call finished with status code: " + response.getStatusCode());
             Platform.runLater(() -> {
                 if (response.getStatusCode() == 201) {
-                    showMessage("رستوران با موفقیت ثبت شد!", "green");
-                    clearFields();
+                    showMessage("رستوران با موفقیت ثبت شد! در حال بازگشت به صفحه اصلی...", "green");
+                    new Thread(() -> {
+                        try {
+                            Thread.sleep(2000);
+                            Platform.runLater(() -> {
+                                try {
+                                    goToHome(event);
+                                } catch (IOException e) { e.printStackTrace(); }
+                            });
+                        } catch (InterruptedException e) { e.printStackTrace(); }
+                    }).start();
                 } else {
                     showMessage("خطا در ثبت رستوران: " + response.getBody(), "red");
                 }
@@ -157,16 +161,6 @@ public class RegisterRestaurantController implements Initializable {
         }
     }
 
-    private void clearFields() {
-        nameField.clear();
-        addressField.clear();
-        phoneField.clear();
-        taxFeeField.clear();
-        additionalFeeField.clear();
-        logoImageView.setImage(null);
-        logoFile = null;
-    }
-
     private void showMessage(String msg, String color) {
         messageLabel.setText(msg);
         messageLabel.setStyle("-fx-text-fill: " + color + ";");
@@ -175,8 +169,8 @@ public class RegisterRestaurantController implements Initializable {
     @FXML
     private void goToHome(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("SellerHome-view.fxml"));
-        Scene scene = ((Node) event.getSource()).getScene();
-        scene.setRoot(root);
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
     }
 
     @FXML

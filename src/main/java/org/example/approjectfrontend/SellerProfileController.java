@@ -13,9 +13,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.example.approjectfrontend.api.*;
 import org.example.approjectfrontend.util.SessionManager;
- import javafx.stage.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -116,6 +117,15 @@ public class SellerProfileController implements Initializable {
                 if (response.getStatusCode() == 200) {
                     messageLabel.setStyle("-fx-text-fill: green;");
                     messageLabel.setText("پروفایل با موفقیت آپدیت شد!");
+
+                    new Thread(() -> {
+                        ApiResponse profileResponse = ApiService.getProfile();
+                        if (profileResponse.getStatusCode() == 200) {
+                            UserDTO freshUser = new Gson().fromJson(profileResponse.getBody(), UserDTO.class);
+                            SessionManager.getInstance().setCurrentUser(freshUser);
+                        }
+                    }).start();
+
                 } else {
                     messageLabel.setStyle("-fx-text-fill: red;");
                     messageLabel.setText("خطا: " + response.getBody());
@@ -163,7 +173,7 @@ public class SellerProfileController implements Initializable {
 
     @FXML
     private void goToMyRestaurant(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("RegisterRestaurant-view.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("SellerHome-view.fxml"));
         Scene scene = ((Node) event.getSource()).getScene();
         scene.setRoot(root);
     }

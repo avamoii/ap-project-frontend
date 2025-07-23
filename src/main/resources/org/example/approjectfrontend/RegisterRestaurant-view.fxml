@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
@@ -9,38 +10,25 @@
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane prefHeight="606.0" prefWidth="694.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.RegisterRestaurantController">
-    <VBox alignment="CENTER" layoutX="20.0" layoutY="12.0" prefHeight="345.0" prefWidth="559.0" spacing="16" style="-fx-background-color: #f9fff9; -fx-background-radius: 16; -fx-border-color: #f9fff9; -fx-border-width: 1.5;" AnchorPane.bottomAnchor="43.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="12.0">
-        <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2b6636;" text="ثبت رستوران جدید" />
-
-        <!-- فیلد نام -->
+    <VBox alignment="CENTER" spacing="16" style="-fx-background-color: #f9fff9; -fx-background-radius: 16; -fx-border-color: #f9fff9; -fx-border-width: 1.5;" AnchorPane.bottomAnchor="43.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="12.0">
+        <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2b6636;" text="ثبت / ویرایش رستوران" />
         <TextField fx:id="nameField" promptText="نام رستوران" style="-fx-background-radius: 10; -fx-border-color: #43b649; -fx-border-radius: 10; -fx-background-color: #fff;" />
-
-        <!-- فیلد آدرس -->
         <TextField fx:id="addressField" promptText="آدرس" style="-fx-background-radius: 10; -fx-border-color: #43b649; -fx-border-radius: 10; -fx-background-color: #fff;" />
-
-        <!-- شماره تماس -->
         <TextField fx:id="phoneField" promptText="شماره تماس" style="-fx-background-radius: 10; -fx-border-color: #43b649; -fx-border-radius: 10; -fx-background-color: #fff;" />
-
-        <!-- لوگوی رستوران -->
         <HBox alignment="CENTER" spacing="8">
-   
-              <!-- مالیات (عدد) -->
-           <TextField fx:id="taxFeeField" promptText="درصد مالیات" style="-fx-background-radius: 10; -fx-border-color: #43b649; -fx-border-radius: 10; -fx-background-color: #fff;" />
+            <TextField fx:id="taxFeeField" promptText="درصد مالیات" style="-fx-background-radius: 10; -fx-border-color: #43b649; -fx-border-radius: 10; -fx-background-color: #fff;" />
             <ImageView fx:id="logoImageView" fitHeight="60" fitWidth="60" style="-fx-background-color: #e0ffe0; -fx-background-radius: 30;" />
-   
-           <!-- هزینه اضافی (عدد) -->
-           <TextField fx:id="additionalFeeField" promptText="هزینه اضافی (ریال)" style="-fx-background-radius: 10; -fx-border-color: #43b649; -fx-border-radius: 10; -fx-background-color: #fff;" />
+            <TextField fx:id="additionalFeeField" promptText="هزینه اضافی (ریال)" style="-fx-background-radius: 10; -fx-border-color: #43b649; -fx-border-radius: 10; -fx-background-color: #fff;" />
         </HBox>
-      <ImageView fitHeight="75.0" fitWidth="138.0" pickOnBounds="true" preserveRatio="true" />
-         <Button fx:id="chooseLogoButton" onAction="#chooseLogo" style="-fx-background-color: #43b649; -fx-background-radius: 14; -fx-text-fill: white;" text="انتخاب لوگو" />
+        <Button fx:id="chooseLogoButton" onAction="#chooseLogo" style="-fx-background-color: #43b649; -fx-background-radius: 14; -fx-text-fill: white;" text="انتخاب لوگو" />
 
-        <Button fx:id="registerButton" onAction="#handleRegister" style="-fx-background-color: #43b649; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 15;" text="ثبت رستوران" />
-      <Label fx:id="messageLabel" prefHeight="38.0" prefWidth="620.0" />
+        <Button fx:id="registerButton" onAction="#handleRegisterOrUpdate" style="-fx-background-color: #43b649; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 15;" text="ثبت رستوران" />
 
+        <Label fx:id="messageLabel" prefHeight="38.0" prefWidth="620.0" />
     </VBox>
-    <HBox alignment="CENTER" prefHeight="27.0" prefWidth="614.0" spacing="0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-14.0">
-        <Button fx:id="homeButton" onAction="#goToHome" prefHeight="27.0" prefWidth="92.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0; " text="خانه" HBox.hgrow="ALWAYS" />
-        <Button fx:id="myRestaurantButton" prefHeight="27.0" prefWidth="111.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="رستوران من" HBox.hgrow="ALWAYS" />
-        <Button fx:id="profileButton" onAction="#goToProfile" prefHeight="27.0" prefWidth="109.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="پروفایل" HBox.hgrow="ALWAYS" />
+    <HBox alignment="CENTER" spacing="0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Button onAction="#goToHome" prefHeight="40.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="خانه" HBox.hgrow="ALWAYS" />
+        <Button onAction="#goToHome" prefHeight="40.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="رستوران من" HBox.hgrow="ALWAYS" />
+        <Button onAction="#goToProfile" prefHeight="40.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="پروفایل" HBox.hgrow="ALWAYS" />
     </HBox>
 </AnchorPane>

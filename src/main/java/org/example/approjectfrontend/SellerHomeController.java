@@ -19,6 +19,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.example.approjectfrontend.api.ApiResponse;
 import org.example.approjectfrontend.api.ApiService;
 import org.example.approjectfrontend.api.RestaurantDTO;
@@ -26,16 +27,11 @@ import org.example.approjectfrontend.api.RestaurantDTO;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Base64;
 import java.util.List;
 import java.util.ResourceBundle;
 
 public class SellerHomeController implements Initializable {
-    @FXML
-    private Button homeButton;
-    @FXML
-    private Button myRestaurantButton;
-    @FXML
-    private Button profileButton;
     @FXML
     private VBox restaurantsVBox;
 
@@ -45,23 +41,39 @@ public class SellerHomeController implements Initializable {
     }
 
     private void loadRestaurantsFromServer() {
+        restaurantsVBox.getChildren().clear();
+        restaurantsVBox.setAlignment(Pos.CENTER);
+        restaurantsVBox.setSpacing(10);
+
         new Thread(() -> {
             ApiResponse response = ApiService.getMyRestaurants();
             Platform.runLater(() -> {
-                restaurantsVBox.getChildren().clear();
                 if (response.getStatusCode() == 200) {
                     Gson gson = new Gson();
-                    List<RestaurantDTO> restaurants = gson.fromJson(response.getBody(), new TypeToken<List<RestaurantDTO>>(){}.getType());
+                    List<RestaurantDTO> restaurants = gson.fromJson(response.getBody(), new TypeToken<List<RestaurantDTO>>() {}.getType());
+
                     if (restaurants.isEmpty()) {
-                        restaurantsVBox.getChildren().add(new Label("شما هنوز رستورانی ثبت نکرده‌اید."));
+                        Label infoLabel = new Label("شما هنوز رستورانی ثبت نکرده‌اید.");
+                        infoLabel.setStyle("-fx-font-size: 16px;");
+                        Button addRestaurantBtn = new Button("ثبت اولین رستوران");
+                        addRestaurantBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14px;");
+                        addRestaurantBtn.setOnAction(event -> {
+                            try {
+                                goToRegisterRestaurantPage(event);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                        restaurantsVBox.getChildren().addAll(infoLabel, addRestaurantBtn);
                     } else {
+                        restaurantsVBox.setAlignment(Pos.TOP_LEFT);
                         for (RestaurantDTO restaurant : restaurants) {
                             HBox card = createRestaurantCard(restaurant);
                             restaurantsVBox.getChildren().add(card);
                         }
                     }
                 } else {
-                    restaurantsVBox.getChildren().add(new Label("خطا در دریافت لیست رستوران‌ها: " + response.getBody()));
+                    restaurantsVBox.getChildren().add(new Label("خطا در دریافت لیست رستوران‌ها."));
                 }
             });
         }).start();
@@ -71,33 +83,26 @@ public class SellerHomeController implements Initializable {
         HBox box = new HBox(10);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setStyle("-fx-padding: 10; -fx-border-color: lightgray; -fx-border-width: 0 0 1 0;");
-
         ImageView imageView = new ImageView();
         imageView.setFitWidth(40);
         imageView.setFitHeight(40);
         if (restaurant.getLogoBase64() != null && !restaurant.getLogoBase64().isEmpty()) {
-            byte[] decodedBytes = java.util.Base64.getDecoder().decode(restaurant.getLogoBase64());
+            byte[] decodedBytes = Base64.getDecoder().decode(restaurant.getLogoBase64());
             imageView.setImage(new Image(new ByteArrayInputStream(decodedBytes)));
         }
-
         Label nameLabel = new Label(restaurant.getName());
         box.getChildren().addAll(imageView, nameLabel);
-
         ContextMenu contextMenu = new ContextMenu();
         MenuItem menuMenu = new MenuItem("ورود به منو رستوران");
         MenuItem menuInfo = new MenuItem("ویرایش اطلاعات رستوران");
         contextMenu.getItems().addAll(menuMenu, menuInfo);
-
         box.setOnMouseClicked(e -> contextMenu.show(box, e.getScreenX(), e.getScreenY()));
-
         menuMenu.setOnAction(ev -> openRestaurantMenu(restaurant));
         menuInfo.setOnAction(ev -> openRestaurantInfo(restaurant));
-
         return box;
     }
 
     private void openRestaurantMenu(RestaurantDTO restaurant) {
-        // منطق رفتن به صفحه منو در آینده اینجا پیاده‌سازی می‌شود
         System.out.println("Opening menu for: " + restaurant.getName());
     }
 
@@ -106,17 +111,23 @@ public class SellerHomeController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/RegisterRestaurant-view.fxml"));
             Parent root = loader.load();
             RegisterRestaurantController controller = loader.getController();
-            controller.setRestaurantToEdit(restaurant); // <-- متد جدید
-            Scene scene = restaurantsVBox.getScene();
-            scene.setRoot(root);
+            controller.setRestaurantToEdit(restaurant);
+            Stage stage = (Stage) restaurantsVBox.getScene().getWindow();
+            stage.setScene(new Scene(root));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    private void goToRegisterRestaurantPage(ActionEvent event) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("RegisterRestaurant-view.fxml"));
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
+    }
+
     @FXML
     private void goToMyRestaurant(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("RegisterRestaurant-view.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("SellerHome-view.fxml"));
         Scene scene = ((Node) event.getSource()).getScene();
         scene.setRoot(root);
     }
