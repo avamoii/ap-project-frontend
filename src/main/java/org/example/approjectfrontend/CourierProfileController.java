@@ -1,5 +1,6 @@
 package org.example.approjectfrontend;
 
+import com.google.gson.Gson;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -48,18 +49,36 @@ public class CourierProfileController implements Initializable {
     }
 
     private void populateUserData() {
-        UserDTO currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            usernameField.setText(currentUser.getFullName());
-            phoneField.setText(currentUser.getPhoneNumber());
-            if (currentUser.getEmail() != null) emailField.setText(currentUser.getEmail());
-
-            BankInfoDTO bankInfo = currentUser.getBankInfo();
-            if (bankInfo != null) {
-                if (bankInfo.getBankName() != null) bankNameField.setText(bankInfo.getBankName());
-                if (bankInfo.getAccountNumber() != null) accountNumberField.setText(bankInfo.getAccountNumber());
-            }
+        UserDTO cachedUser = SessionManager.getInstance().getCurrentUser();
+        if (cachedUser != null) {
+            usernameField.setText(cachedUser.getFullName());
+            phoneField.setText(cachedUser.getPhoneNumber());
+            if (cachedUser.getEmail() != null) emailField.setText(cachedUser.getEmail());
         }
+
+        new Thread(() -> {
+            ApiResponse response = ApiService.getProfile();
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    Gson gson = new Gson();
+                    UserDTO freshUser = gson.fromJson(response.getBody(), UserDTO.class);
+                    SessionManager.getInstance().setCurrentUser(freshUser);
+
+                    usernameField.setText(freshUser.getFullName());
+                    phoneField.setText(freshUser.getPhoneNumber());
+                    if (freshUser.getEmail() != null) emailField.setText(freshUser.getEmail());
+
+                    BankInfoDTO bankInfo = freshUser.getBankInfo();
+                    if (bankInfo != null) {
+                        if (bankInfo.getBankName() != null) bankNameField.setText(bankInfo.getBankName());
+                        if (bankInfo.getAccountNumber() != null) accountNumberField.setText(bankInfo.getAccountNumber());
+                    }
+                } else {
+                    messageLabel.setStyle("-fx-text-fill: red;");
+                    messageLabel.setText("خطا در بارگذاری آخرین اطلاعات پروفایل.");
+                }
+            });
+        }).start();
     }
 
     private void handleSaveProfile() {
@@ -107,9 +126,7 @@ public class CourierProfileController implements Initializable {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             new Thread(() -> ApiService.logout()).start();
-
             SessionManager.getInstance().clear();
-
             try {
                 Parent root = FXMLLoader.load(getClass().getResource("/org/example/approjectfrontend/login-view.fxml"));
                 Stage stage = (Stage) logoutButton.getScene().getWindow();
