@@ -34,6 +34,8 @@ import java.util.ResourceBundle;
 public class SellerHomeController implements Initializable {
     @FXML
     private VBox restaurantsVBox;
+    @FXML
+    private Button addNewRestaurantButton;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -42,8 +44,7 @@ public class SellerHomeController implements Initializable {
 
     private void loadRestaurantsFromServer() {
         restaurantsVBox.getChildren().clear();
-        restaurantsVBox.setAlignment(Pos.CENTER);
-        restaurantsVBox.setSpacing(10);
+        restaurantsVBox.setAlignment(Pos.TOP_LEFT);
 
         new Thread(() -> {
             ApiResponse response = ApiService.getMyRestaurants();
@@ -53,27 +54,17 @@ public class SellerHomeController implements Initializable {
                     List<RestaurantDTO> restaurants = gson.fromJson(response.getBody(), new TypeToken<List<RestaurantDTO>>() {}.getType());
 
                     if (restaurants.isEmpty()) {
-                        Label infoLabel = new Label("شما هنوز رستورانی ثبت نکرده‌اید.");
+                        Label infoLabel = new Label("You haven't registered any restaurants yet.");
                         infoLabel.setStyle("-fx-font-size: 16px;");
-                        Button addRestaurantBtn = new Button("ثبت اولین رستوران");
-                        addRestaurantBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14px;");
-                        addRestaurantBtn.setOnAction(event -> {
-                            try {
-                                goToRegisterRestaurantPage(event);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        });
-                        restaurantsVBox.getChildren().addAll(infoLabel, addRestaurantBtn);
+                        restaurantsVBox.getChildren().add(infoLabel);
                     } else {
-                        restaurantsVBox.setAlignment(Pos.TOP_LEFT);
                         for (RestaurantDTO restaurant : restaurants) {
                             HBox card = createRestaurantCard(restaurant);
                             restaurantsVBox.getChildren().add(card);
                         }
                     }
                 } else {
-                    restaurantsVBox.getChildren().add(new Label("خطا در دریافت لیست رستوران‌ها."));
+                    restaurantsVBox.getChildren().add(new Label("Error fetching restaurant list."));
                 }
             });
         }).start();
@@ -93,8 +84,8 @@ public class SellerHomeController implements Initializable {
         Label nameLabel = new Label(restaurant.getName());
         box.getChildren().addAll(imageView, nameLabel);
         ContextMenu contextMenu = new ContextMenu();
-        MenuItem menuMenu = new MenuItem("ورود به منو رستوران");
-        MenuItem menuInfo = new MenuItem("ویرایش اطلاعات رستوران");
+        MenuItem menuMenu = new MenuItem("Enter Restaurant Menu");
+        MenuItem menuInfo = new MenuItem("Edit Restaurant Info");
         contextMenu.getItems().addAll(menuMenu, menuInfo);
         box.setOnMouseClicked(e -> contextMenu.show(box, e.getScreenX(), e.getScreenY()));
         menuMenu.setOnAction(ev -> openRestaurantMenu(restaurant));
@@ -102,16 +93,19 @@ public class SellerHomeController implements Initializable {
         return box;
     }
 
+    // --- MISSING METHOD 1 ADDED HERE ---
     private void openRestaurantMenu(RestaurantDTO restaurant) {
+        // The logic for navigating to the menu page will be implemented here in the future.
         System.out.println("Opening menu for: " + restaurant.getName());
     }
 
+    // --- MISSING METHOD 2 ADDED HERE ---
     private void openRestaurantInfo(RestaurantDTO restaurant) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/RegisterRestaurant-view.fxml"));
             Parent root = loader.load();
             RegisterRestaurantController controller = loader.getController();
-            controller.setRestaurantToEdit(restaurant);
+            controller.setRestaurantToEdit(restaurant); // This method now exists
             Stage stage = (Stage) restaurantsVBox.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (IOException e) {
@@ -119,6 +113,7 @@ public class SellerHomeController implements Initializable {
         }
     }
 
+    @FXML
     private void goToRegisterRestaurantPage(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("RegisterRestaurant-view.fxml"));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -126,7 +121,7 @@ public class SellerHomeController implements Initializable {
     }
 
     @FXML
-    private void goToMyRestaurant(ActionEvent event) throws IOException {
+    private void goToHome(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("SellerHome-view.fxml"));
         Scene scene = ((Node) event.getSource()).getScene();
         scene.setRoot(root);
