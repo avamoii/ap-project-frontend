@@ -44,9 +44,13 @@ public class BuyerProfileController implements Initializable {
     private Label messageLabel;
     @FXML
     private Button profileBtn, homeBtn, historyBtn;
+    @FXML
+    private Button rechargeWalletButton;
+    @FXML
+    private Label walletBalanceLabel;
 
     private File profileImageFile = null;
-
+    private double walletAmount = 0;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         uploadButton.setOnAction(event -> chooseProfileImage());
@@ -55,7 +59,37 @@ public class BuyerProfileController implements Initializable {
         homeBtn.setOnAction(e -> goToHome());
         historyBtn.setOnAction(e -> handleHistoryClick());
         profileBtn.setDisable(true);
+        rechargeWalletButton.setOnAction(event -> showRechargeDialog());
+        updateWalletDisplay();
         populateUserData();
+    }
+    private void updateWalletDisplay() {
+        walletBalanceLabel.setText("موجودی کیف پول: " + (int)walletAmount + " تومان");
+    }
+    private void showRechargeDialog() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("شارژ کیف پول");
+        dialog.setHeaderText(null);
+        dialog.setContentText("مبلغ مورد نظر (تومان):");
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(txt -> {
+            try {
+                double added = Double.parseDouble(txt.trim());
+                if (added > 0) {
+                    walletAmount += added;
+                    updateWalletDisplay();
+                    messageLabel.setStyle("-fx-text-fill: green;");
+                    messageLabel.setText("کیف پول با موفقیت شارژ شد!");
+                } else {
+                    messageLabel.setStyle("-fx-text-fill: red;");
+                    messageLabel.setText("عدد واردشده معتبر نیست.");
+                }
+            } catch (NumberFormatException e) {
+                messageLabel.setStyle("-fx-text-fill: red;");
+                messageLabel.setText("لطفاً یک عدد معتبر وارد کنید.");
+            }
+        });
     }
 
     private void populateUserData() {

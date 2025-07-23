@@ -28,8 +28,10 @@
 
         <Button fx:id="saveButton" style="-fx-background-color: #54C16E; -fx-text-fill: white; -fx-background-radius: 20;" text="ذخیره پروفایل" />
         <Button fx:id="logoutButton" style="-fx-background-color: #e85a5a; -fx-text-fill: white; -fx-background-radius: 20;" text="خروج از حساب کاربری" />
+        <Label fx:id="walletBalanceLabel" text="موجودی کیف پول: 0 تومان" />
+        <Button fx:id="rechargeWalletButton" style="-fx-background-color: #54C16E; -fx-text-fill: white; -fx-background-radius: 12;" text="شارژ کیف پول" />
 
-        <Label fx:id="messageLabel" textFill="green" />
+        <Label fx:id="messageLabel" prefHeight="108.0" prefWidth="323.0" textFill="green" />
     </VBox>
 
     <!-- نوار ناوبری پایین صفحه -->
@@ -38,4 +40,5 @@
         <Button fx:id="homeBtn" prefHeight="40.0" prefWidth="68.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-pref-width: 133px;" text="خانه" />
         <Button fx:id="historyBtn" prefHeight="40.0" prefWidth="87.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-pref-width: 133px;" text="تاریخچه" />
     </HBox>
+    <HBox alignment="CENTER_LEFT" spacing="15" />
 </AnchorPane>
