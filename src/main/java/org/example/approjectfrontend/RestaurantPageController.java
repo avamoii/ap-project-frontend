@@ -1,11 +1,18 @@
 package org.example.approjectfrontend;
 
 import javafx.collections.FXCollections;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.geometry.Pos;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class RestaurantPageController {
 
@@ -19,8 +26,12 @@ public class RestaurantPageController {
     private TextField addressField;
     @FXML
     private Label totalPriceLabel;
+    @FXML
+    private Button payButton;
+
 
     public void initialize() {
+        payButton.setOnAction(event -> showPaymentMethodDialog());
         // سلول سفارشی برای انتخاب تعداد هر آیتم
         menuListView.setCellFactory(list -> new ListCell<>() {
             private final Label nameAndPrice = new Label();
@@ -54,6 +65,60 @@ public class RestaurantPageController {
 
         // مقدار اولیه مجموع هزینه
         updateTotalPrice();
+    }
+    private void showPaymentMethodDialog() {
+        ChoiceDialog<String> dialog = new ChoiceDialog<>("پرداخت با کارت", "پرداخت با کارت", "پرداخت با کیف پول");
+        dialog.setTitle("انتخاب روش پرداخت");
+        dialog.setHeaderText(null);
+        dialog.setContentText("روش پرداخت را انتخاب کنید:");
+
+        dialog.showAndWait().ifPresent(selected -> {
+            if ("پرداخت با کارت".equals(selected)) {
+                handleCardPayment();
+            } else if ("پرداخت با کیف پول".equals(selected)) {
+                handleWalletPayment(1000); //فعلا مقدار فرضی
+            }
+        });
+    }
+    private void handleCardPayment() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("CardPayment-view.fxml"));
+            Parent root = loader.load();
+
+            CardPaymentController controller = loader.getController();
+            // اینجا اگر خواستی مبلغ یا سفارش هم ست کن:
+            // controller.setAmount(getTotalAmount());
+            // controller.setOrderInfo(...);
+
+            Stage stage = new Stage();
+            stage.setTitle("پرداخت با کارت");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL); // نگذارد همزمان چند بار پرداخت باز شود
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "خطا", null, "خطا در باز کردن فرم پرداخت!");
+        }
+    }
+
+    private void handleWalletPayment(long amount) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/WalletPayment-view.fxml"));
+            Parent root = loader.load();
+
+            WalletPaymentController controller = loader.getController();
+            controller.setAmount(amount);
+
+            Stage stage = new Stage();
+            stage.setTitle("پرداخت با کیف پول");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "خطا", null, "خطا در باز کردن فرم پرداخت با کیف پول!");
+        }
     }
 
     @FXML

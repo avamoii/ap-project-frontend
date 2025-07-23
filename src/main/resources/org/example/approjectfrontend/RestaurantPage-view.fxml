@@ -33,6 +33,9 @@
                    prefWidth="320"
                    style="-fx-background-color: #f3fff3; -fx-background-radius: 4;"/>
         <Label fx:id="totalPriceLabel" text="هزینه کل: ۰ تومان" />
+        <Button fx:id="payButton" text="پرداخت"
+                maxWidth="160"
+                style="-fx-font-size: 15px; -fx-background-color: #44c767; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;"/>
         <!-- دکمه ثبت سفارش -->
         <Button fx:id="orderButton" text="ثبت سفارش"
                 maxWidth="160"
