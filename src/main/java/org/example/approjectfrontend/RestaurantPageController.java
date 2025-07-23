@@ -1,6 +1,7 @@
 package org.example.approjectfrontend;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -13,6 +14,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RestaurantPageController {
 
@@ -28,11 +31,13 @@ public class RestaurantPageController {
     private Label totalPriceLabel;
     @FXML
     private Button payButton;
-
+    private Restaurant restaurant;
 
     public void initialize() {
+        // دکمه پرداخت: بازکردن دیالوگ انتخاب روش پرداخت
         payButton.setOnAction(event -> showPaymentMethodDialog());
-        // سلول سفارشی برای انتخاب تعداد هر آیتم
+
+        // سلول سفارشی برای نمایش آیتم، اسپینر انتخاب تعداد، و به‌روزرسانی قیمت کل
         menuListView.setCellFactory(list -> new ListCell<>() {
             private final Label nameAndPrice = new Label();
             private final Spinner<Integer> spinner = new Spinner<>(0, 20, 0);
@@ -63,9 +68,9 @@ public class RestaurantPageController {
             }
         });
 
-        // مقدار اولیه مجموع هزینه
-        updateTotalPrice();
+        updateTotalPrice(); // مقداردهی اولیه
     }
+
     private void showPaymentMethodDialog() {
         ChoiceDialog<String> dialog = new ChoiceDialog<>("پرداخت با کارت", "پرداخت با کارت", "پرداخت با کیف پول");
         dialog.setTitle("انتخاب روش پرداخت");
@@ -76,24 +81,23 @@ public class RestaurantPageController {
             if ("پرداخت با کارت".equals(selected)) {
                 handleCardPayment();
             } else if ("پرداخت با کیف پول".equals(selected)) {
-                handleWalletPayment(1000); //فعلا مقدار فرضی
+                handleWalletPayment(getCurrentOrderTotalPrice());
             }
         });
     }
+
     private void handleCardPayment() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("CardPayment-view.fxml"));
             Parent root = loader.load();
 
             CardPaymentController controller = loader.getController();
-            // اینجا اگر خواستی مبلغ یا سفارش هم ست کن:
-            // controller.setAmount(getTotalAmount());
-            // controller.setOrderInfo(...);
+            // controller.setAmount(getCurrentOrderTotalPrice()); // اگر نیاز به انتقال مبلغ داشتی
 
             Stage stage = new Stage();
             stage.setTitle("پرداخت با کارت");
             stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL); // نگذارد همزمان چند بار پرداخت باز شود
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -120,15 +124,17 @@ public class RestaurantPageController {
             showAlert(Alert.AlertType.ERROR, "خطا", null, "خطا در باز کردن فرم پرداخت با کیف پول!");
         }
     }
-
     @FXML
     private void handleOrderButton() {
+        // فرض: menuListView از نوع ListView<RestaurantMenuItem> است
+        List<RestaurantMenuItem> selectedItems = menuListView.getItems().stream()
+                .filter(item -> item.getOrderCount() > 0)
+                .map(RestaurantMenuItem::cloneItem)
+                .toList();
+
         String address = addressField.getText();
 
-        // فیلتر آیتم‌هایی که تعدادشان > 0 است
-        var orderedItems = menuListView.getItems().filtered(item -> item.getOrderCount() > 0);
-
-        if (orderedItems.isEmpty()) {
+        if (selectedItems.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "خطا", null, "لطفاً حداقل یک آیتم از منو را انتخاب کنید.");
             return;
         }
@@ -138,33 +144,45 @@ public class RestaurantPageController {
             return;
         }
 
-        System.out.println("سفارش شما به این صورت است:");
-        System.out.println("آدرس: " + address);
-        System.out.println("آیتم‌های سفارش داده‌شده:");
-        orderedItems.forEach(item ->
-                System.out.println(item.getName() + " × " + item.getOrderCount() +
-                        " = " + (Integer.parseInt(item.getPrice()) * item.getOrderCount()) + " تومان"));
+        int totalPrice = selectedItems.stream()
+                .mapToInt(item -> item.getOrderCount() * Integer.parseInt(item.getPrice()))
+                .sum();
 
+        // فرض: سازنده Order شما مناسب این پارامترها باشد
+        Order newOrder = new Order(
+                this.restaurant.getName(),
+                address,
+                selectedItems,
+                totalPrice
+        );
+        OrderRepository.ORDERS.add(newOrder);
 
         showAlert(Alert.AlertType.INFORMATION, "موفقیت", null, "سفارش شما ثبت شد!");
 
-        // (اختیاری) ریست فرم:
-        // menuListView.getItems().forEach(item -> item.setOrderCount(0));
-        // menuListView.refresh();
-        // addressField.clear();
-        // updateTotalPrice();
+        // صفر کردن تعداد سفارش آیتم‌های منو
+        menuListView.getItems().forEach(item -> item.setOrderCount(0));
+        menuListView.refresh();
+        updateTotalPrice();
     }
+
 
     private void updateTotalPrice() {
         int total = menuListView.getItems().stream()
                 .mapToInt(item -> item.getOrderCount() * Integer.parseInt(item.getPrice()))
-
                 .sum();
         totalPriceLabel.setText("هزینه کل: " + total + " تومان");
     }
 
+    // مقدار کل فعلی سفارش بدون ثبت
+    private int getCurrentOrderTotalPrice() {
+        return menuListView.getItems().stream()
+                .mapToInt(item -> item.getOrderCount() * Integer.parseInt(item.getPrice()))
+                .sum();
+    }
+
     // متد دریافت رستوران و ست کردن محتوا
     public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
         if (restaurant == null) return;
 
         nameLabel.setText(restaurant.getName());
