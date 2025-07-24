@@ -214,22 +214,30 @@ public class ApiService {
         }
     }
 
-    public static ApiResponse addFoodItem(long restaurantId, AddFoodItemRequest itemData) {
+    public static ApiResponse addFoodItem(long restaurantId, String menuTitle, AddFoodItemRequest itemData) {
         String token = SessionManager.getInstance().getToken();
-        if (token == null) return new ApiResponse(401, "{\"error\":\"Not logged in\"}");
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+
         try {
-            String jsonBody = gson.toJson(itemData);
+            String jsonBody = new Gson().toJson(itemData);
+            // *** تغییر اصلی اینجاست: URL جدید با عنوان منو ساخته می‌شود ***
+            String url = API_BASE_URL + "/restaurants/" + restaurantId + "/menu/" + menuTitle + "/item";
+
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/restaurants/" + restaurantId + "/item"))
+                    .uri(URI.create(url))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + token)
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
+
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+
         } catch (Exception e) {
             e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"Server connection error\"}");
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
         }
     }
 
@@ -261,6 +269,30 @@ public class ApiService {
                     .header("Authorization", "Bearer " + token)
                     .DELETE()
                     .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"Server connection error\"}");
+        }
+    }
+    // در فایل ApiService.java
+
+    public static ApiResponse removeItemFromMenu(long restaurantId, String menuTitle, long itemId) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            // URL حالا شامل عنوان منو و شناسه آیتم است
+            String url = API_BASE_URL + "/restaurants/" + restaurantId + "/menu/" + menuTitle + "/" + itemId;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + token)
+                    .DELETE()
+                    .build();
+
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
         } catch (Exception e) {

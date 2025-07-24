@@ -109,7 +109,7 @@ public class RestaurantMenuController implements Initializable {
         if (!collectDataFromForm(requestData)) return;
 
         new Thread(() -> {
-            ApiResponse response = ApiService.addFoodItem(currentRestaurant.getId(), requestData);
+            ApiResponse response = ApiService.addFoodItem(currentRestaurant.getId(), currentMenuTitle, requestData);
             Platform.runLater(() -> {
                 if (response.getStatusCode() == 200) {
                     showMessage("آیتم جدید با موفقیت اضافه شد.", "green");

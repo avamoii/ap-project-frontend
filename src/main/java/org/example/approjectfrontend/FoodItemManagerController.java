@@ -113,7 +113,7 @@ public class FoodItemManagerController implements Initializable {
 
         System.out.println("DEBUG: داده‌ها با موفقیت جمع‌آوری شد. شروع ترد تماس با API...");
         new Thread(() -> {
-            ApiResponse response = ApiService.addFoodItem(currentRestaurant.getId(), requestData);
+            ApiResponse response = ApiService.addFoodItem(currentRestaurant.getId(), currentMenuTitle, requestData);
             Platform.runLater(() -> {
                 System.out.println("DEBUG: تماس با API تمام شد. کد وضعیت: " + response.getStatusCode());
                 if (response.getStatusCode() == 200) {
@@ -228,17 +228,22 @@ public class FoodItemManagerController implements Initializable {
         colDelete.setCellFactory(param -> new TableCell<>() {
             private final Button btn = new Button("حذف");
             {
+                btn.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white;"); // استایل دکمه
                 btn.setOnAction(event -> {
                     FoodItemDTO item = getTableView().getItems().get(getIndex());
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "آیا از حذف آیتم '" + item.getName() + "' مطمئن هستید؟", ButtonType.YES, ButtonType.NO);
+
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "آیا از حذف آیتم '" + item.getName() + "' از این منو مطمئن هستید؟", ButtonType.YES, ButtonType.NO);
+                    alert.setHeaderText("تایید حذف");
                     alert.showAndWait().ifPresent(response -> {
                         if (response == ButtonType.YES) {
                             new Thread(() -> {
-                                ApiResponse apiResponse = ApiService.deleteFoodItem(currentRestaurant.getId(), item.getId());
+                                // *** اصلاحیه اصلی اینجاست: فراخوانی متد صحیح ***
+                                ApiResponse apiResponse = ApiService.removeItemFromMenu(currentRestaurant.getId(), currentMenuTitle, item.getId());
+
                                 Platform.runLater(() -> {
                                     if (apiResponse.getStatusCode() == 200) {
-                                        showMessage("آیتم با موفقیت حذف شد.", "green");
-                                        loadMenuItems();
+                                        showMessage("آیتم با موفقیت از منو حذف شد.", "green");
+                                        loadMenuItems(); // رفرش کردن جدول
                                     } else {
                                         showMessage("خطا در حذف آیتم: " + apiResponse.getBody(), "red");
                                     }
@@ -248,6 +253,7 @@ public class FoodItemManagerController implements Initializable {
                     });
                 });
             }
+
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
