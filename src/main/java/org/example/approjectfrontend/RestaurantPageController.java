@@ -1,19 +1,30 @@
 package org.example.approjectfrontend;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.layout.HBox;
 import javafx.geometry.Pos;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import org.example.approjectfrontend.api.ApiResponse;
+import org.example.approjectfrontend.api.ApiService;
+import org.example.approjectfrontend.api.FoodItemDTO;
+import org.example.approjectfrontend.api.RestaurantDTO;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +35,7 @@ public class RestaurantPageController {
     @FXML
     private ImageView logoView;
     @FXML
-    private ListView<RestaurantMenuItem> menuListView;
+    private ListView<FoodItemDTO> menuListView;
     @FXML
     private TextField addressField;
     @FXML
@@ -32,6 +43,9 @@ public class RestaurantPageController {
     @FXML
     private Button payButton;
     private Restaurant restaurant;
+
+    private final ObservableList<FoodItemDTO> allItems = FXCollections.observableArrayList();
+    private final Map<FoodItemDTO, Spinner<Integer>> itemSpinners = new HashMap<>();
 
     public void initialize() {
         // دکمه پرداخت: بازکردن دیالوگ انتخاب روش پرداخت
@@ -44,25 +58,22 @@ public class RestaurantPageController {
             private final HBox box = new HBox(10, nameAndPrice, spinner);
 
             {
-                spinner.setPrefWidth(60);
+                spinner.setPrefWidth(80);
+                HBox.setHgrow(nameAndPrice, Priority.ALWAYS); // باعث می‌شود نام آیتم تمام فضای خالی را بگیرد
                 box.setAlignment(Pos.CENTER_LEFT);
-
-                spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
-                    if (getItem() != null) {
-                        getItem().setOrderCount(newVal);
-                        updateTotalPrice();
-                    }
-                });
+                // هر بار که مقدار اسپینر تغییر می‌کند، قیمت کل آپدیت می‌شود
+                spinner.valueProperty().addListener((obs, oldVal, newVal) -> updateTotalPrice());
             }
 
             @Override
-            protected void updateItem(RestaurantMenuItem item, boolean empty) {
+            protected void updateItem(FoodItemDTO item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setGraphic(null);
                 } else {
                     nameAndPrice.setText(item.getName() + " - " + item.getPrice() + " تومان");
-                    spinner.getValueFactory().setValue(item.getOrderCount());
+                    spinner.getValueFactory().setValue(0);
+                    itemSpinners.put(item, spinner); // اسپینر را به آیتم متصل می‌کنیم تا بعداً قیمت را محاسبه کنیم
                     setGraphic(box);
                 }
             }
@@ -91,6 +102,8 @@ public class RestaurantPageController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("CardPayment-view.fxml"));
             Parent root = loader.load();
 
+    // این متد از BuyerHomeController فراخوانی می‌شود
+    public void setRestaurant(RestaurantDTO restaurant) {
             CardPaymentController controller = loader.getController();
             // controller.setAmount(getCurrentOrderTotalPrice()); // اگر نیاز به انتقال مبلغ داشتی
 
@@ -185,28 +198,60 @@ public class RestaurantPageController {
         this.restaurant = restaurant;
         if (restaurant == null) return;
 
+        // اطلاعات اولیه رستوران را نمایش می‌دهد
         nameLabel.setText(restaurant.getName());
-        if (restaurant.getLogo() != null)
-            logoView.setImage(restaurant.getLogo());
-        else
-            logoView.setImage(null);
+        if (restaurant.getLogoBase64() != null && !restaurant.getLogoBase64().isEmpty()) {
+            byte[] decodedBytes = Base64.getDecoder().decode(restaurant.getLogoBase64());
+            logoView.setImage(new Image(new ByteArrayInputStream(decodedBytes)));
+        }
+        if (restaurant.getAddress() != null) {
+            addressField.setText(restaurant.getAddress());
+        }
 
-        // پر کردن منو با خود آبجکت‌ها (نه رشته)
-        menuListView.setItems(FXCollections.observableArrayList(restaurant.getMenuItems()));
-
-        // ریست کردن تعداد سفارش
-        menuListView.getItems().forEach(item -> item.setOrderCount(0));
-        menuListView.refresh();
-
-        updateTotalPrice();
+        // **مهم‌ترین بخش:** حالا منوی کامل را از سرور درخواست می‌کند
+        loadFullMenu(restaurant.getId());
     }
 
-    // نمایش پیام
-    private void showAlert(Alert.AlertType type, String title, String header, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
+    private void loadFullMenu(long restaurantId) {
+        new Thread(() -> {
+            // از متد getRestaurantMenu که اندپوینت صحیح را فراخوانی می‌کند، استفاده می‌کنیم
+            ApiResponse response = ApiService.getRestaurantMenu(restaurantId);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    Gson gson = new Gson();
+                    JsonObject responseJson = gson.fromJson(response.getBody(), JsonObject.class);
+
+                    allItems.clear();
+                    // روی تمام منوهای داخل پاسخ JSON حلقه می‌زنیم
+                    for (Map.Entry<String, JsonElement> entry : responseJson.entrySet()) {
+                        // کلیدهای اضافی را نادیده می‌گیریم
+                        if (!entry.getKey().equals("vendor") && !entry.getKey().equals("menu_titles")) {
+                            // لیست آیتم‌های هر منو را استخراج می‌کنیم
+                            List<FoodItemDTO> items = gson.fromJson(entry.getValue(), new TypeToken<List<FoodItemDTO>>(){}.getType());
+                            allItems.addAll(items);
+                        }
+                    }
+                    // لیست نهایی آیتم‌ها را به ListView متصل می‌کنیم تا نمایش داده شوند
+                    menuListView.setItems(allItems);
+                } else {
+                    // می‌توانید یک لیبل خطا در FXML اضافه کرده و آن را در اینجا نمایش دهید
+                    System.err.println("Error fetching menu: " + response.getBody());
+                }
+            });
+        }).start();
+    }
+
+    private void updateTotalPrice() {
+        long total = 0;
+        for (Map.Entry<FoodItemDTO, Spinner<Integer>> entry : itemSpinners.entrySet()) {
+            total += (long) entry.getKey().getPrice() * entry.getValue().getValue();
+        }
+        totalPriceLabel.setText("هزینه کل: " + total + " تومان");
+    }
+
+    @FXML
+    private void handleOrderButton() {
+        // منطق ثبت سفارش در آینده در اینجا تکمیل خواهد شد
+        System.out.println("دکمه ثبت سفارش کلیک شد.");
     }
 }
