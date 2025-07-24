@@ -5,11 +5,12 @@ import javafx.scene.image.Image;
 public class RestaurantMenuItem {
     private String name;
     private String desc;
-    private String price;   // اگر عددی می‌خواهی، بهتر است int باشد
-    private String supply;  // اگر عددی می‌خواهی، بهتر است int باشد
+    private String price;
+    private String supply;
     private String keywords;
     private Image image;
     private int orderCount;
+
     // سازنده با عکس
     public RestaurantMenuItem(String name, String desc, String price, String supply, String keywords, Image image) {
         this.name = name;
@@ -25,7 +26,25 @@ public class RestaurantMenuItem {
         this(name, desc, price, supply, keywords, null);
     }
 
-    // Getters
+    // --- کانستراکتور کامل با orderCount فقط برای کپی‌برداری ---
+    public RestaurantMenuItem(String name, String desc, String price, String supply,
+                              String keywords, Image image, int orderCount) {
+        this.name = name;
+        this.desc = desc;
+        this.price = price;
+        this.supply = supply;
+        this.keywords = keywords;
+        this.image = image;
+        this.orderCount = orderCount;
+    }
+
+    // --- متد clone برای ساختن کپی کامل از شیء ---
+    public RestaurantMenuItem cloneItem() {
+        return new RestaurantMenuItem(this.name, this.desc, this.price, this.supply,
+                this.keywords, this.image, this.orderCount);
+    }
+
+    // Getters & Setters
     public String getName() { return name; }
     public String getDesc() { return desc; }
     public String getPrice() { return price; }
