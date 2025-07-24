@@ -12,12 +12,14 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -30,7 +32,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class FoodItemManagerController implements Initializable {
@@ -44,7 +46,7 @@ public class FoodItemManagerController implements Initializable {
     @FXML
     private TextField itemNameField, itemDescField, itemPriceField, itemSupplyField, itemKeywordsField;
     @FXML
-    private Button chooseImageBtn, addItemBtn, backButton;
+    private Button chooseImageBtn, addItemBtn;
     @FXML
     private ImageView itemImageView;
     @FXML
@@ -63,7 +65,7 @@ public class FoodItemManagerController implements Initializable {
         colSupply.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(String.valueOf(cellData.getValue().getSupply())));
         menuTable.setItems(menuItems);
         addEditButtonToTable();
-        addDeleteButtonToTable();
+        addDeleteButtonsToTable();
     }
 
     public void setRestaurantAndMenu(RestaurantDTO restaurant, String menuTitle) {
@@ -83,8 +85,11 @@ public class FoodItemManagerController implements Initializable {
                     Gson gson = new Gson();
                     JsonObject responseJson = gson.fromJson(response.getBody(), JsonObject.class);
                     if (responseJson.has(currentMenuTitle)) {
-                        List<FoodItemDTO> items = gson.fromJson(responseJson.get(currentMenuTitle), new TypeToken<List<FoodItemDTO>>(){}.getType());
-                        menuItems.addAll(items);
+                        JsonElement itemsElement = responseJson.get(currentMenuTitle);
+                        if (itemsElement != null && itemsElement.isJsonArray()) {
+                            List<FoodItemDTO> items = gson.fromJson(itemsElement, new TypeToken<List<FoodItemDTO>>() {}.getType());
+                            menuItems.addAll(items);
+                        }
                     }
                 } else {
                     showMessage("خطا در دریافت آیتم‌های منو.", "red");
@@ -95,7 +100,6 @@ public class FoodItemManagerController implements Initializable {
 
     @FXML
     private void handleAddOrEditItem() {
-        System.out.println("DEBUG: دکمه 'افزودن/ویرایش آیتم' کلیک شد.");
         if (editingItem != null) {
             handleUpdateItem();
         } else {
@@ -104,18 +108,11 @@ public class FoodItemManagerController implements Initializable {
     }
 
     private void handleAddItem() {
-        System.out.println("DEBUG: ورود به متد handleAddItem...");
         AddFoodItemRequest requestData = new AddFoodItemRequest();
-        if (!collectDataFromForm(requestData)) {
-            System.out.println("DEBUG: اعتبارسنجی داده‌ها ناموفق بود. عملیات متوقف شد.");
-            return;
-        }
-
-        System.out.println("DEBUG: داده‌ها با موفقیت جمع‌آوری شد. شروع ترد تماس با API...");
+        if (!collectDataFromForm(requestData)) return;
         new Thread(() -> {
             ApiResponse response = ApiService.addFoodItem(currentRestaurant.getId(), currentMenuTitle, requestData);
             Platform.runLater(() -> {
-                System.out.println("DEBUG: تماس با API تمام شد. کد وضعیت: " + response.getStatusCode());
                 if (response.getStatusCode() == 200) {
                     showMessage("آیتم جدید با موفقیت اضافه شد.", "green");
                     clearFields();
@@ -128,18 +125,11 @@ public class FoodItemManagerController implements Initializable {
     }
 
     private void handleUpdateItem() {
-        System.out.println("DEBUG: ورود به متد handleUpdateItem...");
         UpdateFoodItemRequest requestData = new UpdateFoodItemRequest();
-        if (!collectDataFromForm(requestData)) {
-            System.out.println("DEBUG: اعتبارسنجی داده‌ها برای ویرایش ناموفق بود. عملیات متوقف شد.");
-            return;
-        }
-
-        System.out.println("DEBUG: داده‌های ویرایش با موفقیت جمع‌آوری شد. شروع ترد تماس با API...");
+        if (!collectDataFromForm(requestData)) return;
         new Thread(() -> {
             ApiResponse response = ApiService.updateFoodItem(currentRestaurant.getId(), editingItem.getId(), requestData);
             Platform.runLater(() -> {
-                System.out.println("DEBUG: تماس API ویرایش تمام شد. کد وضعیت: " + response.getStatusCode());
                 if (response.getStatusCode() == 200) {
                     showMessage("آیتم با موفقیت ویرایش شد.", "green");
                     clearFields();
@@ -152,22 +142,17 @@ public class FoodItemManagerController implements Initializable {
     }
 
     private <T> boolean collectDataFromForm(T requestData) {
-        System.out.println("DEBUG: در حال جمع‌آوری داده‌ها از فرم...");
         String name = itemNameField.getText().trim();
         String desc = itemDescField.getText().trim();
-        String priceStr = itemPriceField.getText().trim();
-        String supplyStr = itemSupplyField.getText().trim();
         String keywords = itemKeywordsField.getText().trim();
-
-        if (name.isEmpty() || desc.isEmpty() || priceStr.isEmpty() || supplyStr.isEmpty() || keywords.isEmpty()) {
-            showMessage("تمام فیلدها باید پر شوند.", "red");
+        if (name.isEmpty() || desc.isEmpty() || keywords.isEmpty()) {
+            showMessage("تمام فیلدهای متنی باید پر شوند.", "red");
             return false;
         }
-
         Integer price, supply;
         try {
-            price = Integer.parseInt(priceStr);
-            supply = Integer.parseInt(supplyStr);
+            price = Integer.parseInt(itemPriceField.getText().trim());
+            supply = Integer.parseInt(itemSupplyField.getText().trim());
         } catch (NumberFormatException e) {
             showMessage("قیمت و موجودی باید عدد باشند.", "red");
             return false;
@@ -224,28 +209,50 @@ public class FoodItemManagerController implements Initializable {
         });
     }
 
-    private void addDeleteButtonToTable() {
+    private void addDeleteButtonsToTable() {
         colDelete.setCellFactory(param -> new TableCell<>() {
-            private final Button btn = new Button("حذف");
-            {
-                btn.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white;"); // استایل دکمه
-                btn.setOnAction(event -> {
-                    FoodItemDTO item = getTableView().getItems().get(getIndex());
+            private final Button btnRemove = new Button("از منو");
+            private final Button btnDelete = new Button("دائمی");
+            private final HBox pane = new HBox(5, btnRemove, btnDelete);
 
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "آیا از حذف آیتم '" + item.getName() + "' از این منو مطمئن هستید؟", ButtonType.YES, ButtonType.NO);
-                    alert.setHeaderText("تایید حذف");
+            {
+                pane.setAlignment(Pos.CENTER);
+                btnRemove.setStyle("-fx-background-color: #f0ad4e; -fx-text-fill: white;");
+                btnDelete.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white;");
+
+                btnRemove.setOnAction(event -> {
+                    FoodItemDTO item = getTableView().getItems().get(getIndex());
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "آیا از حذف آیتم '" + item.getName() + "' فقط از این منو مطمئن هستید؟", ButtonType.YES, ButtonType.NO);
                     alert.showAndWait().ifPresent(response -> {
                         if (response == ButtonType.YES) {
                             new Thread(() -> {
-                                // *** اصلاحیه اصلی اینجاست: فراخوانی متد صحیح ***
                                 ApiResponse apiResponse = ApiService.removeItemFromMenu(currentRestaurant.getId(), currentMenuTitle, item.getId());
-
                                 Platform.runLater(() -> {
                                     if (apiResponse.getStatusCode() == 200) {
                                         showMessage("آیتم با موفقیت از منو حذف شد.", "green");
-                                        loadMenuItems(); // رفرش کردن جدول
+                                        loadMenuItems();
                                     } else {
-                                        showMessage("خطا در حذف آیتم: " + apiResponse.getBody(), "red");
+                                        showMessage("خطا در حذف از منو: " + apiResponse.getBody(), "red");
+                                    }
+                                });
+                            }).start();
+                        }
+                    });
+                });
+
+                btnDelete.setOnAction(event -> {
+                    FoodItemDTO item = getTableView().getItems().get(getIndex());
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "هشدار: این آیتم برای همیشه از سیستم حذف خواهد شد! آیا مطمئن هستید؟", ButtonType.YES, ButtonType.NO);
+                    alert.showAndWait().ifPresent(response -> {
+                        if (response == ButtonType.YES) {
+                            new Thread(() -> {
+                                ApiResponse apiResponse = ApiService.deleteFoodItem(currentRestaurant.getId(), item.getId());
+                                Platform.runLater(() -> {
+                                    if (apiResponse.getStatusCode() == 200) {
+                                        showMessage("آیتم با موفقیت به طور کامل حذف شد.", "green");
+                                        loadMenuItems();
+                                    } else {
+                                        showMessage("خطا در حذف دائمی: " + apiResponse.getBody(), "red");
                                     }
                                 });
                             }).start();
@@ -257,7 +264,7 @@ public class FoodItemManagerController implements Initializable {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty ? null : btn);
+                setGraphic(empty ? null : pane);
             }
         });
     }
