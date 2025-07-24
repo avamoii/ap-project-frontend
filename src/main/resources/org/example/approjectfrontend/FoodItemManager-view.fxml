@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.FoodItemManagerController">
+    <SplitPane dividerPositions="0.6" orientation="HORIZONTAL" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+        <VBox minWidth="380.0" spacing="10" style="-fx-padding: 10;">
+            <Label fx:id="menuTitleLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <HBox spacing="10">
+                <TextField fx:id="itemNameField" promptText="نام آیتم" HBox.hgrow="ALWAYS" />
+                <TextField fx:id="itemDescField" promptText="توضیحات" HBox.hgrow="ALWAYS" />
+            </HBox>
+            <HBox spacing="10">
+                <TextField fx:id="itemPriceField" promptText="قیمت" />
+                <TextField fx:id="itemSupplyField" promptText="موجودی" />
+            </HBox>
+            <TextField fx:id="itemKeywordsField" promptText="کلمات کلیدی (با کاما جدا کنید)" />
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Button fx:id="chooseImageBtn" onAction="#handleChooseImage" style="-fx-background-color: #5cb85c; -fx-text-fill: white;" text="انتخاب عکس" />
+                <Button fx:id="addItemBtn" onAction="#handleAddOrEditItem" style="-fx-background-color: #337ab7; -fx-text-fill: white;" text="افزودن آیتم" />
+                <Button onAction="#handleGoBackToMenus" style="-fx-background-color: #f0ad4e; -fx-text-fill: white;" text="بازگشت به لیست منوها" />
+            </HBox>
+            <ImageView fx:id="itemImageView" fitHeight="76.0" fitWidth="86.0" pickOnBounds="true" preserveRatio="true" />
+            <Label fx:id="messageLabel" managed="false" visible="false" wrapText="true"/>
+        </VBox>
+        <TableView fx:id="menuTable">
+            <columns>
+                <TableColumn fx:id="colName" prefWidth="100.0" text="نام" />
+                <TableColumn fx:id="colPrice" prefWidth="75.0" text="قیمت" />
+                <TableColumn fx:id="colSupply" prefWidth="75.0" text="موجودی" />
+                <TableColumn fx:id="colEdit" prefWidth="60.0" text="ویرایش" />
+                <TableColumn fx:id="colDelete" prefWidth="60.0" text="حذف" />
+            </columns>
+        </TableView>
+    </SplitPane>
+</AnchorPane>
