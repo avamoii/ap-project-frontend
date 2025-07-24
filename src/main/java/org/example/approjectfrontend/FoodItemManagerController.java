@@ -102,7 +102,6 @@ public class FoodItemManagerController implements Initializable {
             handleAddItem();
         }
     }
-
     private void handleAddItem() {
         System.out.println("DEBUG: ورود به متد handleAddItem...");
         AddFoodItemRequest requestData = new AddFoodItemRequest();
@@ -119,13 +118,20 @@ public class FoodItemManagerController implements Initializable {
                 if (response.getStatusCode() == 200) {
                     showMessage("آیتم جدید با موفقیت اضافه شد.", "green");
                     clearFields();
-                    loadMenuItems();
+
+                    // تاخیر 200 میلی‌ثانیه‌ای قبل از رفرش منو:
+                    new Thread(() -> {
+                        try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+                        Platform.runLater(this::loadMenuItems);
+                    }).start();
+
                 } else {
                     showMessage("خطا در ثبت آیتم: " + response.getBody(), "red");
                 }
             });
         }).start();
     }
+
 
     private void handleUpdateItem() {
         System.out.println("DEBUG: ورود به متد handleUpdateItem...");
