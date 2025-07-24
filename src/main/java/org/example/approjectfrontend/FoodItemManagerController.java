@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-public class RestaurantMenuController implements Initializable {
+public class FoodItemManagerController implements Initializable {
 
     @FXML
     private TableView<FoodItemDTO> menuTable;
@@ -62,7 +62,6 @@ public class RestaurantMenuController implements Initializable {
         colPrice.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(String.valueOf(cellData.getValue().getPrice())));
         colSupply.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(String.valueOf(cellData.getValue().getSupply())));
         menuTable.setItems(menuItems);
-
         addEditButtonToTable();
         addDeleteButtonToTable();
     }
@@ -77,7 +76,6 @@ public class RestaurantMenuController implements Initializable {
     private void loadMenuItems() {
         if (currentRestaurant == null || currentMenuTitle == null) return;
         menuItems.clear();
-
         new Thread(() -> {
             ApiResponse response = ApiService.getRestaurantMenu(currentRestaurant.getId());
             Platform.runLater(() -> {
@@ -97,6 +95,7 @@ public class RestaurantMenuController implements Initializable {
 
     @FXML
     private void handleAddOrEditItem() {
+        System.out.println("DEBUG: دکمه 'افزودن/ویرایش آیتم' کلیک شد.");
         if (editingItem != null) {
             handleUpdateItem();
         } else {
@@ -105,12 +104,18 @@ public class RestaurantMenuController implements Initializable {
     }
 
     private void handleAddItem() {
+        System.out.println("DEBUG: ورود به متد handleAddItem...");
         AddFoodItemRequest requestData = new AddFoodItemRequest();
-        if (!collectDataFromForm(requestData)) return;
+        if (!collectDataFromForm(requestData)) {
+            System.out.println("DEBUG: اعتبارسنجی داده‌ها ناموفق بود. عملیات متوقف شد.");
+            return;
+        }
 
+        System.out.println("DEBUG: داده‌ها با موفقیت جمع‌آوری شد. شروع ترد تماس با API...");
         new Thread(() -> {
             ApiResponse response = ApiService.addFoodItem(currentRestaurant.getId(), requestData);
             Platform.runLater(() -> {
+                System.out.println("DEBUG: تماس با API تمام شد. کد وضعیت: " + response.getStatusCode());
                 if (response.getStatusCode() == 200) {
                     showMessage("آیتم جدید با موفقیت اضافه شد.", "green");
                     clearFields();
@@ -123,12 +128,18 @@ public class RestaurantMenuController implements Initializable {
     }
 
     private void handleUpdateItem() {
+        System.out.println("DEBUG: ورود به متد handleUpdateItem...");
         UpdateFoodItemRequest requestData = new UpdateFoodItemRequest();
-        if (!collectDataFromForm(requestData)) return;
+        if (!collectDataFromForm(requestData)) {
+            System.out.println("DEBUG: اعتبارسنجی داده‌ها برای ویرایش ناموفق بود. عملیات متوقف شد.");
+            return;
+        }
 
+        System.out.println("DEBUG: داده‌های ویرایش با موفقیت جمع‌آوری شد. شروع ترد تماس با API...");
         new Thread(() -> {
             ApiResponse response = ApiService.updateFoodItem(currentRestaurant.getId(), editingItem.getId(), requestData);
             Platform.runLater(() -> {
+                System.out.println("DEBUG: تماس API ویرایش تمام شد. کد وضعیت: " + response.getStatusCode());
                 if (response.getStatusCode() == 200) {
                     showMessage("آیتم با موفقیت ویرایش شد.", "green");
                     clearFields();
@@ -141,17 +152,22 @@ public class RestaurantMenuController implements Initializable {
     }
 
     private <T> boolean collectDataFromForm(T requestData) {
+        System.out.println("DEBUG: در حال جمع‌آوری داده‌ها از فرم...");
         String name = itemNameField.getText().trim();
         String desc = itemDescField.getText().trim();
+        String priceStr = itemPriceField.getText().trim();
+        String supplyStr = itemSupplyField.getText().trim();
         String keywords = itemKeywordsField.getText().trim();
-        if (name.isEmpty() || desc.isEmpty() || keywords.isEmpty()) {
-            showMessage("تمام فیلدهای متنی باید پر شوند.", "red");
+
+        if (name.isEmpty() || desc.isEmpty() || priceStr.isEmpty() || supplyStr.isEmpty() || keywords.isEmpty()) {
+            showMessage("تمام فیلدها باید پر شوند.", "red");
             return false;
         }
+
         Integer price, supply;
         try {
-            price = Integer.parseInt(itemPriceField.getText().trim());
-            supply = Integer.parseInt(itemSupplyField.getText().trim());
+            price = Integer.parseInt(priceStr);
+            supply = Integer.parseInt(supplyStr);
         } catch (NumberFormatException e) {
             showMessage("قیمت و موجودی باید عدد باشند.", "red");
             return false;
