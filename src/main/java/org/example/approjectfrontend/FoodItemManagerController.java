@@ -44,7 +44,7 @@ public class FoodItemManagerController implements Initializable {
     @FXML
     private TextField itemNameField, itemDescField, itemPriceField, itemSupplyField, itemKeywordsField;
     @FXML
-    private Button chooseImageBtn, addItemBtn;
+    private Button chooseImageBtn, addItemBtn, backButton;
     @FXML
     private ImageView itemImageView;
     @FXML
@@ -95,16 +95,27 @@ public class FoodItemManagerController implements Initializable {
 
     @FXML
     private void handleAddOrEditItem() {
-        if (editingItem != null) handleUpdateItem();
-        else handleAddItem();
+        System.out.println("DEBUG: دکمه 'افزودن/ویرایش آیتم' کلیک شد.");
+        if (editingItem != null) {
+            handleUpdateItem();
+        } else {
+            handleAddItem();
+        }
     }
 
     private void handleAddItem() {
+        System.out.println("DEBUG: ورود به متد handleAddItem...");
         AddFoodItemRequest requestData = new AddFoodItemRequest();
-        if (!collectDataFromForm(requestData)) return;
+        if (!collectDataFromForm(requestData)) {
+            System.out.println("DEBUG: اعتبارسنجی داده‌ها ناموفق بود. عملیات متوقف شد.");
+            return;
+        }
+
+        System.out.println("DEBUG: داده‌ها با موفقیت جمع‌آوری شد. شروع ترد تماس با API...");
         new Thread(() -> {
             ApiResponse response = ApiService.addFoodItem(currentRestaurant.getId(), requestData);
             Platform.runLater(() -> {
+                System.out.println("DEBUG: تماس با API تمام شد. کد وضعیت: " + response.getStatusCode());
                 if (response.getStatusCode() == 200) {
                     showMessage("آیتم جدید با موفقیت اضافه شد.", "green");
                     clearFields();
@@ -117,11 +128,18 @@ public class FoodItemManagerController implements Initializable {
     }
 
     private void handleUpdateItem() {
+        System.out.println("DEBUG: ورود به متد handleUpdateItem...");
         UpdateFoodItemRequest requestData = new UpdateFoodItemRequest();
-        if (!collectDataFromForm(requestData)) return;
+        if (!collectDataFromForm(requestData)) {
+            System.out.println("DEBUG: اعتبارسنجی داده‌ها برای ویرایش ناموفق بود. عملیات متوقف شد.");
+            return;
+        }
+
+        System.out.println("DEBUG: داده‌های ویرایش با موفقیت جمع‌آوری شد. شروع ترد تماس با API...");
         new Thread(() -> {
             ApiResponse response = ApiService.updateFoodItem(currentRestaurant.getId(), editingItem.getId(), requestData);
             Platform.runLater(() -> {
+                System.out.println("DEBUG: تماس API ویرایش تمام شد. کد وضعیت: " + response.getStatusCode());
                 if (response.getStatusCode() == 200) {
                     showMessage("آیتم با موفقیت ویرایش شد.", "green");
                     clearFields();
@@ -134,17 +152,22 @@ public class FoodItemManagerController implements Initializable {
     }
 
     private <T> boolean collectDataFromForm(T requestData) {
+        System.out.println("DEBUG: در حال جمع‌آوری داده‌ها از فرم...");
         String name = itemNameField.getText().trim();
         String desc = itemDescField.getText().trim();
+        String priceStr = itemPriceField.getText().trim();
+        String supplyStr = itemSupplyField.getText().trim();
         String keywords = itemKeywordsField.getText().trim();
-        if (name.isEmpty() || desc.isEmpty() || keywords.isEmpty()) {
-            showMessage("تمام فیلدهای متنی باید پر شوند.", "red");
+
+        if (name.isEmpty() || desc.isEmpty() || priceStr.isEmpty() || supplyStr.isEmpty() || keywords.isEmpty()) {
+            showMessage("تمام فیلدها باید پر شوند.", "red");
             return false;
         }
+
         Integer price, supply;
         try {
-            price = Integer.parseInt(itemPriceField.getText().trim());
-            supply = Integer.parseInt(itemSupplyField.getText().trim());
+            price = Integer.parseInt(priceStr);
+            supply = Integer.parseInt(supplyStr);
         } catch (NumberFormatException e) {
             showMessage("قیمت و موجودی باید عدد باشند.", "red");
             return false;
@@ -235,7 +258,14 @@ public class FoodItemManagerController implements Initializable {
 
     @FXML
     private void handleChooseImage() {
-        // ... (مثل قبل)
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("انتخاب تصویر غذا");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.jpg", "*.jpeg", "*.png"));
+        File file = fileChooser.showOpenDialog(itemImageView.getScene().getWindow());
+        if (file != null) {
+            selectedImageFile = file;
+            itemImageView.setImage(new Image(file.toURI().toString()));
+        }
     }
 
     @FXML
@@ -249,10 +279,31 @@ public class FoodItemManagerController implements Initializable {
     }
 
     private void clearFields() {
-        // ... (مثل قبل)
+        editingItem = null;
+        itemNameField.clear();
+        itemDescField.clear();
+        itemPriceField.clear();
+        itemSupplyField.clear();
+        itemKeywordsField.clear();
+        itemImageView.setImage(null);
+        selectedImageFile = null;
+        addItemBtn.setText("افزودن آیتم");
     }
 
     private void showMessage(String message, String color) {
-        // ... (مثل قبل)
+        messageLabel.setText(message);
+        messageLabel.setVisible(true);
+        messageLabel.setManaged(true);
+        if (color.equals("green")) {
+            messageLabel.setStyle("-fx-background-color: #dff0d8; -fx-text-fill: #3c763d; -fx-padding: 10; -fx-background-radius: 5;");
+        } else {
+            messageLabel.setStyle("-fx-background-color: #f2dede; -fx-text-fill: #a94442; -fx-padding: 10; -fx-background-radius: 5;");
+        }
+        PauseTransition delay = new PauseTransition(Duration.seconds(4));
+        delay.setOnFinished(event -> {
+            messageLabel.setVisible(false);
+            messageLabel.setManaged(false);
+        });
+        delay.play();
     }
 }

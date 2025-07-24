@@ -74,6 +74,7 @@ public class SellerHomeController implements Initializable {
         HBox box = new HBox(10);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setStyle("-fx-padding: 10; -fx-border-color: lightgray; -fx-border-width: 0 0 1 0;");
+
         ImageView imageView = new ImageView();
         imageView.setFitWidth(40);
         imageView.setFitHeight(40);
@@ -81,15 +82,21 @@ public class SellerHomeController implements Initializable {
             byte[] decodedBytes = Base64.getDecoder().decode(restaurant.getLogoBase64());
             imageView.setImage(new Image(new ByteArrayInputStream(decodedBytes)));
         }
+
         Label nameLabel = new Label(restaurant.getName());
         box.getChildren().addAll(imageView, nameLabel);
+
         ContextMenu contextMenu = new ContextMenu();
+        // *** اصلاحیه اصلی اینجاست ***
         MenuItem menuManage = new MenuItem("مشاهده و مدیریت منو");
         MenuItem menuInfo = new MenuItem("ویرایش اطلاعات رستوران");
         contextMenu.getItems().addAll(menuManage, menuInfo);
+
         box.setOnMouseClicked(e -> contextMenu.show(box, e.getScreenX(), e.getScreenY()));
-        menuManage.setOnAction(ev -> openRestaurantMenu(restaurant));
+
+        menuManage.setOnAction(ev -> openRestaurantMenu(restaurant)); // متد فراخوانی شده تغییر نکرده
         menuInfo.setOnAction(ev -> openRestaurantInfo(restaurant));
+
         return box;
     }
 

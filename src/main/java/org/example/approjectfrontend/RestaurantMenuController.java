@@ -1,83 +1,202 @@
 package org.example.approjectfrontend;
-import org.example.approjectfrontend.RestaurantMenuItem;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
-import javafx.scene.image.Image;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+import org.example.approjectfrontend.api.*;
+
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
-public class RestaurantMenuController {
-
-    @FXML private TableView<RestaurantMenuItem> menuTable;
-    @FXML private TableColumn<RestaurantMenuItem, String> colName;
-    @FXML private TableColumn<RestaurantMenuItem, String> colPrice;
-    @FXML private TableColumn<RestaurantMenuItem, String> colSupply;
-    @FXML private TableColumn<RestaurantMenuItem, Void> colEdit;
-    @FXML private TableColumn<RestaurantMenuItem, Void> colDelete;
-
-    @FXML private TextField itemNameField, itemDescField, itemPriceField, itemSupplyField, itemKeywordsField;
-    @FXML private Button chooseImageBtn, addItemBtn,clearMenuBtn;
-    @FXML private ImageView itemImageView;
-    private Restaurant restaurant;
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant;
-        // اینجا می‌تونی اطلاعات را load or show کنی
-    }
-    private ObservableList<RestaurantMenuItem> menuItems = FXCollections.observableArrayList();
-    private RestaurantMenuItem editingItem = null;
-    private Image selectedImage = null; // عکس انتخابی موقت
-
+public class RestaurantMenuController implements Initializable {
 
     @FXML
-    private void initialize() {
-        menuTable.setItems(menuItems);
+    private TableView<FoodItemDTO> menuTable;
+    @FXML
+    private TableColumn<FoodItemDTO, String> colName, colPrice, colSupply;
+    @FXML
+    private TableColumn<FoodItemDTO, Void> colEdit, colDelete;
+    @FXML
+    private TextField itemNameField, itemDescField, itemPriceField, itemSupplyField, itemKeywordsField;
+    @FXML
+    private Button chooseImageBtn, addItemBtn, backButton;
+    @FXML
+    private ImageView itemImageView;
+    @FXML
+    private Label messageLabel, menuTitleLabel;
+
+    private RestaurantDTO currentRestaurant;
+    private String currentMenuTitle;
+    private final ObservableList<FoodItemDTO> menuItems = FXCollections.observableArrayList();
+    private File selectedImageFile = null;
+    private FoodItemDTO editingItem = null;
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
         colName.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getName()));
-        colPrice.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getPrice()));
-        colSupply.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getSupply()));
-        clearMenuBtn.setOnAction(e -> handleClearMenu());
+        colPrice.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(String.valueOf(cellData.getValue().getPrice())));
+        colSupply.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(String.valueOf(cellData.getValue().getSupply())));
+        menuTable.setItems(menuItems);
 
         addEditButtonToTable();
         addDeleteButtonToTable();
-
-        addItemBtn.setOnAction(e -> handleAddOrEditItem());
-        chooseImageBtn.setOnAction(e -> handleChooseImage());
     }
-    private void handleClearMenu() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "آیا از حذف کل آیتم‌های منو مطمئن هستید؟", ButtonType.YES, ButtonType.NO);
-        alert.setHeaderText(null);
-        alert.showAndWait();
-        if (alert.getResult() == ButtonType.YES) {
-            menuItems.clear();
-            menuTable.refresh();
-            showAlert("تمام آیتم‌های منو حذف شدند.", Alert.AlertType.INFORMATION);
-            clearFields();
-            editingItem = null;
-            addItemBtn.setText("افزودن آیتم");
+
+    public void setRestaurantAndMenu(RestaurantDTO restaurant, String menuTitle) {
+        this.currentRestaurant = restaurant;
+        this.currentMenuTitle = menuTitle;
+        menuTitleLabel.setText("آیتم‌های منوی: " + menuTitle);
+        loadMenuItems();
+    }
+
+    private void loadMenuItems() {
+        if (currentRestaurant == null || currentMenuTitle == null) return;
+        menuItems.clear();
+
+        new Thread(() -> {
+            ApiResponse response = ApiService.getRestaurantMenu(currentRestaurant.getId());
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    Gson gson = new Gson();
+                    JsonObject responseJson = gson.fromJson(response.getBody(), JsonObject.class);
+                    if (responseJson.has(currentMenuTitle)) {
+                        List<FoodItemDTO> items = gson.fromJson(responseJson.get(currentMenuTitle), new TypeToken<List<FoodItemDTO>>(){}.getType());
+                        menuItems.addAll(items);
+                    }
+                } else {
+                    showMessage("خطا در دریافت آیتم‌های منو.", "red");
+                }
+            });
+        }).start();
+    }
+
+    @FXML
+    private void handleAddOrEditItem() {
+        if (editingItem != null) {
+            handleUpdateItem();
+        } else {
+            handleAddItem();
         }
     }
 
+    private void handleAddItem() {
+        AddFoodItemRequest requestData = new AddFoodItemRequest();
+        if (!collectDataFromForm(requestData)) return;
+
+        new Thread(() -> {
+            ApiResponse response = ApiService.addFoodItem(currentRestaurant.getId(), requestData);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    showMessage("آیتم جدید با موفقیت اضافه شد.", "green");
+                    clearFields();
+                    loadMenuItems();
+                } else {
+                    showMessage("خطا در ثبت آیتم: " + response.getBody(), "red");
+                }
+            });
+        }).start();
+    }
+
+    private void handleUpdateItem() {
+        UpdateFoodItemRequest requestData = new UpdateFoodItemRequest();
+        if (!collectDataFromForm(requestData)) return;
+
+        new Thread(() -> {
+            ApiResponse response = ApiService.updateFoodItem(currentRestaurant.getId(), editingItem.getId(), requestData);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    showMessage("آیتم با موفقیت ویرایش شد.", "green");
+                    clearFields();
+                    loadMenuItems();
+                } else {
+                    showMessage("خطا در ویرایش آیتم: " + response.getBody(), "red");
+                }
+            });
+        }).start();
+    }
+
+    private <T> boolean collectDataFromForm(T requestData) {
+        String name = itemNameField.getText().trim();
+        String desc = itemDescField.getText().trim();
+        String keywords = itemKeywordsField.getText().trim();
+        if (name.isEmpty() || desc.isEmpty() || keywords.isEmpty()) {
+            showMessage("تمام فیلدهای متنی باید پر شوند.", "red");
+            return false;
+        }
+        Integer price, supply;
+        try {
+            price = Integer.parseInt(itemPriceField.getText().trim());
+            supply = Integer.parseInt(itemSupplyField.getText().trim());
+        } catch (NumberFormatException e) {
+            showMessage("قیمت و موجودی باید عدد باشند.", "red");
+            return false;
+        }
+
+        List<String> keywordsList = Arrays.asList(keywords.split(","));
+        if (requestData instanceof AddFoodItemRequest req) {
+            req.setName(name);
+            req.setDescription(desc);
+            req.setKeywords(keywordsList);
+            req.setPrice(price);
+            req.setSupply(supply);
+        } else if (requestData instanceof UpdateFoodItemRequest req) {
+            req.setName(name);
+            req.setDescription(desc);
+            req.setKeywords(keywordsList);
+            req.setPrice(price);
+            req.setSupply(supply);
+        }
+
+        if (selectedImageFile != null) {
+            try {
+                byte[] fileContent = Files.readAllBytes(selectedImageFile.toPath());
+                String imageBase64 = Base64.getEncoder().encodeToString(fileContent);
+                if (requestData instanceof AddFoodItemRequest req) req.setImageBase64(imageBase64);
+                else if (requestData instanceof UpdateFoodItemRequest req) req.setImageBase64(imageBase64);
+            } catch (IOException e) {
+                showMessage("مشکل در پردازش تصویر.", "red");
+                return false;
+            }
+        }
+        return true;
+    }
 
     private void addEditButtonToTable() {
         colEdit.setCellFactory(param -> new TableCell<>() {
-            private final Button btn = new Button("✏️");
+            private final Button btn = new Button("ویرایش");
             {
-                btn.setStyle("-fx-background-color: #ffc107; -fx-text-fill: black;");
                 btn.setOnAction(event -> {
-                    RestaurantMenuItem item = getTableView().getItems().get(getIndex());
-                    itemNameField.setText(item.getName());
-                    itemDescField.setText(item.getDesc());
-                    itemPriceField.setText(item.getPrice());
-                    itemSupplyField.setText(item.getSupply());
-                    itemKeywordsField.setText(item.getKeywords());
-
-                    itemImageView.setImage(item.getImage()); // نمایش عکس قبلی
-                    selectedImage = item.getImage();         // ذخیره عکس فعلی آیتم
-
-                    editingItem = item;
+                    editingItem = getTableView().getItems().get(getIndex());
+                    itemNameField.setText(editingItem.getName());
+                    itemDescField.setText(editingItem.getDescription());
+                    itemPriceField.setText(editingItem.getPrice().toString());
+                    itemSupplyField.setText(editingItem.getSupply().toString());
+                    itemKeywordsField.setText(String.join(",", editingItem.getKeywords()));
                     addItemBtn.setText("ذخیره تغییرات");
                 });
             }
@@ -91,21 +210,26 @@ public class RestaurantMenuController {
 
     private void addDeleteButtonToTable() {
         colDelete.setCellFactory(param -> new TableCell<>() {
-            private final Button btn = new Button("🗑️");
+            private final Button btn = new Button("حذف");
             {
-                btn.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white;");
                 btn.setOnAction(event -> {
-                    RestaurantMenuItem item = getTableView().getItems().get(getIndex());
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "آیا از حذف این آیتم مطمئن هستید؟", ButtonType.YES, ButtonType.NO);
-                    alert.setHeaderText(null);
-                    alert.showAndWait();
-                    if (alert.getResult() == ButtonType.YES) {
-                        menuItems.remove(item);
-                        showAlert("آیتم حذف شد.", Alert.AlertType.INFORMATION);
-                        clearFields();
-                        editingItem = null;
-                        addItemBtn.setText("افزودن آیتم");
-                    }
+                    FoodItemDTO item = getTableView().getItems().get(getIndex());
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "آیا از حذف آیتم '" + item.getName() + "' مطمئن هستید؟", ButtonType.YES, ButtonType.NO);
+                    alert.showAndWait().ifPresent(response -> {
+                        if (response == ButtonType.YES) {
+                            new Thread(() -> {
+                                ApiResponse apiResponse = ApiService.deleteFoodItem(currentRestaurant.getId(), item.getId());
+                                Platform.runLater(() -> {
+                                    if (apiResponse.getStatusCode() == 200) {
+                                        showMessage("آیتم با موفقیت حذف شد.", "green");
+                                        loadMenuItems();
+                                    } else {
+                                        showMessage("خطا در حذف آیتم: " + apiResponse.getBody(), "red");
+                                    }
+                                });
+                            }).start();
+                        }
+                    });
                 });
             }
             @Override
@@ -120,102 +244,50 @@ public class RestaurantMenuController {
     private void handleChooseImage() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("انتخاب تصویر غذا");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Image Files", "*.jpg", "*.jpeg", "*.png")
-        );
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.jpg", "*.jpeg", "*.png"));
         File file = fileChooser.showOpenDialog(itemImageView.getScene().getWindow());
         if (file != null) {
-            Image image = new Image(file.toURI().toString());
-            itemImageView.setImage(image);
-            selectedImage = image; // عکس انتخابی را ذخیره کن
+            selectedImageFile = file;
+            itemImageView.setImage(new Image(file.toURI().toString()));
         }
     }
 
-    // افزودن یا ویرایش آیتم
-    private void handleAddOrEditItem() {
-        String name = itemNameField.getText().trim();
-        String desc = itemDescField.getText().trim();
-        String price = itemPriceField.getText().trim();
-        String supply = itemSupplyField.getText().trim();
-        String keywords = itemKeywordsField.getText().trim();
-
-
-        if (editingItem != null) { // حالت ویرایش
-            editingItem.setName(name);
-            editingItem.setDesc(desc);
-            editingItem.setPrice(price);
-            editingItem.setSupply(supply);
-            editingItem.setKeywords(keywords);
-            // اگر عکس جدید انتخاب شده، جایگزین شود
-            if (selectedImage != null) {
-                editingItem.setImage(selectedImage);
-            }
-            menuTable.refresh();
-            showAlert("تغییرات آیتم ذخیره شد.", Alert.AlertType.INFORMATION);
-            editingItem = null;
-            addItemBtn.setText("افزودن آیتم");
-            clearFields();
-            return;
-        }
-
-        // حالت افزودن آیتم جدید
-        int responseCode = addMenuItemToServer(new RestaurantMenuItem(name, desc, price, supply, keywords, selectedImage));
-        switch (responseCode) {
-            case 200:
-                menuItems.add(new RestaurantMenuItem(name, desc, price, supply, keywords, selectedImage));
-                showAlert("آیتم جدید با موفقیت به منو اضافه شد.", Alert.AlertType.INFORMATION);
-                clearFields();
-                break;
-            case 400:
-                showAlert("ورودی نامعتبر! لطفاً اطلاعات را درست وارد کنید.", Alert.AlertType.ERROR);
-                break;
-            case 401:
-                showAlert("احراز هویت نشده‌اید! لطفاً مجدداً وارد شوید.", Alert.AlertType.ERROR);
-                break;
-            case 403:
-                showAlert("شما اجازه این عملیات را ندارید.", Alert.AlertType.ERROR);
-                break;
-            case 404:
-                showAlert("آدرس یا سرویس مورد نظر پیدا نشد.", Alert.AlertType.ERROR);
-                break;
-            case 409:
-                showAlert("این آیتم قبلاً در منو ثبت شده است.", Alert.AlertType.ERROR);
-                break;
-            case 415:
-                showAlert("فرمت اطلاعات یا عکس ارسال شده صحیح نیست.", Alert.AlertType.ERROR);
-                break;
-            case 429:
-                showAlert("درخواست‌های بیش از حد! لطفاً کمی صبر کنید.", Alert.AlertType.ERROR);
-                break;
-            case 500:
-                showAlert("خطای سرور! بعداً دوباره تلاش کنید.", Alert.AlertType.ERROR);
-                break;
-            default:
-                showAlert("خطای پیش‌بینی نشده!", Alert.AlertType.ERROR);
-        }
-    }
-
-    // نمونه کد برای شبیه‌سازی پاسخ سرور
-    private int addMenuItemToServer(RestaurantMenuItem item) {
-        if (item.getName().equalsIgnoreCase("پیتزا"))
-            return 409;
-        if (!item.getPrice().matches("\\d+"))
-            return 400;
-        return 200;
-    }
-
-    private void showAlert(String message, Alert.AlertType alertType) {
-        Alert alert = new Alert(alertType, message, ButtonType.OK);
-        alert.showAndWait();
+    @FXML
+    private void handleGoBackToMenus(ActionEvent event) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuManager-view.fxml"));
+        Parent root = loader.load();
+        MenuManagerController controller = loader.getController();
+        controller.setRestaurant(currentRestaurant);
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
     }
 
     private void clearFields() {
+        editingItem = null;
         itemNameField.clear();
         itemDescField.clear();
         itemPriceField.clear();
         itemSupplyField.clear();
         itemKeywordsField.clear();
         itemImageView.setImage(null);
-        selectedImage = null; // عکس موقت پاک شود
+        selectedImageFile = null;
+        addItemBtn.setText("افزودن آیتم");
+    }
+
+    private void showMessage(String message, String color) {
+        messageLabel.setText(message);
+        messageLabel.setVisible(true);
+        messageLabel.setManaged(true);
+        if (color.equals("green")) {
+            messageLabel.setStyle("-fx-background-color: #dff0d8; -fx-text-fill: #3c763d; -fx-padding: 10; -fx-background-radius: 5;");
+        } else {
+            messageLabel.setStyle("-fx-background-color: #f2dede; -fx-text-fill: #a94442; -fx-padding: 10; -fx-background-radius: 5;");
+        }
+        PauseTransition delay = new PauseTransition(Duration.seconds(4));
+        delay.setOnFinished(event -> {
+            messageLabel.setVisible(false);
+            messageLabel.setManaged(false);
+        });
+        delay.play();
     }
 }
