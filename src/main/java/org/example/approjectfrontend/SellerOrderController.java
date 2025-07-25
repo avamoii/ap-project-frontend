@@ -114,8 +114,8 @@ public class SellerOrderController {
 
     private String getStatusFa(String status) {
         return switch (status) {
-            case "NEW" -> "جدید";
-            case "ACCEPTED" -> "تایید شده";
+            case "NEW" -> "در انتظار تایید رستوران";
+            case "ACCEPTED" -> "در حال اماده سازی";
             case "REJECTED" -> "رد شده";
             default -> ""; // برای حالتی که وضعیت ناشناخته باشد
         };
