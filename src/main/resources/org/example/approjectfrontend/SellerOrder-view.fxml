@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.approjectfrontend.SellerOrdersController"
+      spacing="15" style="-fx-padding: 15">
+    <HBox spacing="10">
+        <Label fx:id="restaurantNameLabel"
+               style="-fx-font-size:17px; -fx-font-weight:bold;" />
+        <Button text="بازگشت" onAction="#backToHome"
+                style="-fx-font-size:13;"/>
+    </HBox>
+    <TableView fx:id="ordersTable" prefHeight="400">
+        <columns>
+            <TableColumn text="خریدار" fx:id="buyerColumn" prefWidth="80"/>
+            <TableColumn text="آیتم‌ها" fx:id="itemsColumn" prefWidth="130"/>
+            <TableColumn text="قیمت کل" fx:id="totalPriceColumn" prefWidth="60"/>
+            <TableColumn text="آدرس" fx:id="addressColumn" prefWidth="110"/>
+            <TableColumn text="تلفن" fx:id="mobileColumn" prefWidth="100"/>
+            <TableColumn text="وضعیت" fx:id="statusColumn" prefWidth="70"/>
+            <TableColumn text="عملیات" fx:id="actionsColumn" prefWidth="120"/>
+        </columns>
+    </TableView>
+</VBox>

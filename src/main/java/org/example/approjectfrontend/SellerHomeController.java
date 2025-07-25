@@ -11,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert; // Alert اضافه شد
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -86,19 +87,61 @@ public class SellerHomeController implements Initializable {
         Label nameLabel = new Label(restaurant.getName());
         box.getChildren().addAll(imageView, nameLabel);
 
+        // --- شروع تغییرات ---
         ContextMenu contextMenu = new ContextMenu();
-        // *** اصلاحیه اصلی اینجاست ***
+
+        // آیتم جدید برای مشاهده سفارشات
+        MenuItem menuViewOrders = new MenuItem("مشاهده سفارشات");
+        menuViewOrders.setOnAction(event -> openRestaurantOrders(restaurant)); // فراخوانی متد جدید
+
+        // آیتم‌های موجود
         MenuItem menuManage = new MenuItem("مشاهده و مدیریت منو");
         MenuItem menuInfo = new MenuItem("ویرایش اطلاعات رستوران");
-        contextMenu.getItems().addAll(menuManage, menuInfo);
+
+        // اضافه کردن همه آیتم‌ها به منوی کلیک راست
+        contextMenu.getItems().addAll(menuViewOrders, menuManage, menuInfo); // menuViewOrders اضافه شد
 
         box.setOnMouseClicked(e -> contextMenu.show(box, e.getScreenX(), e.getScreenY()));
 
-        menuManage.setOnAction(ev -> openRestaurantMenu(restaurant)); // متد فراخوانی شده تغییر نکرده
+        // Action ها برای آیتم‌های موجود (بدون تغییر)
+        menuManage.setOnAction(ev -> openRestaurantMenu(restaurant));
         menuInfo.setOnAction(ev -> openRestaurantInfo(restaurant));
+        // --- پایان تغییرات ---
 
         return box;
     }
+
+    // متد باز کردن صفحه سفارشات رستوران
+    private void openRestaurantOrders(RestaurantDTO restaurant) {
+        try {
+            // مسیر فایل FXML صفحه سفارشات
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/SellerOrders-view.fxml"));
+            Parent root = loader.load();
+
+            // دریافت کنترلر صفحه سفارشات
+            SellerOrderController controller = loader.getController();
+            // ارسال اطلاعات رستوران انتخاب شده به کنترلر سفارشات
+            controller.setRestaurant(restaurant);
+
+            // گرفتن پنجره فعلی (Stage)
+            // از restaurantsVBox استفاده می‌کنیم چون در این کلاس تعریف شده و گره‌ای از صحنه فعلی است.
+            Stage stage = (Stage) restaurantsVBox.getScene().getWindow();
+            // تغییر صحنه (Scene) به صفحه سفارشات
+            stage.setScene(new Scene(root));
+            // نمایش پنجره
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // نمایش یک پیام خطا به کاربر در صورت بروز مشکل
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("خطای بارگذاری");
+            alert.setHeaderText(null);
+            alert.setContentText("امکان باز کردن صفحه سفارشات وجود ندارد. لطفاً دوباره تلاش کنید.");
+            alert.showAndWait();
+        }
+    }
+
 
     private void openRestaurantMenu(RestaurantDTO restaurant) {
         try {
