@@ -20,14 +20,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.approjectfrontend.api.ApiResponse;
 import org.example.approjectfrontend.api.ApiService;
+import org.example.approjectfrontend.api.FoodItemDTO;
 import org.example.approjectfrontend.api.RestaurantDTO;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Base64;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class BuyerHomeController implements Initializable {
     @FXML
@@ -40,13 +40,17 @@ public class BuyerHomeController implements Initializable {
     private TextField searchField;
     @FXML
     private VBox restaurantListVBox;
-
+    // اضافه کردن لیست کامل رستوران‌ها
+    private List<RestaurantDTO> allRestaurants;
+    private List<FoodItemDTO> allFoodItems;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loadRestaurants();
         profileBtn.setOnAction(e -> goToProfile());
         historyBtn.setOnAction(e -> goToHistory());
         homeBtn.setDisable(true);
+        searchField.textProperty().addListener((obs, oldValue, newValue) -> handleSearch());
+
     }
 
     private void loadRestaurants() {
@@ -74,6 +78,58 @@ public class BuyerHomeController implements Initializable {
             });
         }).start();
     }
+    private void showRestaurants(List<RestaurantDTO> restaurants) {
+        restaurantListVBox.getChildren().clear();
+        if (restaurants == null || restaurants.isEmpty()) {
+            restaurantListVBox.getChildren().add(new Label("در حال حاضر هیچ رستورانی فعال نیست."));
+        } else {
+            for (RestaurantDTO restaurant : restaurants) {
+                HBox card = buildRestaurantCard(restaurant);
+                restaurantListVBox.getChildren().add(card);
+            }
+        }
+    }
+
+    @FXML
+    private void handleSearch() {
+        String searchText = searchField.getText().trim().toLowerCase();
+        if (allRestaurants == null) return;
+
+        // رستوران‌هایی که با نام پیدا می‌شن
+        Set<Long> restaurantIdsByName = allRestaurants.stream()
+                .filter(r -> r.getName() != null && r.getName().toLowerCase().contains(searchText))
+                .map(RestaurantDTO::getId)
+                .collect(Collectors.toSet());
+
+        // رستوران‌هایی که بر اساس غذا پیدا می‌شن
+        Set<Long> restaurantIdsByFood = new HashSet<>();
+        if (allFoodItems != null) {
+            allFoodItems.stream()
+                    .filter(food ->
+                            (food.getName() != null && food.getName().toLowerCase().contains(searchText)) ||
+                                    (food.getKeywords() != null && food.getKeywords().stream()
+                                            .anyMatch(k -> k != null && k.toLowerCase().contains(searchText)))
+                    )
+                    .map(FoodItemDTO::getRestaurantId)
+                    .forEach(restaurantIdsByFood::add);
+        }
+
+        // ادغام نتایج
+        Set<Long> finalRestaurantIds = new HashSet<>(restaurantIdsByName);
+        finalRestaurantIds.addAll(restaurantIdsByFood);
+
+        List<RestaurantDTO> filtered;
+        if (searchText.isEmpty()) {
+            filtered = allRestaurants;
+        } else {
+            filtered = allRestaurants.stream()
+                    .filter(r -> finalRestaurantIds.contains(r.getId()))
+                    .toList();
+        }
+
+        showRestaurants(filtered);
+    }
+
 
     private HBox buildRestaurantCard(RestaurantDTO restaurant) {
         HBox box = new HBox(10);
