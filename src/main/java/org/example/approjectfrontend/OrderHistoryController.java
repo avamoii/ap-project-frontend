@@ -93,6 +93,9 @@ public class OrderHistoryController {
             case "NEW" -> "در انتظار تایید رستوران";
             case "ACCEPTED" -> "در حال آماده‌سازی";
             case "REJECTED" -> "رد شده";
+            case "WAITING_FOR_DELIVERY" -> "در انتظار پیک";
+            case "IN_DELIVERY" -> "در حال تحویل توسط پیک";
+            case "DELIVERED" -> "تحویل داده شده";
             default -> "نامشخص";
         };
     }

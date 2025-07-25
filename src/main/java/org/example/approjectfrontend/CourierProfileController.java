@@ -37,7 +37,8 @@ public class CourierProfileController implements Initializable {
     private Button logoutButton;
     @FXML
     private Label messageLabel;
-
+    @FXML private Button homeBtn;
+    @FXML private Button profileBtn;
     private File profileImageFile = null;
 
     @Override
@@ -45,6 +46,8 @@ public class CourierProfileController implements Initializable {
         uploadButton.setOnAction(event -> chooseProfileImage());
         saveButton.setOnAction(event -> handleSaveProfile());
         logoutButton.setOnAction(event -> handleLogout());
+        homeBtn.setOnAction(e -> goToHome());
+        profileBtn.setOnAction(e -> goToProfile());
         populateUserData();
     }
 
@@ -145,6 +148,27 @@ public class CourierProfileController implements Initializable {
         if (selectedFile != null) {
             profileImageFile = selectedFile;
             profileImageView.setImage(new Image(selectedFile.toURI().toString()));
+        }
+    }
+    private void goToHome() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("CourierHome-view.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) homeBtn.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void goToProfile() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("CourierProfile-view.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) profileBtn.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 }

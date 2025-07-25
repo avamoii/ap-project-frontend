@@ -117,7 +117,10 @@ public class SellerOrderController {
             case "NEW" -> "در انتظار تایید رستوران";
             case "ACCEPTED" -> "در حال اماده سازی";
             case "REJECTED" -> "رد شده";
-            default -> ""; // برای حالتی که وضعیت ناشناخته باشد
+            case "WAITING_FOR_DELIVERY" -> "در انتظار پیک";
+            case "IN_DELIVERY" -> "در حال تحویل توسط پیک";
+            case "DELIVERED" -> "تحویل داده شده";
+            default -> "نامشخص";
         };
     }
 
