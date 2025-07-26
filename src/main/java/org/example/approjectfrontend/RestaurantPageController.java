@@ -23,13 +23,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.example.approjectfrontend.api.ApiResponse;
-import org.example.approjectfrontend.api.ApiService;
-import org.example.approjectfrontend.api.FoodItemDTO;
-import org.example.approjectfrontend.api.RestaurantDTO;
+import org.example.approjectfrontend.api.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +51,7 @@ public class RestaurantPageController {
     @FXML
     private Button orderButton;
     @FXML
-    private Button backButton; // تعریف دکمه بازگشت
+    private Button backButton;
 
     private RestaurantDTO currentRestaurant;
     private final ObservableList<FoodItemDTO> allItems = FXCollections.observableArrayList();
@@ -72,30 +70,20 @@ public class RestaurantPageController {
             private final Label keywordsLabel = new Label();
 
             {
-                // تنظیمات ردیف اصلی (نام، اسپینر، دکمه)
                 spinner.setPrefWidth(80);
                 HBox.setHgrow(nameAndPrice, Priority.ALWAYS);
                 topHBox.setAlignment(Pos.CENTER_LEFT);
                 topHBox.getChildren().addAll(nameAndPrice, spinner, detailsButton);
-
-                // تنظیمات لیبل‌های جزئیات
                 descriptionLabel.setWrapText(true);
                 descriptionLabel.setStyle("-fx-text-fill: #555; -fx-padding: 0 0 0 10;");
                 keywordsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #777; -fx-padding: 0 0 0 10;");
-
-                // مخفی کردن لیبل‌های جزئیات در ابتدا
                 descriptionLabel.setVisible(false);
                 descriptionLabel.setManaged(false);
                 keywordsLabel.setVisible(false);
                 keywordsLabel.setManaged(false);
-
-                // اضافه کردن همه چیز به کانتینر اصلی
                 mainVBox.getChildren().addAll(topHBox, descriptionLabel, keywordsLabel);
                 mainVBox.setPadding(new Insets(5));
-
-                // اتصال رویدادها
                 spinner.valueProperty().addListener((obs, oldVal, newVal) -> updateTotalPrice());
-
                 detailsButton.setOnAction(event -> {
                     boolean isVisible = descriptionLabel.isVisible();
                     descriptionLabel.setVisible(!isVisible);
@@ -114,12 +102,10 @@ public class RestaurantPageController {
                     nameAndPrice.setText(item.getName() + " - " + item.getPrice() + " تومان");
                     descriptionLabel.setText("توضیحات: " + item.getDescription());
                     keywordsLabel.setText("کلمات کلیدی: " + String.join(", ", item.getKeywords()));
-
                     descriptionLabel.setVisible(false);
                     descriptionLabel.setManaged(false);
                     keywordsLabel.setVisible(false);
                     keywordsLabel.setManaged(false);
-
                     spinner.getValueFactory().setValue(0);
                     itemSpinners.put(item, spinner);
                     setGraphic(mainVBox);
@@ -184,17 +170,47 @@ public class RestaurantPageController {
 
     @FXML
     private void handleOrderButton() {
-        Map<FoodItemDTO, Integer> selectedItems = itemSpinners.entrySet().stream()
-                .filter(entry -> entry.getValue().getValue() > 0)
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
+        List<OrderItemRequestDTO> selectedItems = new ArrayList<>();
+        for (Map.Entry<FoodItemDTO, Spinner<Integer>> entry : itemSpinners.entrySet()) {
+            if (entry.getValue().getValue() > 0) {
+                selectedItems.add(new OrderItemRequestDTO(entry.getKey().getId(), entry.getValue().getValue()));
+            }
+        }
 
         if (selectedItems.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "خطا", "لطفاً حداقل یک آیتم از منو را انتخاب کنید.");
             return;
         }
 
-        showAlert(Alert.AlertType.INFORMATION, "موفقیت", "سفارش شما با موفقیت ثبت شد (شبیه‌سازی شده).");
+        String address = addressField.getText().trim();
+        if (address.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "خطا", "لطفاً آدرس تحویل سفارش را وارد کنید.");
+            return;
+        }
+
+        SubmitOrderRequest orderRequest = new SubmitOrderRequest(address, currentRestaurant.getId(), selectedItems);
+
+        new Thread(() -> {
+            ApiResponse response = ApiService.submitOrder(orderRequest);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    showAlert(Alert.AlertType.INFORMATION, "موفقیت", "سفارش شما با موفقیت ثبت شد.");
+                } else {
+                    String errorMessage = "خطا در ثبت سفارش.";
+                    try {
+                        JsonObject errorJson = new Gson().fromJson(response.getBody(), JsonObject.class);
+                        if (errorJson != null && errorJson.has("error")) {
+                            errorMessage = errorJson.get("error").getAsString();
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Could not parse error response: " + response.getBody());
+                    }
+                    showAlert(Alert.AlertType.ERROR, "خطا", errorMessage);
+                }
+            });
+        }).start();
     }
+
 
     private void showPaymentMethodDialog() {
         ChoiceDialog<String> dialog = new ChoiceDialog<>("پرداخت با کارت", "پرداخت با کارت", "پرداخت با کیف پول");
@@ -249,14 +265,9 @@ public class RestaurantPageController {
         alert.showAndWait();
     }
 
-    /**
-     * این متد جدید برای دکمه بازگشت است.
-     * پنجره فعلی (منوی رستوران) را می‌بندد.
-     */
     @FXML
     private void handleBackButton(ActionEvent event) {
         try {
-            // پنجره فعلی را پیدا کرده و آن را می‌بندد
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.close();
         } catch (Exception e) {

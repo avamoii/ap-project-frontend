@@ -306,7 +306,6 @@ public class ApiService {
         }
     }
 
-
     public static ApiResponse getFoodItemDetails(long itemId) {
         String token = SessionManager.getInstance().getToken();
         if (token == null || token.isEmpty()) {
@@ -325,13 +324,15 @@ public class ApiService {
             return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
         }
     }
+
+    // --- Order Endpoints ---
     public static ApiResponse submitOrder(SubmitOrderRequest orderData) {
         String token = SessionManager.getInstance().getToken();
         if (token == null || token.isEmpty()) {
             return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
         }
         try {
-            String jsonBody = new Gson().toJson(orderData);
+            String jsonBody = gson.toJson(orderData);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(API_BASE_URL + "/orders"))
                     .header("Content-Type", "application/json")
@@ -345,6 +346,10 @@ public class ApiService {
             return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
         }
     }
+
+    /**
+     * متد جدید برای دریافت تاریخچه سفارشات کاربر
+     */
     public static ApiResponse getOrderHistory() {
         String token = SessionManager.getInstance().getToken();
         if (token == null || token.isEmpty()) {
@@ -364,6 +369,9 @@ public class ApiService {
         }
     }
 
+    /**
+     * متد جدید برای دریافت جزئیات یک سفارش خاص
+     */
     public static ApiResponse getOrderDetails(long orderId) {
         String token = SessionManager.getInstance().getToken();
         if (token == null || token.isEmpty()) {

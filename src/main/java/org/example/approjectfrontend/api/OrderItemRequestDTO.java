@@ -1,23 +1,29 @@
-// مسیر: src/main/java/org/example/approjectfrontend/api/OrderItemRequestDTO.java
 package org.example.approjectfrontend.api;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * این کلاس مدل داده برای هر آیتم در درخواست ثبت سفارش است.
+ * نام فیلدها با @SerializedName دقیقاً مطابق با چیزی است که بک‌اند انتظار دارد.
+ */
 public class OrderItemRequestDTO {
     @SerializedName("item_id")
-    private Long itemId;
+    private final Long itemId;
 
     @SerializedName("quantity")
-    private Integer quantity;
+    private final Integer quantity;
 
-    // Constructor, Getters and Setters
     public OrderItemRequestDTO(Long itemId, Integer quantity) {
         this.itemId = itemId;
         this.quantity = quantity;
     }
 
-    public Long getItemId() { return itemId; }
-    public void setItemId(Long itemId) { this.itemId = itemId; }
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    // Getters
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
 }
