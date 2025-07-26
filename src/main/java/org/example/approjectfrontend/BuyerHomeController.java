@@ -11,9 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -47,10 +45,39 @@ public class BuyerHomeController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loadRestaurants();
-        profileBtn.setOnAction(e -> navigateToPage(e, "BuyerProfile-view.fxml"));
-        historyBtn.setOnAction(e -> navigateToPage(e, "OrderHistory-view.fxml"));
+        profileBtn.setOnAction(e -> navigateToPage(new ActionEvent(e.getSource(), e.getTarget()), "BuyerProfile-view.fxml"));
+        // --- تغییر اصلی اینجاست ---
+        // به جای ناوبری مستقیم، ابتدا دیالوگ انتخاب را نمایش می‌دهیم
+        historyBtn.setOnAction(e -> showHistoryChoiceDialog());
         homeBtn.setDisable(true);
         searchField.textProperty().addListener((obs, oldValue, newValue) -> handleSearch());
+    }
+
+    /**
+     * یک دیالوگ برای انتخاب بین تاریخچه سفارشات و تراکنش‌ها نمایش می‌دهد و بر اساس انتخاب کاربر عمل می‌کند.
+     */
+    private void showHistoryChoiceDialog() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("انتخاب نوع تاریخچه");
+        alert.setHeaderText("کدام تاریخچه را می‌خواهید مشاهده کنید؟");
+        alert.setContentText("لطفا یک گزینه را انتخاب کنید:");
+
+        ButtonType ordersBtn = new ButtonType("تاریخچه سفارشات");
+        ButtonType transactionsBtn = new ButtonType("تاریخچه تراکنش‌ها");
+        ButtonType cancelBtn = new ButtonType("انصراف", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(ordersBtn, transactionsBtn, cancelBtn);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent()) {
+            if (result.get() == ordersBtn) {
+                navigateToPage(new ActionEvent(historyBtn, null), "OrderHistory-view.fxml");
+            } else if (result.get() == transactionsBtn) {
+                navigateToPage(new ActionEvent(historyBtn, null), "TransactionHistory-view.fxml");
+            }
+            // اگر کاربر انصراف را بزند، در همین صفحه باقی می‌ماند.
+        }
     }
 
     private void loadRestaurants() {
@@ -143,16 +170,15 @@ public class BuyerHomeController implements Initializable {
 
     private void navigateToPage(ActionEvent event, String fxmlFile) {
         try {
-            // --- تغییر اصلی اینجاست ---
-            // از یک روش مطمئن‌تر برای پیدا کردن فایل FXML استفاده می‌کنیم
             URL fxmlLocation = getClass().getResource(fxmlFile);
             if (fxmlLocation == null) {
                 System.err.println("Could not find FXML file: " + fxmlFile);
-                return; // اگر فایل پیدا نشد، از ادامه کار جلوگیری می‌کنیم
+                return;
             }
 
             Parent root = FXMLLoader.load(fxmlLocation);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Node sourceNode = (Node) event.getSource();
+            Stage stage = (Stage) sourceNode.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {

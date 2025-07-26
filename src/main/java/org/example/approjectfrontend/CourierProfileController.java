@@ -25,20 +25,15 @@ import java.util.ResourceBundle;
 
 public class CourierProfileController implements Initializable {
 
-    @FXML
-    private ImageView profileImageView;
-    @FXML
-    private Button uploadButton;
-    @FXML
-    private TextField usernameField, emailField, phoneField, bankNameField, accountNumberField;
-    @FXML
-    private Button saveButton;
-    @FXML
-    private Button logoutButton;
-    @FXML
-    private Label messageLabel;
+    @FXML private ImageView profileImageView;
+    @FXML private Button uploadButton;
+    @FXML private TextField usernameField, emailField, phoneField, bankNameField, accountNumberField;
+    @FXML private Button saveButton;
+    @FXML private Button logoutButton;
+    @FXML private Label messageLabel;
     @FXML private Button homeBtn;
     @FXML private Button profileBtn;
+    @FXML private Button historyBtn;
     private File profileImageFile = null;
 
     @Override
@@ -47,7 +42,8 @@ public class CourierProfileController implements Initializable {
         saveButton.setOnAction(event -> handleSaveProfile());
         logoutButton.setOnAction(event -> handleLogout());
         homeBtn.setOnAction(e -> goToHome());
-        profileBtn.setOnAction(e -> goToProfile());
+        profileBtn.setDisable(true); // دکمه صفحه فعلی غیرفعال است
+        historyBtn.setOnAction(e -> goToHistory());
         populateUserData();
     }
 
@@ -150,25 +146,23 @@ public class CourierProfileController implements Initializable {
             profileImageView.setImage(new Image(selectedFile.toURI().toString()));
         }
     }
+
     private void goToHome() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("CourierHome-view.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) homeBtn.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        navigateToPage("CourierHome-view.fxml");
     }
 
-    private void goToProfile() {
+    private void goToHistory() {
+        navigateToPage("CourierHistory-view.fxml");
+    }
+
+    // متد یکپارچه برای ناوبری
+    private void navigateToPage(String fxmlFile) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("CourierProfile-view.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlFile));
+            Stage stage = (Stage) homeBtn.getScene().getWindow();
             stage.setScene(new Scene(root));
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
