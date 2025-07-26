@@ -305,7 +305,6 @@ public class ApiService {
             return new ApiResponse(0, "{\"error\":\"Server connection error\"}");
         }
     }
-    // در فایل ApiService.java
 
     public static ApiResponse getFoodItemDetails(long itemId) {
         String token = SessionManager.getInstance().getToken();
@@ -315,6 +314,72 @@ public class ApiService {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(API_BASE_URL + "/items/" + itemId))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+
+    // --- Order Endpoints ---
+    public static ApiResponse submitOrder(SubmitOrderRequest orderData) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            String jsonBody = gson.toJson(orderData);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/orders"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+
+    /**
+     * متد جدید برای دریافت تاریخچه سفارشات کاربر
+     */
+    public static ApiResponse getOrderHistory() {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/orders/history"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+
+    /**
+     * متد جدید برای دریافت جزئیات یک سفارش خاص
+     */
+    public static ApiResponse getOrderDetails(long orderId) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/orders/" + orderId))
                     .header("Authorization", "Bearer " + token)
                     .GET()
                     .build();

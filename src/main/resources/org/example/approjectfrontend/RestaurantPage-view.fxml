@@ -9,10 +9,10 @@
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.approjectfrontend.RestaurantPageController"
-            prefWidth="600" prefHeight="480">
-    <VBox spacing="20" alignment="TOP_CENTER"
+            prefWidth="600" prefHeight="520">
+    <VBox spacing="15" alignment="TOP_CENTER"
           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
-          AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+          AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" style="-fx-padding: 15;">
 
         <!-- هدر: لوگو و نام رستوران -->
         <HBox spacing="16" alignment="CENTER_LEFT">
@@ -25,7 +25,7 @@
         <!-- عنوان منو -->
         <Label text="منو:" style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
 
-        <!-- لیست انتخاب چند آیتم (انتخاب چندتایی فعال می‌شود در کنترلر) -->
+        <!-- لیست آیتم‌های منو -->
         <ListView fx:id="menuListView" prefHeight="200" style="-fx-font-size: 15px;"/>
 
         <!-- بخش وارد کردن آدرس سفارش -->
@@ -40,5 +40,11 @@
         <Button fx:id="orderButton" text="ثبت سفارش"
                 maxWidth="160"
                 style="-fx-font-size: 15px; -fx-background-color: #44c767; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;"
-                onAction="#handleOrderButton"/>  </VBox>
+                onAction="#handleOrderButton"/>
+
+        <!-- دکمه بازگشت جدید -->
+        <Button fx:id="backButton" text="بازگشت به لیست رستوران‌ها" onAction="#handleBackButton"
+                maxWidth="250"
+                style="-fx-font-size: 15px; -fx-background-color: #f0ad4e; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;"/>
+    </VBox>
 </AnchorPane>
