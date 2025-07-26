@@ -41,7 +41,9 @@ public class OrderHistoryController {
                             new Label("آدرس: " + order.getAddress()),
                             new Label("سفارش: " + getOrderSummary(order)), // <-- خلاصه سفارش
                             new Label("مبلغ کل: " + order.getTotalPrice() + " تومان"),
-                            new Label("تعداد آیتم: " + order.getItems().stream().mapToInt(RestaurantMenuItem::getOrderCount).sum())
+                            new Label("تعداد آیتم: " + order.getItems().stream().mapToInt(RestaurantMenuItem::getOrderCount).sum()),
+                            // === نمای وضعیت سفارش به فارسی ===
+                            new Label("وضعیت: " + getStatusFa(order.getStatus()))
                     );
                     box.setStyle("-fx-padding: 10; -fx-background-color: #fcfcff; -fx-border-radius: 8; -fx-spacing: 7;");
                     setGraphic(box);
@@ -86,7 +88,17 @@ public class OrderHistoryController {
             default -> String.valueOf(number);
         };
     }
-
+    private String getStatusFa(String status) {
+        return switch (status) {
+            case "NEW" -> "در انتظار تایید رستوران";
+            case "ACCEPTED" -> "در حال آماده‌سازی";
+            case "REJECTED" -> "رد شده";
+            case "WAITING_FOR_DELIVERY" -> "در انتظار پیک";
+            case "IN_DELIVERY" -> "در حال تحویل توسط پیک";
+            case "DELIVERED" -> "تحویل داده شده";
+            default -> "نامشخص";
+        };
+    }
     private void goToProfile() {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("BuyerProfile-view.fxml"));
