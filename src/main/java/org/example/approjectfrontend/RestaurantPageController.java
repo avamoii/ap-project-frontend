@@ -7,10 +7,12 @@ import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -21,12 +23,16 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.example.approjectfrontend.api.*;
+import org.example.approjectfrontend.api.ApiResponse;
+import org.example.approjectfrontend.api.ApiService;
+import org.example.approjectfrontend.api.FoodItemDTO;
+import org.example.approjectfrontend.api.RestaurantDTO;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.*;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -44,6 +50,10 @@ public class RestaurantPageController {
     private Label totalPriceLabel;
     @FXML
     private Button payButton;
+    @FXML
+    private Button orderButton;
+    @FXML
+    private Button backButton; // تعریف دکمه بازگشت
 
     private RestaurantDTO currentRestaurant;
     private final ObservableList<FoodItemDTO> allItems = FXCollections.observableArrayList();
@@ -62,22 +72,28 @@ public class RestaurantPageController {
             private final Label keywordsLabel = new Label();
 
             {
+                // تنظیمات ردیف اصلی (نام، اسپینر، دکمه)
+                spinner.setPrefWidth(80);
                 HBox.setHgrow(nameAndPrice, Priority.ALWAYS);
                 topHBox.setAlignment(Pos.CENTER_LEFT);
                 topHBox.getChildren().addAll(nameAndPrice, spinner, detailsButton);
 
+                // تنظیمات لیبل‌های جزئیات
                 descriptionLabel.setWrapText(true);
                 descriptionLabel.setStyle("-fx-text-fill: #555; -fx-padding: 0 0 0 10;");
                 keywordsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #777; -fx-padding: 0 0 0 10;");
 
+                // مخفی کردن لیبل‌های جزئیات در ابتدا
                 descriptionLabel.setVisible(false);
                 descriptionLabel.setManaged(false);
                 keywordsLabel.setVisible(false);
                 keywordsLabel.setManaged(false);
 
+                // اضافه کردن همه چیز به کانتینر اصلی
                 mainVBox.getChildren().addAll(topHBox, descriptionLabel, keywordsLabel);
                 mainVBox.setPadding(new Insets(5));
 
+                // اتصال رویدادها
                 spinner.valueProperty().addListener((obs, oldVal, newVal) -> updateTotalPrice());
 
                 detailsButton.setOnAction(event -> {
@@ -168,44 +184,16 @@ public class RestaurantPageController {
 
     @FXML
     private void handleOrderButton() {
-        String address = addressField.getText().trim();
-        if (address.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "خطا", "لطفاً آدرس تحویل را وارد کنید.");
-            return;
-        }
+        Map<FoodItemDTO, Integer> selectedItems = itemSpinners.entrySet().stream()
+                .filter(entry -> entry.getValue().getValue() > 0)
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
 
-        // ۱. جمع‌آوری آیتم‌های انتخاب شده (تعداد > ۰)
-        List<OrderItemRequestDTO> orderedItems = new ArrayList<>();
-        for (Map.Entry<FoodItemDTO, Spinner<Integer>> entry : itemSpinners.entrySet()) {
-            if (entry.getValue().getValue() > 0) {
-                orderedItems.add(new OrderItemRequestDTO(entry.getKey().getId(), entry.getValue().getValue()));
-            }
-        }
-
-        if (orderedItems.isEmpty()) {
+        if (selectedItems.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "خطا", "لطفاً حداقل یک آیتم از منو را انتخاب کنید.");
             return;
         }
 
-        // ۲. ساختن آبجکت درخواست
-        SubmitOrderRequest orderRequest = new SubmitOrderRequest();
-        orderRequest.setVendorId(currentRestaurant.getId());
-        orderRequest.setDeliveryAddress(address);
-        orderRequest.setItems(orderedItems);
-        orderRequest.setCouponId(null); // <-- فعلاً کوپن را null ارسال می‌کنیم
-
-        // ۳. ارسال درخواست به سرور در یک ترد جدید
-        new Thread(() -> {
-            ApiResponse response = ApiService.submitOrder(orderRequest);
-            Platform.runLater(() -> {
-                if (response.getStatusCode() == 200) {
-                    showAlert(Alert.AlertType.INFORMATION, "موفقیت", "سفارش شما با موفقیت ثبت شد!");
-                    // می‌توانید صفحه را ببندید یا به صفحه تاریخچه سفارشات بروید
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "خطا", "خطا در ثبت سفارش: " + response.getBody());
-                }
-            });
-        }).start();
+        showAlert(Alert.AlertType.INFORMATION, "موفقیت", "سفارش شما با موفقیت ثبت شد (شبیه‌سازی شده).");
     }
 
     private void showPaymentMethodDialog() {
@@ -261,5 +249,18 @@ public class RestaurantPageController {
         alert.showAndWait();
     }
 
-
+    /**
+     * این متد جدید برای دکمه بازگشت است.
+     * پنجره فعلی (منوی رستوران) را می‌بندد.
+     */
+    @FXML
+    private void handleBackButton(ActionEvent event) {
+        try {
+            // پنجره فعلی را پیدا کرده و آن را می‌بندد
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
