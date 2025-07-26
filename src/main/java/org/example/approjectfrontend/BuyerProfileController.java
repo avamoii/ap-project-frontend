@@ -57,7 +57,7 @@ public class BuyerProfileController implements Initializable {
         saveButton.setOnAction(event -> handleSaveProfile());
         logoutButton.setOnAction(event -> handleLogout());
         homeBtn.setOnAction(e -> goToHome());
-        historyBtn.setOnAction(e -> handleHistoryClick());
+        historyBtn.setOnAction(e -> handleHistoryClick(e)); // event را پاس می‌دهیم
         profileBtn.setDisable(true);
         rechargeWalletButton.setOnAction(event -> showRechargeDialog());
         updateWalletDisplay();
@@ -184,44 +184,18 @@ public class BuyerProfileController implements Initializable {
         }
     }
 
-    private void handleHistoryClick() {
-        // ساخت یک دیالوگ با دو گزینه
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("انتخاب نوع تاریخچه");
-        alert.setHeaderText("کدام تاریخچه را می‌خواهید مشاهده کنید؟");
-
-        ButtonType ordersBtn = new ButtonType("تاریخچه سفارشات");
-        ButtonType transactionsBtn = new ButtonType("تاریخچه تراکنش‌ها");
-        ButtonType cancelBtn = new ButtonType("انصراف", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        alert.getButtonTypes().setAll(ordersBtn, transactionsBtn, cancelBtn);
-
-        Optional<ButtonType> result = alert.showAndWait();
-
-        if (result.isPresent()) {
-            if (result.get() == ordersBtn) {
-                goToOrderHistory();
-            } else if (result.get() == transactionsBtn) {
-                goToTransactionHistory();
-            }
-        }
-    }
-    private void goToOrderHistory() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("OrderHistory-view.fxml"));
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void handleHistoryClick(ActionEvent event) {
+        // مستقیم به صفحه تاریخچه سفارشات می‌رویم
+        navigateToPage(event, "OrderHistory-view.fxml");
     }
 
-    private void goToTransactionHistory() {
+    private void navigateToPage(ActionEvent event, String fxmlFile) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("TransactionHistory-view.fxml"));
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlFile));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
-        } catch (Exception e) {
+            stage.show();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
