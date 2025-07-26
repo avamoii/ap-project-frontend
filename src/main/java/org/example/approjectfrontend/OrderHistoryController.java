@@ -1,6 +1,7 @@
 package org.example.approjectfrontend;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -8,11 +9,15 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.approjectfrontend.api.ApiResponse;
 import org.example.approjectfrontend.api.ApiService;
@@ -20,9 +25,12 @@ import org.example.approjectfrontend.api.FoodItemDTO;
 import org.example.approjectfrontend.api.OrderDTO;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class OrderHistoryController {
+public class OrderHistoryController implements Initializable {
     @FXML private Button profileBtn;
     @FXML private Button homeBtn;
     @FXML private Button historyBtn;
@@ -38,16 +46,23 @@ public class OrderHistoryController {
     private final ObservableList<OrderDTO> orderList = FXCollections.observableArrayList();
     private final ObservableList<String> itemNames = FXCollections.observableArrayList();
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
         historyBtn.setStyle("-fx-background-color: #1e7e44;");
+        profileBtn.setOnAction(e -> navigateToPage(e, "BuyerProfile-view.fxml"));
+        homeBtn.setOnAction(e -> navigateToPage(e, "BuyerHome-view.fxml"));
+        historyBtn.setOnAction(e -> showHistoryChoiceDialog());
+
         ordersListView.setItems(orderList);
         itemsListView.setItems(itemNames);
 
         // در ابتدا بخش جزئیات را مخفی می‌کنیم
-        detailsPane.setVisible(false);
-        detailsPane.setManaged(false);
+        if (detailsPane != null) {
+            detailsPane.setVisible(false);
+            detailsPane.setManaged(false);
+        }
 
+        // --- اصلاح اصلی: استفاده از CellFactory برای رندر کردن هر آیتم ---
         ordersListView.setCellFactory(listView -> new ListCell<>() {
             @Override
             protected void updateItem(OrderDTO order, boolean empty) {
@@ -55,12 +70,8 @@ public class OrderHistoryController {
                 if (empty || order == null) {
                     setGraphic(null);
                 } else {
-                    VBox box = new VBox(5);
-                    box.setStyle("-fx-padding: 10; -fx-background-color: #fcfcff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;");
-                    Label priceLabel = new Label("مبلغ کل: " + order.getPayPrice() + " تومان");
-                    Label dateLabel = new Label("تاریخ ثبت: " + order.getCreatedAt().substring(0, 10));
-                    box.getChildren().addAll(priceLabel, dateLabel);
-                    setGraphic(box);
+                    // ساخت کارت گرافیکی برای هر سفارش
+                    setGraphic(buildOrderCard(order));
                 }
             }
         });
@@ -75,19 +86,60 @@ public class OrderHistoryController {
         loadOrderHistory();
     }
 
-    private void displayOrderDetails(OrderDTO order) {
-        // بخش جزئیات را نمایان می‌کنیم
-        detailsPane.setVisible(true);
-        detailsPane.setManaged(true);
-        mainSplitPane.setDividerPositions(0.5); // تقسیم صفحه به دو نیم
+    private VBox buildOrderCard(OrderDTO order) {
+        Label orderInfo = new Label(String.format("سفارش #%d - مبلغ: %,d تومان",
+                order.getId(), order.getPayPrice()));
+        orderInfo.setStyle("-fx-font-size: 14px;");
 
-        // اطلاعات اصلی را فوراً نمایش می‌دهیم
+        Label debugStatusLabel = new Label("وضعیت خام: " + order.getStatus() + " | وضعیت فارسی: " + getStatusInPersian(order.getStatus()));
+        debugStatusLabel.setStyle("-fx-text-fill: grey; -fx-font-size: 10px;");
+
+        VBox content = new VBox(5, orderInfo, debugStatusLabel);
+        content.setStyle("-fx-background-color: #ffffff; -fx-padding: 10; -fx-background-radius: 8; -fx-border-color: #e0e0e0; -fx-border-radius: 8;");
+        content.setAlignment(Pos.CENTER_LEFT);
+
+        if ("COMPLETED".equalsIgnoreCase(order.getStatus())) {
+            Button rateButton = new Button("ثبت نظر");
+            rateButton.setOnAction(e -> openRatingWindow(order));
+            content.getChildren().add(rateButton);
+        }
+
+        return content;
+    }
+
+    private void openRatingWindow(OrderDTO order) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("SubmitRating-view.fxml"));
+            Parent root = loader.load();
+
+            SubmitRatingController controller = loader.getController();
+            controller.setOrder(order);
+
+            Stage stage = new Stage();
+            stage.setTitle("ثبت نظر برای سفارش #" + order.getId());
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            loadOrderHistory();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void displayOrderDetails(OrderDTO order) {
+        if (detailsPane != null && mainSplitPane != null) {
+            detailsPane.setVisible(true);
+            detailsPane.setManaged(true);
+            mainSplitPane.setDividerPositions(0.5);
+        }
+
         orderIdLabel.setText(String.valueOf(order.getId()));
         statusLabel.setText(getStatusInPersian(order.getStatus()));
         priceLabel.setText(order.getPayPrice() + " تومان");
         addressLabel.setText(order.getDeliveryAddress());
 
-        // دریافت نام آیتم‌ها
         itemNames.clear();
         itemsListView.setPlaceholder(new Label("در حال بارگذاری آیتم‌ها..."));
         for (Long itemId : order.getItemIds()) {
@@ -106,21 +158,44 @@ public class OrderHistoryController {
     }
 
     private void loadOrderHistory() {
+        ordersListView.setPlaceholder(new ProgressIndicator());
         new Thread(() -> {
             ApiResponse response = ApiService.getOrderHistory();
             Platform.runLater(() -> {
                 if (response.getStatusCode() == 200) {
                     List<OrderDTO> orders = new Gson().fromJson(response.getBody(), new TypeToken<List<OrderDTO>>() {}.getType());
-                    orderList.setAll(orders);
-                    if (orders.isEmpty()) {
+                    if (orders == null || orders.isEmpty()) {
                         ordersListView.setPlaceholder(new Label("شما تاکنون سفارشی ثبت نکرده‌اید."));
+                    } else {
+                        orderList.setAll(orders);
                     }
                 } else {
                     ordersListView.setPlaceholder(new Label("خطا در دریافت تاریخچه سفارشات."));
-                    System.err.println("Error fetching order history: " + response.getBody());
                 }
             });
         }).start();
+    }
+
+    private void showHistoryChoiceDialog() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("انتخاب نوع تاریخچه");
+        alert.setHeaderText("کدام تاریخچه را می‌خواهید مشاهده کنید؟");
+
+        ButtonType ordersBtn = new ButtonType("تاریخچه سفارشات");
+        ButtonType transactionsBtn = new ButtonType("تاریخچه تراکنش‌ها");
+        ButtonType cancelBtn = new ButtonType("انصراف", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(ordersBtn, transactionsBtn, cancelBtn);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent()) {
+            if (result.get() == ordersBtn) {
+                loadOrderHistory();
+            } else if (result.get() == transactionsBtn) {
+                navigateToPage(new ActionEvent(historyBtn, null), "TransactionHistory-view.fxml");
+            }
+        }
     }
 
     private String getStatusInPersian(String status) {

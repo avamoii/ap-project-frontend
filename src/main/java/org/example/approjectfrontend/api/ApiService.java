@@ -555,4 +555,29 @@ public class ApiService {
             return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
         }
     }
+    /**
+     * یک نظر و امتیاز جدید را برای یک سفارش به سرور ارسال می‌کند.
+     * @param ratingData داده‌های نظر شامل شناسه سفارش، امتیاز و متن نظر.
+     * @return ApiResponse از سرور.
+     */
+    public static ApiResponse submitRating(SubmitRatingRequest ratingData) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            String jsonBody = gson.toJson(ratingData);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/ratings"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
 }

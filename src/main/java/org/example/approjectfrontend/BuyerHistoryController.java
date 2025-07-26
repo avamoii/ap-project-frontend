@@ -4,16 +4,18 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.approjectfrontend.api.ApiResponse;
 import org.example.approjectfrontend.api.ApiService;
@@ -25,38 +27,41 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-/**
- * کنترلر برای نمایش تاریخچه سفارشات خریدار.
- * این صفحه لیست سفارشات را نمایش می‌دهد و امکان ناوبری به بخش‌های دیگر را فراهم می‌کند.
- */
 public class BuyerHistoryController implements Initializable {
-    @FXML
-    private Button profileBtn;
-    @FXML
-    private Button homeBtn;
-    @FXML
-    private Button historyBtn;
-    @FXML
-    private VBox ordersVBox;
+    @FXML private Button profileBtn;
+    @FXML private Button homeBtn;
+    @FXML private Button historyBtn;
+    @FXML private ListView<OrderDTO> ordersListView; // --- اصلاح اصلی: استفاده از ListView به جای VBox ---
+
+    private final ObservableList<OrderDTO> orderList = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // تنظیم رویدادهای کلیک برای دکمه‌های ناوبری
         profileBtn.setOnAction(e -> navigateToPage("BuyerProfile-view.fxml"));
         homeBtn.setOnAction(e -> navigateToPage("BuyerHome-view.fxml"));
-        historyBtn.setOnAction(e -> showHistoryChoiceDialog()); // کلیک روی دکمه تاریخچه هم دیالوگ را نشان می‌دهد
-
-        // استایل‌دهی به دکمه فعال (تاریخچه)
+        historyBtn.setOnAction(e -> showHistoryChoiceDialog());
         historyBtn.setStyle("-fx-background-color: #1e7e44;");
 
-        // به جای بارگذاری مستقیم، دیالوگ انتخاب را نمایش می‌دهیم تا کاربر تصمیم بگیرد.
-        // این کار را در Platform.runLater قرار می‌دهیم تا اطمینان حاصل شود که صحنه به طور کامل آماده شده است.
-        Platform.runLater(this::showHistoryChoiceDialog);
+        // اتصال لیست به ListView
+        ordersListView.setItems(orderList);
+
+        // --- اصلاح اصلی: استفاده از CellFactory برای رندر کردن هر آیتم ---
+        ordersListView.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(OrderDTO order, boolean empty) {
+                super.updateItem(order, empty);
+                if (empty || order == null) {
+                    setGraphic(null);
+                } else {
+                    // ساخت کارت گرافیکی برای هر سفارش در اینجا انجام می‌شود
+                    setGraphic(buildOrderCard(order));
+                }
+            }
+        });
+
+        loadOrderHistory();
     }
 
-    /**
-     * یک دیالوگ برای انتخاب بین تاریخچه سفارشات و تراکنش‌ها نمایش می‌دهد و بر اساس انتخاب کاربر عمل می‌کند.
-     */
     private void showHistoryChoiceDialog() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("انتخاب نوع تاریخچه");
@@ -65,7 +70,7 @@ public class BuyerHistoryController implements Initializable {
 
         ButtonType ordersBtn = new ButtonType("تاریخچه سفارشات");
         ButtonType transactionsBtn = new ButtonType("تاریخچه تراکنش‌ها");
-        ButtonType cancelBtn = new ButtonType("بازگشت", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType cancelBtn = new ButtonType("انصراف", ButtonBar.ButtonData.CANCEL_CLOSE);
 
         alert.getButtonTypes().setAll(ordersBtn, transactionsBtn, cancelBtn);
 
@@ -73,79 +78,81 @@ public class BuyerHistoryController implements Initializable {
 
         if (result.isPresent()) {
             if (result.get() == ordersBtn) {
-                // اگر کاربر تاریخچه سفارشات را انتخاب کرد، محتوای آن را بارگذاری می‌کنیم.
                 loadOrderHistory();
             } else if (result.get() == transactionsBtn) {
-                // اگر تاریخچه تراکنش‌ها انتخاب شد، به صفحه مربوطه می‌رویم.
                 navigateToPage("TransactionHistory-view.fxml");
-            } else {
-                // اگر کاربر "بازگشت" را زد، به صفحه اصلی برمی‌گردیم.
-                navigateToPage("BuyerHome-view.fxml");
             }
-        } else {
-            // اگر کاربر دیالوگ را بدون انتخاب بست، باز هم به صفحه اصلی برمی‌گردیم.
-            navigateToPage("BuyerHome-view.fxml");
         }
     }
 
-    /**
-     * داده‌های تاریخچه سفارشات را از API دریافت کرده و در VBox نمایش می‌دهد.
-     */
     private void loadOrderHistory() {
-        ordersVBox.getChildren().clear();
-        ordersVBox.setAlignment(Pos.CENTER);
-        ordersVBox.getChildren().add(new ProgressIndicator()); // نمایش لودینگ
+        ordersListView.setPlaceholder(new ProgressIndicator());
 
         new Thread(() -> {
             ApiResponse response = ApiService.getOrderHistory();
             Platform.runLater(() -> {
-                ordersVBox.getChildren().clear(); // حذف لودینگ
                 if (response.getStatusCode() == 200) {
-                    ordersVBox.setAlignment(Pos.TOP_LEFT);
                     Gson gson = new Gson();
                     List<OrderDTO> orders = gson.fromJson(response.getBody(), new TypeToken<List<OrderDTO>>() {}.getType());
                     if (orders == null || orders.isEmpty()) {
-                        ordersVBox.setAlignment(Pos.CENTER);
-                        ordersVBox.getChildren().add(new Label("شما هنوز هیچ سفارشی ثبت نکرده‌اید."));
+                        ordersListView.setPlaceholder(new Label("شما هنوز هیچ سفارشی ثبت نکرده‌اید."));
                     } else {
-                        for (OrderDTO order : orders) {
-                            HBox card = buildOrderCard(order);
-                            ordersVBox.getChildren().add(card);
-                        }
+                        orderList.setAll(orders);
                     }
                 } else {
-                    ordersVBox.setAlignment(Pos.CENTER);
-                    ordersVBox.getChildren().add(new Label("خطا در دریافت تاریخچه سفارشات."));
+                    ordersListView.setPlaceholder(new Label("خطا در دریافت تاریخچه سفارشات."));
                 }
             });
         }).start();
     }
 
-    /**
-     * یک کارت گرافیکی برای نمایش اطلاعات یک سفارش ایجاد می‌کند.
-     * @param order آبجکت سفارش
-     * @return یک HBox که کارت سفارش است.
-     */
-    private HBox buildOrderCard(OrderDTO order) {
-        HBox box = new HBox(10);
-        box.setStyle("-fx-background-color: #ffffff; -fx-padding: 10; -fx-background-radius: 8; -fx-border-color: #e0e0e0; -fx-border-radius: 8;");
-        box.setAlignment(Pos.CENTER_LEFT);
-
-        Label orderInfo = new Label(String.format("سفارش #%d - وضعیت: %s - مبلغ: %,d تومان",
-                order.getId(), getStatusInPersian(order.getStatus()), order.getPayPrice()));
+    private VBox buildOrderCard(OrderDTO order) {
+        Label orderInfo = new Label(String.format("سفارش #%d - مبلغ: %,d تومان",
+                order.getId(), order.getPayPrice()));
         orderInfo.setStyle("-fx-font-size: 14px;");
 
-        box.getChildren().add(orderInfo);
-        // با کلیک روی هر کارت، جزئیات کامل آن نمایش داده می‌شود
-        box.setOnMouseClicked(e -> showOrderDetails(order.getId()));
+        Label debugStatusLabel = new Label("وضعیت خام: " + order.getStatus() + " | وضعیت فارسی: " + getStatusInPersian(order.getStatus()));
+        debugStatusLabel.setStyle("-fx-text-fill: grey; -fx-font-size: 10px;");
 
-        return box;
+        VBox content = new VBox(5, orderInfo, debugStatusLabel);
+        content.setStyle("-fx-background-color: #ffffff; -fx-padding: 10; -fx-background-radius: 8; -fx-border-color: #e0e0e0; -fx-border-radius: 8;");
+        content.setAlignment(Pos.CENTER_LEFT);
+
+        if ("COMPLETED".equalsIgnoreCase(order.getStatus())) {
+            Button rateButton = new Button("ثبت نظر");
+            rateButton.setOnAction(e -> openRatingWindow(order));
+            content.getChildren().add(rateButton);
+        }
+
+        content.setOnMouseClicked(e -> {
+            if (!(e.getTarget() instanceof Button)) {
+                showOrderDetails(order.getId());
+            }
+        });
+        return content;
     }
 
-    /**
-     * جزئیات کامل یک سفارش را در یک پنجره Alert نمایش می‌دهد.
-     * @param orderId شناسه سفارش
-     */
+    private void openRatingWindow(OrderDTO order) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("SubmitRating-view.fxml"));
+            Parent root = loader.load();
+
+            SubmitRatingController controller = loader.getController();
+            controller.setOrder(order);
+
+            Stage stage = new Stage();
+            stage.setTitle("ثبت نظر برای سفارش #" + order.getId());
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            loadOrderHistory();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void showOrderDetails(long orderId) {
         new Thread(() -> {
             ApiResponse response = ApiService.getOrderDetails(orderId);
@@ -155,7 +162,6 @@ public class BuyerHistoryController implements Initializable {
                     alert.setTitle("جزئیات سفارش #" + orderId);
                     alert.setHeaderText("اطلاعات کامل سفارش شما:");
 
-                    // برای نمایش زیباتر JSON
                     Gson gson = new GsonBuilder().setPrettyPrinting().create();
                     Object jsonObject = gson.fromJson(response.getBody(), Object.class);
                     String prettyJson = gson.toJson(jsonObject);
@@ -177,10 +183,6 @@ public class BuyerHistoryController implements Initializable {
         }).start();
     }
 
-    /**
-     * متد کمکی برای ناوبری بین صفحات مختلف.
-     * @param fxmlFile نام فایل FXML مقصد
-     */
     private void navigateToPage(String fxmlFile) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlFile));
@@ -191,11 +193,6 @@ public class BuyerHistoryController implements Initializable {
         }
     }
 
-    /**
-     * وضعیت سفارش را از انگلیسی به فارسی ترجمه می‌کند.
-     * @param status وضعیت انگلیسی
-     * @return معادل فارسی
-     */
     private String getStatusInPersian(String status) {
         if (status == null) return "نامشخص";
         return switch (status.toUpperCase()) {
