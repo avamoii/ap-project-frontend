@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.approjectfrontend.AdminTransactionsController"
+      spacing="18"
+      alignment="TOP_CENTER"
+      style="-fx-background-color: linear-gradient(to bottom right, #f6fafc 65%, #e6f2fb 100%);
+             -fx-padding: 32 40 32 40;">
+
+    <Label text="تراکنش‌های مالی"
+           style="-fx-font-size: 21px;
+                  -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #207088;
+                  -fx-padding: 0 0 12 0;"/>
+
+    <TableView fx:id="transactionsTable"
+               prefHeight="420"
+               prefWidth="540"
+               style="-fx-background-color: #fff;
+                      -fx-border-color: #b7c9ea;
+                      -fx-border-radius: 10;
+                      -fx-background-radius: 10;
+                      -fx-effect: dropshadow(three-pass-box, #acd5ea, 7, 0.17, 0.0, 1.8);">
+        <columns>
+            <!-- ستون ردیف (شماره سریال) -->
+            <TableColumn fx:id="colSerial" text="ردیف" prefWidth="48" style="-fx-alignment: CENTER;"/>
+            <!-- ستون شناسه تراکنش -->
+            <TableColumn fx:id="colId" text="شناسه" prefWidth="52" style="-fx-alignment: CENTER;"/>
+            <!-- ستون شماره سفارش -->
+            <TableColumn fx:id="colOrderId" text="شماره سفارش" prefWidth="95" style="-fx-alignment: CENTER;"/>
+            <!-- ستون مبلغ -->
+            <TableColumn fx:id="colAmount" text="مبلغ" prefWidth="90" style="-fx-alignment: CENTER;"/>
+            <!-- ستون وضعیت -->
+            <TableColumn fx:id="colStatus" text="وضعیت" prefWidth="98" style="-fx-alignment: CENTER;"/>
+            <!-- ستون تاریخ -->
+            <TableColumn fx:id="colDate" text="تاریخ" prefWidth="120" style="-fx-alignment: CENTER;"/>
+        </columns>
+    </TableView>
+</VBox>

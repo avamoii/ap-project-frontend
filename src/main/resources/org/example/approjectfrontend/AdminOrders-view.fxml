@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.approjectfrontend.AdminOrdersController"
+      spacing="18"
+      alignment="TOP_CENTER"
+      style="-fx-background-color: linear-gradient(to bottom right, #f5fbff 67%, #e6f2fb 100%);
+             -fx-padding: 32 40 32 40;">
+
+    <Label text="لیست سفارش‌ها"
+           style="-fx-font-size: 21px;
+                  -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #206094;
+                  -fx-padding: 0 0 12 0;"/>
+
+    <TableView fx:id="ordersTable"
+               prefHeight="420"
+               prefWidth="650"
+               style="-fx-background-color: #fff;
+                      -fx-border-color: #bbddf7;
+                      -fx-border-radius: 10;
+                      -fx-background-radius: 10;
+                      -fx-effect: dropshadow(three-pass-box, #a6d5fa, 8, 0.18, 0.0, 2.0);">
+        <columns>
+            <!-- ستون شماره ردیف (سریال) -->
+            <TableColumn fx:id="colSerial" text="ردیف" prefWidth="48" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colId" text="شناسه" prefWidth="60" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colUser" text="کاربر" prefWidth="120" style="-fx-alignment: CENTER_LEFT;"/>
+            <TableColumn fx:id="colRestaurant" text="رستوران" prefWidth="125" style="-fx-alignment: CENTER_LEFT;"/>
+            <TableColumn fx:id="colStatus" text="وضعیت" prefWidth="90" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colAmount" text="مبلغ" prefWidth="80" style="-fx-alignment: CENTER;"/>
+        </columns>
+    </TableView>
+</VBox>

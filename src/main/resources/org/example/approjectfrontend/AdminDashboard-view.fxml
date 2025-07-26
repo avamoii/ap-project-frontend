@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.approjectfrontend.AdminDashboardController"
+            prefHeight="450" prefWidth="800"
+            style="-fx-background-color: #f8fafc;">
+    <left>
+        <VBox spacing="16" alignment="TOP_CENTER"
+              style="-fx-background-color: #255DA4; -fx-padding: 30 10 10 10; -fx-background-radius: 0 18 18 0; -fx-effect: dropshadow(three-pass-box,rgba(0,0,0,0.08),8,0,2,2);"
+              BorderPane.alignment="CENTER">
+            <Label text="پنل ادمین"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #fff;"/>
+            <Separator />
+            <Button text="مدیریت کاربران"   onAction="#showUsers"
+                    style="-fx-background-color: #fff; -fx-text-fill: #255DA4; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"/>
+            <Button text="سفارشات"          onAction="#showOrders"
+                    style="-fx-background-color: #fff; -fx-text-fill: #255DA4; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"/>
+            <Button text="تراکنش‌های مالی" onAction="#showTransactions"
+                    style="-fx-background-color: #fff; -fx-text-fill: #255DA4; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"/>
+            <VBox.margin>
+                <Insets top="0" right="0" bottom="0" left="0"/>
+            </VBox.margin>
+        </VBox>
+    </left>
+    <center>
+        <StackPane fx:id="contentPane"
+                   style="-fx-background-color: rgba(255,255,255,0.98); -fx-background-radius: 16; -fx-effect: dropshadow(three-pass-box,rgba(0,26,64,0.06),12,0,0,4);"
+                   BorderPane.alignment="CENTER">
+            <!-- هنگام سوییچ ویوها اینجا محتوای هر صفحه ظاهر میشه -->
+            <Label text="خوش آمدید!" style="-fx-font-size: 18px; -fx-text-fill: #888;"/>
+        </StackPane>
+    </center>
+</BorderPane>
