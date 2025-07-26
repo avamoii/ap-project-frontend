@@ -16,30 +16,38 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.approjectfrontend.api.ApiResponse;
 import org.example.approjectfrontend.api.ApiService;
+import org.example.approjectfrontend.api.FoodItemDTO;
 import org.example.approjectfrontend.api.OrderDTO;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public class OrderHistoryController {
-    @FXML
-    private Button profileBtn;
-    @FXML
-    private Button homeBtn;
-    @FXML
-    private Button historyBtn;
-    @FXML
-    private ListView<OrderDTO> ordersListView;
+    @FXML private Button profileBtn;
+    @FXML private Button homeBtn;
+    @FXML private Button historyBtn;
+    @FXML private ListView<OrderDTO> ordersListView;
+    @FXML private SplitPane mainSplitPane;
+    @FXML private VBox detailsPane;
+    @FXML private Label orderIdLabel;
+    @FXML private Label statusLabel;
+    @FXML private Label priceLabel;
+    @FXML private Label addressLabel;
+    @FXML private ListView<String> itemsListView;
 
     private final ObservableList<OrderDTO> orderList = FXCollections.observableArrayList();
+    private final ObservableList<String> itemNames = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        historyBtn.setStyle("-fx-background-color: #1e7e44;"); // دکمه فعال تاریخچه
+        historyBtn.setStyle("-fx-background-color: #1e7e44;");
         ordersListView.setItems(orderList);
+        itemsListView.setItems(itemNames);
 
-        // تنظیم نحوه نمایش هر آیتم در لیست
+        // در ابتدا بخش جزئیات را مخفی می‌کنیم
+        detailsPane.setVisible(false);
+        detailsPane.setManaged(false);
+
         ordersListView.setCellFactory(listView -> new ListCell<>() {
             @Override
             protected void updateItem(OrderDTO order, boolean empty) {
@@ -50,15 +58,51 @@ public class OrderHistoryController {
                     VBox box = new VBox(5);
                     box.setStyle("-fx-padding: 10; -fx-background-color: #fcfcff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;");
                     Label priceLabel = new Label("مبلغ کل: " + order.getPayPrice() + " تومان");
-                    Label statusLabel = new Label("وضعیت: " + getStatusInPersian(order.getStatus()));
-                    Label dateLabel = new Label("تاریخ ثبت: " + order.getCreatedAt().substring(0, 10)); // فقط تاریخ نمایش داده شود
-                    box.getChildren().addAll(priceLabel, statusLabel, dateLabel);
+                    Label dateLabel = new Label("تاریخ ثبت: " + order.getCreatedAt().substring(0, 10));
+                    box.getChildren().addAll(priceLabel, dateLabel);
                     setGraphic(box);
                 }
             }
         });
 
+        // با یک بار کلیک، جزئیات نمایش داده می‌شود
+        ordersListView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                displayOrderDetails(newSelection);
+            }
+        });
+
         loadOrderHistory();
+    }
+
+    private void displayOrderDetails(OrderDTO order) {
+        // بخش جزئیات را نمایان می‌کنیم
+        detailsPane.setVisible(true);
+        detailsPane.setManaged(true);
+        mainSplitPane.setDividerPositions(0.5); // تقسیم صفحه به دو نیم
+
+        // اطلاعات اصلی را فوراً نمایش می‌دهیم
+        orderIdLabel.setText(String.valueOf(order.getId()));
+        statusLabel.setText(getStatusInPersian(order.getStatus()));
+        priceLabel.setText(order.getPayPrice() + " تومان");
+        addressLabel.setText(order.getDeliveryAddress());
+
+        // دریافت نام آیتم‌ها
+        itemNames.clear();
+        itemsListView.setPlaceholder(new Label("در حال بارگذاری آیتم‌ها..."));
+        for (Long itemId : order.getItemIds()) {
+            new Thread(() -> {
+                ApiResponse itemResponse = ApiService.getFoodItemDetails(itemId);
+                Platform.runLater(() -> {
+                    if (itemResponse.getStatusCode() == 200) {
+                        FoodItemDTO foodItem = new Gson().fromJson(itemResponse.getBody(), FoodItemDTO.class);
+                        itemNames.add(foodItem.getName());
+                    } else {
+                        itemNames.add("آیتم با شناسه " + itemId + " (یافت نشد)");
+                    }
+                });
+            }).start();
+        }
     }
 
     private void loadOrderHistory() {
@@ -101,11 +145,6 @@ public class OrderHistoryController {
     @FXML
     private void goToHome(ActionEvent event) {
         navigateToPage(event, "BuyerHome-view.fxml");
-    }
-
-    @FXML
-    private void handleHistoryClick(ActionEvent event) {
-        // چون در همین صفحه هستیم، کاری انجام نمی‌دهیم
     }
 
     private void navigateToPage(ActionEvent event, String fxmlFile) {
