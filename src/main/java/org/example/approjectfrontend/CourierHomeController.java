@@ -102,8 +102,9 @@ public class CourierHomeController implements Initializable {
         button.setText("در حال پردازش...");
 
         new Thread(() -> {
-            // طبق مستندات API، وضعیت باید "accepted" باشد
-            ApiResponse response = ApiService.updateDeliveryStatus(order.getId(), "accepted");
+            // --- تغییر اصلی اینجاست ---
+            // وضعیت باید با حروف بزرگ ارسال شود تا با Enum در بک‌اند مطابقت داشته باشد.
+            ApiResponse response = ApiService.updateDeliveryStatus(order.getId(), "ACCEPTED");
             Platform.runLater(() -> {
                 if (response.getStatusCode() == 200) {
                     showAlert(Alert.AlertType.INFORMATION, "موفقیت", "سفارش #" + order.getId() + " با موفقیت به شما اختصاص یافت.");
