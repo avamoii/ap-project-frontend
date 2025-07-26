@@ -49,6 +49,7 @@ public class OrderHistoryController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         historyBtn.setStyle("-fx-background-color: #1e7e44;");
+        // رویدادهای کلیک به صورت برنامه‌نویسی تنظیم می‌شوند تا از خطای FXML جلوگیری شود
         profileBtn.setOnAction(e -> navigateToPage(e, "BuyerProfile-view.fxml"));
         homeBtn.setOnAction(e -> navigateToPage(e, "BuyerHome-view.fxml"));
         historyBtn.setOnAction(e -> showHistoryChoiceDialog());
@@ -56,13 +57,11 @@ public class OrderHistoryController implements Initializable {
         ordersListView.setItems(orderList);
         itemsListView.setItems(itemNames);
 
-        // در ابتدا بخش جزئیات را مخفی می‌کنیم
         if (detailsPane != null) {
             detailsPane.setVisible(false);
             detailsPane.setManaged(false);
         }
 
-        // --- اصلاح اصلی: استفاده از CellFactory برای رندر کردن هر آیتم ---
         ordersListView.setCellFactory(listView -> new ListCell<>() {
             @Override
             protected void updateItem(OrderDTO order, boolean empty) {
@@ -70,13 +69,11 @@ public class OrderHistoryController implements Initializable {
                 if (empty || order == null) {
                     setGraphic(null);
                 } else {
-                    // ساخت کارت گرافیکی برای هر سفارش
                     setGraphic(buildOrderCard(order));
                 }
             }
         });
 
-        // با یک بار کلیک، جزئیات نمایش داده می‌شود
         ordersListView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 displayOrderDetails(newSelection);
@@ -91,10 +88,10 @@ public class OrderHistoryController implements Initializable {
                 order.getId(), order.getPayPrice()));
         orderInfo.setStyle("-fx-font-size: 14px;");
 
-        Label debugStatusLabel = new Label("وضعیت خام: " + order.getStatus() + " | وضعیت فارسی: " + getStatusInPersian(order.getStatus()));
-        debugStatusLabel.setStyle("-fx-text-fill: grey; -fx-font-size: 10px;");
+        Label statusDisplayLabel = new Label("وضعیت: " + getStatusInPersian(order.getStatus()));
+        statusDisplayLabel.setStyle("-fx-text-fill: #333; -fx-font-size: 12px;");
 
-        VBox content = new VBox(5, orderInfo, debugStatusLabel);
+        VBox content = new VBox(5, orderInfo, statusDisplayLabel);
         content.setStyle("-fx-background-color: #ffffff; -fx-padding: 10; -fx-background-radius: 8; -fx-border-color: #e0e0e0; -fx-border-radius: 8;");
         content.setAlignment(Pos.CENTER_LEFT);
 
@@ -103,6 +100,12 @@ public class OrderHistoryController implements Initializable {
             rateButton.setOnAction(e -> openRatingWindow(order));
             content.getChildren().add(rateButton);
         }
+
+        content.setOnMouseClicked(e -> {
+            if (!(e.getTarget() instanceof Button)) {
+                showOrderDetails(order.getId());
+            }
+        });
 
         return content;
     }
@@ -213,12 +216,12 @@ public class OrderHistoryController implements Initializable {
     }
 
     @FXML
-    private void goToProfile(ActionEvent event) {
+    public void goToProfile(ActionEvent event) {
         navigateToPage(event, "BuyerProfile-view.fxml");
     }
 
     @FXML
-    private void goToHome(ActionEvent event) {
+    public void goToHome(ActionEvent event) {
         navigateToPage(event, "BuyerHome-view.fxml");
     }
 
@@ -231,5 +234,39 @@ public class OrderHistoryController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * جزئیات کامل یک سفارش را در یک پنجره Alert نمایش می‌دهد.
+     * @param orderId شناسه سفارش
+     */
+    private void showOrderDetails(long orderId) {
+        new Thread(() -> {
+            ApiResponse response = ApiService.getOrderDetails(orderId);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("جزئیات سفارش #" + orderId);
+                    alert.setHeaderText("اطلاعات کامل سفارش شما:");
+
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    Object jsonObject = gson.fromJson(response.getBody(), Object.class);
+                    String prettyJson = gson.toJson(jsonObject);
+
+                    TextArea textArea = new TextArea(prettyJson);
+                    textArea.setEditable(false);
+                    textArea.setWrapText(true);
+
+                    alert.getDialogPane().setContent(textArea);
+                    alert.setResizable(true);
+                    alert.showAndWait();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("خطا");
+                    alert.setContentText("خطا در دریافت جزئیات سفارش: " + response.getBody());
+                    alert.showAndWait();
+                }
+            });
+        }).start();
     }
 }
