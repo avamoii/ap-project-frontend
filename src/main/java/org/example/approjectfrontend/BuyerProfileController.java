@@ -14,10 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.example.approjectfrontend.api.ApiResponse;
-import org.example.approjectfrontend.api.ApiService;
-import org.example.approjectfrontend.api.UpdateProfileRequest;
-import org.example.approjectfrontend.api.UserDTO;
+import org.example.approjectfrontend.api.*;
 import org.example.approjectfrontend.util.SessionManager;
 
 import java.io.File;
@@ -30,42 +27,34 @@ import java.util.ResourceBundle;
 
 public class BuyerProfileController implements Initializable {
 
-    @FXML
-    private ImageView profileImageView;
-    @FXML
-    private Button uploadButton;
-    @FXML
-    private TextField usernameField, emailField, addressField, phoneField;
-    @FXML
-    private Button saveButton;
-    @FXML
-    private Button logoutButton;
-    @FXML
-    private Label messageLabel;
-    @FXML
-    private Button profileBtn, homeBtn, historyBtn;
-    @FXML
-    private Button rechargeWalletButton;
-    @FXML
-    private Label walletBalanceLabel;
+    @FXML private ImageView profileImageView;
+    @FXML private Button uploadButton;
+    @FXML private TextField usernameField, emailField, addressField, phoneField;
+    @FXML private Button saveButton;
+    @FXML private Button logoutButton;
+    @FXML private Label messageLabel;
+    @FXML private Button profileBtn, homeBtn, historyBtn;
+    @FXML private Button rechargeWalletButton;
+    @FXML private Label walletBalanceLabel;
 
     private File profileImageFile = null;
-    private double walletAmount = 0;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         uploadButton.setOnAction(event -> chooseProfileImage());
         saveButton.setOnAction(event -> handleSaveProfile());
         logoutButton.setOnAction(event -> handleLogout());
-        homeBtn.setOnAction(e -> goToHome());
-        historyBtn.setOnAction(e -> handleHistoryClick());
+        homeBtn.setOnAction(e -> navigateToPage(e, "BuyerHome-view.fxml"));
+        historyBtn.setOnAction(e -> navigateToPage(e, "OrderHistory-view.fxml"));
         profileBtn.setDisable(true);
         rechargeWalletButton.setOnAction(event -> showRechargeDialog());
-        updateWalletDisplay();
         populateUserData();
     }
-    private void updateWalletDisplay() {
-        walletBalanceLabel.setText("موجودی کیف پول: " + (int)walletAmount + " تومان");
+
+    private void updateWalletDisplay(int balance) {
+        walletBalanceLabel.setText("موجودی کیف پول: " + balance + " تومان");
     }
+
     private void showRechargeDialog() {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("شارژ کیف پول");
@@ -75,16 +64,29 @@ public class BuyerProfileController implements Initializable {
 
         result.ifPresent(txt -> {
             try {
-                double added = Double.parseDouble(txt.trim());
-                if (added > 0) {
-                    walletAmount += added;
-                    updateWalletDisplay();
-                    messageLabel.setStyle("-fx-text-fill: green;");
-                    messageLabel.setText("کیف پول با موفقیت شارژ شد!");
-                } else {
+                int amount = Integer.parseInt(txt.trim());
+                if (amount <= 0) {
                     messageLabel.setStyle("-fx-text-fill: red;");
-                    messageLabel.setText("عدد واردشده معتبر نیست.");
+                    messageLabel.setText("مبلغ باید یک عدد مثبت باشد.");
+                    return;
                 }
+
+                // ارسال درخواست به سرور
+                new Thread(() -> {
+                    ApiResponse response = ApiService.topUpWallet(amount);
+                    Platform.runLater(() -> {
+                        if (response.getStatusCode() == 200) {
+                            messageLabel.setStyle("-fx-text-fill: green;");
+                            messageLabel.setText("کیف پول با موفقیت شارژ شد!");
+                            // پروفایل را مجدداً بارگذاری می‌کنیم تا موجودی جدید نمایش داده شود
+                            populateUserData();
+                        } else {
+                            messageLabel.setStyle("-fx-text-fill: red;");
+                            messageLabel.setText("خطا در شارژ کیف پول: " + response.getBody());
+                        }
+                    });
+                }).start();
+
             } catch (NumberFormatException e) {
                 messageLabel.setStyle("-fx-text-fill: red;");
                 messageLabel.setText("لطفاً یک عدد معتبر وارد کنید.");
@@ -93,14 +95,6 @@ public class BuyerProfileController implements Initializable {
     }
 
     private void populateUserData() {
-        UserDTO cachedUser = SessionManager.getInstance().getCurrentUser();
-        if (cachedUser != null) {
-            usernameField.setText(cachedUser.getFullName());
-            phoneField.setText(cachedUser.getPhoneNumber());
-            if (cachedUser.getEmail() != null) emailField.setText(cachedUser.getEmail());
-            if (cachedUser.getAddress() != null) addressField.setText(cachedUser.getAddress());
-        }
-
         new Thread(() -> {
             ApiResponse response = ApiService.getProfile();
             Platform.runLater(() -> {
@@ -113,9 +107,17 @@ public class BuyerProfileController implements Initializable {
                     phoneField.setText(freshUser.getPhoneNumber());
                     if (freshUser.getEmail() != null) emailField.setText(freshUser.getEmail());
                     if (freshUser.getAddress() != null) addressField.setText(freshUser.getAddress());
+
+                    // نمایش موجودی واقعی کیف پول
+                    if (freshUser.getWalletBalance() != null) {
+                        updateWalletDisplay(freshUser.getWalletBalance());
+                    } else {
+                        updateWalletDisplay(0);
+                    }
+
                 } else {
                     messageLabel.setStyle("-fx-text-fill: red;");
-                    messageLabel.setText("خطا در بارگذاری آخرین اطلاعات پروفایل.");
+                    messageLabel.setText("خطا در بارگذاری اطلاعات پروفایل.");
                 }
             });
         }).start();
@@ -174,54 +176,13 @@ public class BuyerProfileController implements Initializable {
         }
     }
 
-    private void goToHome() {
+    private void navigateToPage(ActionEvent event, String fxmlFile) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("BuyerHome-view.fxml"));
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlFile));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void handleHistoryClick() {
-        // ساخت یک دیالوگ با دو گزینه
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("انتخاب نوع تاریخچه");
-        alert.setHeaderText("کدام تاریخچه را می‌خواهید مشاهده کنید؟");
-
-        ButtonType ordersBtn = new ButtonType("تاریخچه سفارشات");
-        ButtonType transactionsBtn = new ButtonType("تاریخچه تراکنش‌ها");
-        ButtonType cancelBtn = new ButtonType("انصراف", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        alert.getButtonTypes().setAll(ordersBtn, transactionsBtn, cancelBtn);
-
-        Optional<ButtonType> result = alert.showAndWait();
-
-        if (result.isPresent()) {
-            if (result.get() == ordersBtn) {
-                goToOrderHistory();
-            } else if (result.get() == transactionsBtn) {
-                goToTransactionHistory();
-            }
-        }
-    }
-    private void goToOrderHistory() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("OrderHistory-view.fxml"));
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void goToTransactionHistory() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("TransactionHistory-view.fxml"));
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
+            stage.show();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

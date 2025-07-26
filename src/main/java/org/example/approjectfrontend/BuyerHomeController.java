@@ -3,6 +3,7 @@ package org.example.approjectfrontend;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -40,17 +41,16 @@ public class BuyerHomeController implements Initializable {
     private TextField searchField;
     @FXML
     private VBox restaurantListVBox;
-    // اضافه کردن لیست کامل رستوران‌ها
     private List<RestaurantDTO> allRestaurants;
     private List<FoodItemDTO> allFoodItems;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loadRestaurants();
-        profileBtn.setOnAction(e -> goToProfile());
-        historyBtn.setOnAction(e -> goToHistory());
+        profileBtn.setOnAction(e -> navigateToPage(e, "BuyerProfile-view.fxml"));
+        historyBtn.setOnAction(e -> navigateToPage(e, "OrderHistory-view.fxml"));
         homeBtn.setDisable(true);
         searchField.textProperty().addListener((obs, oldValue, newValue) -> handleSearch());
-
     }
 
     private void loadRestaurants() {
@@ -63,25 +63,20 @@ public class BuyerHomeController implements Initializable {
                 if (response.getStatusCode() == 200) {
                     restaurantListVBox.setAlignment(Pos.TOP_LEFT);
                     Gson gson = new Gson();
-                    List<RestaurantDTO> restaurants = gson.fromJson(response.getBody(), new TypeToken<List<RestaurantDTO>>() {}.getType());
-                    if (restaurants.isEmpty()) {
-                        restaurantListVBox.getChildren().add(new Label("در حال حاضر هیچ رستورانی فعال نیست."));
-                    } else {
-                        for (RestaurantDTO restaurant : restaurants) {
-                            HBox card = buildRestaurantCard(restaurant);
-                            restaurantListVBox.getChildren().add(card);
-                        }
-                    }
+                    allRestaurants = gson.fromJson(response.getBody(), new TypeToken<List<RestaurantDTO>>() {}.getType());
+                    showRestaurants(allRestaurants);
                 } else {
                     restaurantListVBox.getChildren().add(new Label("خطا در دریافت لیست رستوران‌ها."));
                 }
             });
         }).start();
     }
+
     private void showRestaurants(List<RestaurantDTO> restaurants) {
         restaurantListVBox.getChildren().clear();
         if (restaurants == null || restaurants.isEmpty()) {
-            restaurantListVBox.getChildren().add(new Label("در حال حاضر هیچ رستورانی فعال نیست."));
+            restaurantListVBox.setAlignment(Pos.CENTER);
+            restaurantListVBox.getChildren().add(new Label("رستورانی یافت نشد."));
         } else {
             for (RestaurantDTO restaurant : restaurants) {
                 HBox card = buildRestaurantCard(restaurant);
@@ -95,41 +90,17 @@ public class BuyerHomeController implements Initializable {
         String searchText = searchField.getText().trim().toLowerCase();
         if (allRestaurants == null) return;
 
-        // رستوران‌هایی که با نام پیدا می‌شن
-        Set<Long> restaurantIdsByName = allRestaurants.stream()
-                .filter(r -> r.getName() != null && r.getName().toLowerCase().contains(searchText))
-                .map(RestaurantDTO::getId)
-                .collect(Collectors.toSet());
-
-        // رستوران‌هایی که بر اساس غذا پیدا می‌شن
-        Set<Long> restaurantIdsByFood = new HashSet<>();
-        if (allFoodItems != null) {
-            allFoodItems.stream()
-                    .filter(food ->
-                            (food.getName() != null && food.getName().toLowerCase().contains(searchText)) ||
-                                    (food.getKeywords() != null && food.getKeywords().stream()
-                                            .anyMatch(k -> k != null && k.toLowerCase().contains(searchText)))
-                    )
-                    .map(FoodItemDTO::getRestaurantId)
-                    .forEach(restaurantIdsByFood::add);
-        }
-
-        // ادغام نتایج
-        Set<Long> finalRestaurantIds = new HashSet<>(restaurantIdsByName);
-        finalRestaurantIds.addAll(restaurantIdsByFood);
-
-        List<RestaurantDTO> filtered;
         if (searchText.isEmpty()) {
-            filtered = allRestaurants;
-        } else {
-            filtered = allRestaurants.stream()
-                    .filter(r -> finalRestaurantIds.contains(r.getId()))
-                    .toList();
+            showRestaurants(allRestaurants);
+            return;
         }
 
-        showRestaurants(filtered);
-    }
+        List<RestaurantDTO> filteredRestaurants = allRestaurants.stream()
+                .filter(r -> r.getName() != null && r.getName().toLowerCase().contains(searchText))
+                .collect(Collectors.toList());
 
+        showRestaurants(filteredRestaurants);
+    }
 
     private HBox buildRestaurantCard(RestaurantDTO restaurant) {
         HBox box = new HBox(10);
@@ -160,7 +131,6 @@ public class BuyerHomeController implements Initializable {
             RestaurantPageController controller = loader.getController();
             controller.setRestaurant(restaurant);
 
-            // باز کردن صفحه رستوران در یک پنجره جدید (Stage)
             Stage stage = new Stage();
             stage.setTitle(restaurant.getName());
             stage.setScene(new Scene(root));
@@ -171,22 +141,21 @@ public class BuyerHomeController implements Initializable {
         }
     }
 
-    private void goToProfile() {
+    private void navigateToPage(ActionEvent event, String fxmlFile) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("BuyerProfile-view.fxml"));
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+            // --- تغییر اصلی اینجاست ---
+            // از یک روش مطمئن‌تر برای پیدا کردن فایل FXML استفاده می‌کنیم
+            URL fxmlLocation = getClass().getResource(fxmlFile);
+            if (fxmlLocation == null) {
+                System.err.println("Could not find FXML file: " + fxmlFile);
+                return; // اگر فایل پیدا نشد، از ادامه کار جلوگیری می‌کنیم
+            }
 
-    private void goToHistory() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("BuyerHistory-view.fxml"));
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
+            Parent root = FXMLLoader.load(fxmlLocation);
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
-        } catch (Exception e) {
+            stage.show();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

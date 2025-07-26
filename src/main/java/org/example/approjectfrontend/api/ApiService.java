@@ -7,6 +7,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Map;
 
 public class ApiService {
 
@@ -17,7 +18,7 @@ public class ApiService {
             .build();
     private static final Gson gson = new Gson();
 
-    // --- Authentication & Profile Endpoints ---
+    // ... (متدهای قبلی بدون تغییر باقی می‌مانند) ...
 
     public static ApiResponse register(RegisterRequest requestData) {
         try {
@@ -111,8 +112,6 @@ public class ApiService {
         }
     }
 
-    // --- Restaurant & Vendor Endpoints ---
-
     public static ApiResponse createRestaurant(CreateRestaurantRequest restaurantData) {
         String token = SessionManager.getInstance().getToken();
         if (token == null || token.isEmpty()) {
@@ -193,8 +192,6 @@ public class ApiService {
             return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
         }
     }
-
-    // --- Menu and Food Item Endpoints ---
 
     public static ApiResponse getRestaurantMenu(long restaurantId) {
         String token = SessionManager.getInstance().getToken();
@@ -325,7 +322,6 @@ public class ApiService {
         }
     }
 
-    // --- Order Endpoints ---
     public static ApiResponse submitOrder(SubmitOrderRequest orderData) {
         String token = SessionManager.getInstance().getToken();
         if (token == null || token.isEmpty()) {
@@ -347,9 +343,6 @@ public class ApiService {
         }
     }
 
-    /**
-     * متد جدید برای دریافت تاریخچه سفارشات کاربر
-     */
     public static ApiResponse getOrderHistory() {
         String token = SessionManager.getInstance().getToken();
         if (token == null || token.isEmpty()) {
@@ -369,9 +362,6 @@ public class ApiService {
         }
     }
 
-    /**
-     * متد جدید برای دریافت جزئیات یک سفارش خاص
-     */
     public static ApiResponse getOrderDetails(long orderId) {
         String token = SessionManager.getInstance().getToken();
         if (token == null || token.isEmpty()) {
@@ -382,6 +372,90 @@ public class ApiService {
                     .uri(URI.create(API_BASE_URL + "/orders/" + orderId))
                     .header("Authorization", "Bearer " + token)
                     .GET()
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+
+    // --- متدهای جدید برای فروشنده ---
+    public static ApiResponse getRestaurantOrders(long restaurantId) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/restaurants/" + restaurantId + "/orders"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+
+    public static ApiResponse updateOrderStatus(long orderId, String status) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            String jsonBody = gson.toJson(Map.of("status", status));
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/restaurants/orders/" + orderId))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+    // --- متد جدید برای شارژ کیف پول ---
+    public static ApiResponse topUpWallet(int amount) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            TopUpWalletRequest requestData = new TopUpWalletRequest(amount);
+            String jsonBody = gson.toJson(requestData);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/wallet/top-up"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+    public static ApiResponse makePayment(PaymentRequest paymentRequest) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            String jsonBody = gson.toJson(paymentRequest);
+            // اندپوینت شما /payment/online است اما هر دو نوع پرداخت را مدیریت می‌کند
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/payment/online"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());

@@ -1,26 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.approjectfrontend.OrderHistoryController"
-            prefHeight="400.0" prefWidth="600.0">
-    <!-- لیست سفارشات (مستطیلی) -->
-    <ListView fx:id="ordersListView"
-              prefHeight="330.0"
-              prefWidth="560.0"
-              layoutX="20.0"
-              layoutY="20.0"
-              style="-fx-background-color: #f9f9f9; -fx-border-radius: 12; -fx-background-radius: 12;" />
+<AnchorPane prefHeight="600.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.OrderHistoryController">
+    <VBox spacing="10" style="-fx-padding: 10;" AnchorPane.bottomAnchor="50" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <Label text="تاریخچه سفارشات" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+        <SplitPane fx:id="mainSplitPane" dividerPositions="1.0" VBox.vgrow="ALWAYS">
+            <!-- سمت چپ: لیست سفارشات -->
+            <ListView fx:id="ordersListView" maxWidth="2000"/>
+
+            <!-- سمت راست: جزئیات سفارش (در ابتدا مخفی) -->
+            <VBox fx:id="detailsPane" spacing="10" style="-fx-padding: 10;" minWidth="220">
+                <Label text="جزئیات سفارش" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <Separator/>
+                <GridPane hgap="10" vgap="8">
+                    <Label text="شماره سفارش:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="orderIdLabel" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="وضعیت:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="statusLabel" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <Label text="مبلغ کل:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="priceLabel" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    <Label text="آدرس تحویل:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="addressLabel" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                </GridPane>
+                <Separator/>
+                <Label text="آیتم‌های سفارش:" style="-fx-font-weight: bold;"/>
+                <ListView fx:id="itemsListView" prefHeight="150"/>
+            </VBox>
+        </SplitPane>
+    </VBox>
+
     <!-- نوار ناوبری پایین صفحه -->
-    <HBox alignment="CENTER" layoutX="73.0" layoutY="574.0" prefHeight="40.0" prefWidth="254.0" spacing="0" style="-fx-background-color: #27ae60;" AnchorPane.bottomAnchor="-0.40000000000009095" AnchorPane.leftAnchor="73.0" AnchorPane.rightAnchor="73.39999999999998">
-        <Button fx:id="profileBtn" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-pref-width: 133px;" text="پروفایل" />
-        <Button fx:id="homeBtn" prefHeight="40.0" prefWidth="68.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-pref-width: 133px;" text="خانه" />
-        <Button fx:id="historyBtn" prefHeight="40.0" prefWidth="87.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-pref-width: 133px;" text="تاریخچه" />
+    <HBox alignment="CENTER" prefHeight="40.0" spacing="0" style="-fx-background-color: #27ae60;" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <Button fx:id="profileBtn" onAction="#goToProfile" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;" text="پروفایل" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="homeBtn" onAction="#goToHome" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;" text="خانه" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="historyBtn" style="-fx-background-color: #1e7e44; -fx-text-fill: white; -fx-font-size: 18px;" text="تاریخچه" HBox.hgrow="ALWAYS"/>
     </HBox>
 </AnchorPane>

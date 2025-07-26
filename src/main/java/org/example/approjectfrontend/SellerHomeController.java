@@ -11,7 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert; // Alert اضافه شد
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -87,61 +87,41 @@ public class SellerHomeController implements Initializable {
         Label nameLabel = new Label(restaurant.getName());
         box.getChildren().addAll(imageView, nameLabel);
 
-        // --- شروع تغییرات ---
         ContextMenu contextMenu = new ContextMenu();
-
-        // آیتم جدید برای مشاهده سفارشات
         MenuItem menuViewOrders = new MenuItem("مشاهده سفارشات");
-        menuViewOrders.setOnAction(event -> openRestaurantOrders(restaurant)); // فراخوانی متد جدید
-
-        // آیتم‌های موجود
-        MenuItem menuManage = new MenuItem("مشاهده و مدیریت منو");
-        MenuItem menuInfo = new MenuItem("ویرایش اطلاعات رستوران");
-
-        // اضافه کردن همه آیتم‌ها به منوی کلیک راست
-        contextMenu.getItems().addAll(menuViewOrders, menuManage, menuInfo); // menuViewOrders اضافه شد
-
+        menuViewOrders.setOnAction(event -> openRestaurantOrders(restaurant));
+        MenuItem menuManage = new MenuItem("مدیریت منو");
+        MenuItem menuInfo = new MenuItem("ویرایش اطلاعات");
+        contextMenu.getItems().addAll(menuViewOrders, menuManage, menuInfo);
         box.setOnMouseClicked(e -> contextMenu.show(box, e.getScreenX(), e.getScreenY()));
-
-        // Action ها برای آیتم‌های موجود (بدون تغییر)
         menuManage.setOnAction(ev -> openRestaurantMenu(restaurant));
         menuInfo.setOnAction(ev -> openRestaurantInfo(restaurant));
-        // --- پایان تغییرات ---
 
         return box;
     }
 
-    // متد باز کردن صفحه سفارشات رستوران
     private void openRestaurantOrders(RestaurantDTO restaurant) {
         try {
-            // مسیر فایل FXML صفحه سفارشات
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/SellerOrders-view.fxml"));
+            // --- تغییر اصلی اینجاست: استفاده از مسیر مطلق ---
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/SellerOrder-view.fxml"));
             Parent root = loader.load();
 
-            // دریافت کنترلر صفحه سفارشات
-            SellerOrderController controller = loader.getController();
-            // ارسال اطلاعات رستوران انتخاب شده به کنترلر سفارشات
+            SellerOrdersController controller = loader.getController();
             controller.setRestaurant(restaurant);
 
-            // گرفتن پنجره فعلی (Stage)
-            // از restaurantsVBox استفاده می‌کنیم چون در این کلاس تعریف شده و گره‌ای از صحنه فعلی است.
             Stage stage = (Stage) restaurantsVBox.getScene().getWindow();
-            // تغییر صحنه (Scene) به صفحه سفارشات
             stage.setScene(new Scene(root));
-            // نمایش پنجره
             stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
-            // نمایش یک پیام خطا به کاربر در صورت بروز مشکل
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("خطای بارگذاری");
             alert.setHeaderText(null);
-            alert.setContentText("امکان باز کردن صفحه سفارشات وجود ندارد. لطفاً دوباره تلاش کنید.");
+            alert.setContentText("امکان باز کردن صفحه سفارشات وجود ندارد.");
             alert.showAndWait();
         }
     }
-
 
     private void openRestaurantMenu(RestaurantDTO restaurant) {
         try {
@@ -171,21 +151,21 @@ public class SellerHomeController implements Initializable {
 
     @FXML
     private void goToRegisterRestaurantPage(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("RegisterRestaurant-view.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/org/example/approjectfrontend/RegisterRestaurant-view.fxml"));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(root));
     }
 
     @FXML
     private void goToHome(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("SellerHome-view.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/org/example/approjectfrontend/SellerHome-view.fxml"));
         Scene scene = ((Node) event.getSource()).getScene();
         scene.setRoot(root);
     }
 
     @FXML
     private void goToProfile(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("SellerProfile-view.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/org/example/approjectfrontend/SellerProfile-view.fxml"));
         Scene scene = ((Node) event.getSource()).getScene();
         scene.setRoot(root);
     }
