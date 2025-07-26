@@ -7,8 +7,9 @@ import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
+import javafx.fxml.*;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -17,6 +18,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.approjectfrontend.api.ApiResponse;
@@ -55,15 +59,43 @@ public class RestaurantPageController {
         payButton.setOnAction(event -> showPaymentMethodDialog());
 
         menuListView.setCellFactory(list -> new ListCell<>() {
+            private final VBox mainVBox = new VBox(5);
+            private final HBox topHBox = new HBox(10);
             private final Label nameAndPrice = new Label();
             private final Spinner<Integer> spinner = new Spinner<>(0, 20, 0);
-            private final HBox box = new HBox(10, nameAndPrice, spinner);
+            private final Button detailsButton = new Button("جزئیات");
+            private final Label descriptionLabel = new Label();
+            private final Label keywordsLabel = new Label();
 
             {
+                HBox.setHgrow(nameAndPrice, Priority.ALWAYS);
+                topHBox.setAlignment(Pos.CENTER_LEFT);
+                topHBox.getChildren().addAll(nameAndPrice, spinner, detailsButton);
+
+                descriptionLabel.setWrapText(true);
+                descriptionLabel.setStyle("-fx-text-fill: #555; -fx-padding: 0 0 0 10;");
+                keywordsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #777; -fx-padding: 0 0 0 10;");
+
+                descriptionLabel.setVisible(false);
+                descriptionLabel.setManaged(false);
+                keywordsLabel.setVisible(false);
+                keywordsLabel.setManaged(false);
+
+                mainVBox.getChildren().addAll(topHBox, descriptionLabel, keywordsLabel);
+                mainVBox.setPadding(new Insets(5));
+
                 spinner.setPrefWidth(80);
                 HBox.setHgrow(nameAndPrice, Priority.ALWAYS);
                 box.setAlignment(Pos.CENTER_LEFT);
                 spinner.valueProperty().addListener((obs, oldVal, newVal) -> updateTotalPrice());
+
+                detailsButton.setOnAction(event -> {
+                    boolean isVisible = descriptionLabel.isVisible();
+                    descriptionLabel.setVisible(!isVisible);
+                    descriptionLabel.setManaged(!isVisible);
+                    keywordsLabel.setVisible(!isVisible);
+                    keywordsLabel.setManaged(!isVisible);
+                });
             }
 
             @Override
@@ -73,9 +105,17 @@ public class RestaurantPageController {
                     setGraphic(null);
                 } else {
                     nameAndPrice.setText(item.getName() + " - " + item.getPrice() + " تومان");
+                    descriptionLabel.setText("توضیحات: " + item.getDescription());
+                    keywordsLabel.setText("کلمات کلیدی: " + String.join(", ", item.getKeywords()));
+
+                    descriptionLabel.setVisible(false);
+                    descriptionLabel.setManaged(false);
+                    keywordsLabel.setVisible(false);
+                    keywordsLabel.setManaged(false);
+
                     spinner.getValueFactory().setValue(0);
                     itemSpinners.put(item, spinner);
-                    setGraphic(box);
+                    setGraphic(mainVBox);
                 }
             }
         });
@@ -146,10 +186,6 @@ public class RestaurantPageController {
             return;
         }
 
-        System.out.println("دکمه ثبت سفارش کلیک شد. آیتم‌های انتخاب شده:");
-        selectedItems.forEach((item, count) -> System.out.println(item.getName() + " - تعداد: " + count));
-
-        // در آینده، اینجا باید درخواست ثبت سفارش به سرور ارسال شود.
         showAlert(Alert.AlertType.INFORMATION, "موفقیت", "سفارش شما با موفقیت ثبت شد (شبیه‌سازی شده).");
     }
 
@@ -172,9 +208,6 @@ public class RestaurantPageController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("CardPayment-view.fxml"));
             Parent root = loader.load();
-            // CardPaymentController controller = loader.getController();
-            // controller.setAmount(getCurrentOrderTotalPrice());
-
             Stage stage = new Stage();
             stage.setTitle("پرداخت با کارت");
             stage.setScene(new Scene(root));
@@ -190,9 +223,6 @@ public class RestaurantPageController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/WalletPayment-view.fxml"));
             Parent root = loader.load();
-            // WalletPaymentController controller = loader.getController();
-            // controller.setAmount(amount);
-
             Stage stage = new Stage();
             stage.setTitle("پرداخت با کیف پول");
             stage.setScene(new Scene(root));
