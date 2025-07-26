@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.approjectfrontend.AdminCouponsController"
+      spacing="18"
+      alignment="TOP_CENTER"
+      style="-fx-background-color: linear-gradient(to bottom right, #f5fbff 67%, #e6f2fb 100%);
+             -fx-padding: 32 40 32 40;">
+
+    <Label text="لیست کدهای تخفیف"
+           style="-fx-font-size:21px; -fx-font-family:'Vazirmatn', Tahoma, Arial;
+                  -fx-font-weight:bold; -fx-text-fill:#206094; -fx-padding: 0 0 12 0;"/>
+
+    <TableView fx:id="couponsTable"
+               prefHeight="420" prefWidth="770"
+               style="-fx-background-color: #fff; -fx-border-color: #bbddf7;
+                      -fx-border-radius: 10; -fx-background-radius: 10;
+                      -fx-effect: dropshadow(three-pass-box, #a6d5fa, 8, 0.18, 0, 2);">
+
+        <columns>
+            <TableColumn fx:id="colSerial"        text="ردیف"       prefWidth="45" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colId"            text="ID"         prefWidth="50" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colCouponCode"    text="کد"         prefWidth="100" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colType"          text="نوع"        prefWidth="80" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colValue"         text="مقدار"      prefWidth="70" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colMinPrice"      text="حداقل خرید" prefWidth="90" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colUserCount"     text="تعداد مجاز" prefWidth="80" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colStartDate"     text="شروع"       prefWidth="90" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colEndDate" text="پایان" prefWidth="90" style="-fx-alignment: CENTER;"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="16" alignment="CENTER">
+        <Button text="افزودن" fx:id="btnAddCoupon"
+                style="-fx-background-color:linear-gradient(to right,#44eab5,#24b3dc);-fx-background-radius:7;-fx-font-family:'Vazirmatn',Tahoma;-fx-font-size:14;-fx-text-fill:#fff;-fx-font-weight:bold;"/>
+        <Button text="ویرایش" fx:id="btnEditCoupon"
+                style="-fx-background-color:#ddeefd;-fx-background-radius:7;-fx-font-family:'Vazirmatn';-fx-font-size:13;-fx-text-fill:#1167a8;-fx-font-weight:bold;"/>
+        <Button text="حذف" fx:id="btnDeleteCoupon"
+                style="-fx-background-color:#f43f5e;-fx-background-radius:7;-fx-font-family:'Vazirmatn';-fx-font-size:13;-fx-text-fill:#fff;-fx-font-weight:bold;"/>
+    </HBox>
+
+</VBox>

@@ -26,6 +26,11 @@ public class AdminDashboardController {
     private void showOrders() {
         loadView("AdminOrders-view.fxml");
     }
+    @FXML
+    private void showCoupons() {
+        loadView("AdminCoupons-view.fxml");
+    }
+
 
     @FXML
     private void showTransactions() {

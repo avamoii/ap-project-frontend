@@ -22,6 +22,8 @@
                     style="-fx-background-color: #fff; -fx-text-fill: #255DA4; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"/>
             <Button text="تراکنش‌های مالی" onAction="#showTransactions"
                     style="-fx-background-color: #fff; -fx-text-fill: #255DA4; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"/>
+            <Button text="کوپن ها" onAction="#showCoupons"
+                    style="-fx-background-color: #fff; -fx-text-fill: #255DA4; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"/>
             <VBox.margin>
                 <Insets top="0" right="0" bottom="0" left="0"/>
             </VBox.margin>

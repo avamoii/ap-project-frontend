@@ -43,6 +43,11 @@ public class RestaurantPageController {
     @FXML private Label totalPriceLabel;
     @FXML private Button submitAndPayButton;
     @FXML private Button backButton;
+    @FXML private TextField couponCodeField;
+    @FXML private Button applyCouponButton;
+    @FXML private Label couponStatusLabel;
+
+    private Coupon appliedCoupon = null; // یا فقط تخفیف عددی، بسته به پیاده‌سازی تو
 
     private RestaurantDTO currentRestaurant;
     private final ObservableList<FoodItemDTO> allItems = FXCollections.observableArrayList();
@@ -155,6 +160,39 @@ public class RestaurantPageController {
             total += (long) entry.getKey().getPrice() * entry.getValue().getValue();
         }
         totalPriceLabel.setText("هزینه کل: " + total + " تومان");
+    }
+    @FXML
+    private void handleApplyCoupon(ActionEvent event) {
+        String code = couponCodeField.getText().trim();
+
+        if (code.isEmpty()) {
+            couponStatusLabel.setText("کد تخفیف را وارد کنید.");
+            appliedCoupon = null;
+            updateTotalPrice();
+            return;
+        }
+
+        // بخش Mock: شبیه‌ساز کد تخفیف
+        // مثلاً code="ghaza10" اگر وارد شد ۱۰ درصد Discount بده،
+        // یا code="takhfif50" پنجاه هزار تومن.
+        if (code.equalsIgnoreCase("ghaza10")) {
+            appliedCoupon = new Coupon();
+            appliedCoupon.setCoupon_code("ghaza10");
+            appliedCoupon.setType("percent");
+            appliedCoupon.setValue(10); // یعنی ۱۰ درصد
+            couponStatusLabel.setText("کد ۱۰٪ تخفیف اعمال شد ✅");
+        } else if (code.equalsIgnoreCase("takhfif50")) {
+            appliedCoupon = new Coupon();
+            appliedCoupon.setCoupon_code("takhfif50");
+            appliedCoupon.setType("fixed");
+            appliedCoupon.setValue(50000); // ۵۰ هزار تومن
+            couponStatusLabel.setText("کد ۵۰هزار تومانی اعمال شد ✅");
+        } else {
+            appliedCoupon = null;
+            couponStatusLabel.setText("کد نامعتبر است ❌");
+        }
+
+        updateTotalPrice();
     }
 
     @FXML
