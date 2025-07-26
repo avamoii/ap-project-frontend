@@ -36,30 +36,19 @@ import java.util.stream.Collectors;
 
 public class RestaurantPageController {
 
-    @FXML
-    private Label nameLabel;
-    @FXML
-    private ImageView logoView;
-    @FXML
-    private ListView<FoodItemDTO> menuListView;
-    @FXML
-    private TextField addressField;
-    @FXML
-    private Label totalPriceLabel;
-    @FXML
-    private Button payButton;
-    @FXML
-    private Button orderButton;
-    @FXML
-    private Button backButton;
+    @FXML private Label nameLabel;
+    @FXML private ImageView logoView;
+    @FXML private ListView<FoodItemDTO> menuListView;
+    @FXML private TextField addressField;
+    @FXML private Label totalPriceLabel;
+    @FXML private Button submitAndPayButton;
+    @FXML private Button backButton;
 
     private RestaurantDTO currentRestaurant;
     private final ObservableList<FoodItemDTO> allItems = FXCollections.observableArrayList();
     private final Map<FoodItemDTO, Spinner<Integer>> itemSpinners = new HashMap<>();
 
     public void initialize() {
-        payButton.setOnAction(event -> showPaymentMethodDialog());
-
         menuListView.setCellFactory(list -> new ListCell<>() {
             private final VBox mainVBox = new VBox(5);
             private final HBox topHBox = new HBox(10);
@@ -118,7 +107,6 @@ public class RestaurantPageController {
     public void setRestaurant(RestaurantDTO restaurant) {
         this.currentRestaurant = restaurant;
         if (restaurant == null) return;
-
         nameLabel.setText(restaurant.getName());
         if (restaurant.getLogoBase64() != null && !restaurant.getLogoBase64().isEmpty()) {
             byte[] decodedBytes = Base64.getDecoder().decode(restaurant.getLogoBase64());
@@ -160,16 +148,8 @@ public class RestaurantPageController {
         totalPriceLabel.setText("هزینه کل: " + total + " تومان");
     }
 
-    private long getCurrentOrderTotalPrice() {
-        long total = 0;
-        for (Map.Entry<FoodItemDTO, Spinner<Integer>> entry : itemSpinners.entrySet()) {
-            total += (long) entry.getKey().getPrice() * entry.getValue().getValue();
-        }
-        return total;
-    }
-
     @FXML
-    private void handleOrderButton() {
+    private void handleSubmitAndPay(ActionEvent event) {
         List<OrderItemRequestDTO> selectedItems = new ArrayList<>();
         for (Map.Entry<FoodItemDTO, Spinner<Integer>> entry : itemSpinners.entrySet()) {
             if (entry.getValue().getValue() > 0) {
@@ -181,7 +161,6 @@ public class RestaurantPageController {
             showAlert(Alert.AlertType.WARNING, "خطا", "لطفاً حداقل یک آیتم از منو را انتخاب کنید.");
             return;
         }
-
         String address = addressField.getText().trim();
         if (address.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "خطا", "لطفاً آدرس تحویل سفارش را وارد کنید.");
@@ -194,7 +173,8 @@ public class RestaurantPageController {
             ApiResponse response = ApiService.submitOrder(orderRequest);
             Platform.runLater(() -> {
                 if (response.getStatusCode() == 200) {
-                    showAlert(Alert.AlertType.INFORMATION, "موفقیت", "سفارش شما با موفقیت ثبت شد.");
+                    OrderDTO createdOrder = new Gson().fromJson(response.getBody(), OrderDTO.class);
+                    showPaymentMethodDialog(createdOrder.getId());
                 } else {
                     String errorMessage = "خطا در ثبت سفارش.";
                     try {
@@ -211,50 +191,49 @@ public class RestaurantPageController {
         }).start();
     }
 
-
-    private void showPaymentMethodDialog() {
-        ChoiceDialog<String> dialog = new ChoiceDialog<>("پرداخت با کارت", "پرداخت با کارت", "پرداخت با کیف پول");
+    private void showPaymentMethodDialog(long orderId) {
+        ChoiceDialog<String> dialog = new ChoiceDialog<>("پرداخت با کیف پول", "پرداخت با کیف پول", "پرداخت با کارت");
         dialog.setTitle("انتخاب روش پرداخت");
-        dialog.setHeaderText(null);
-        dialog.setContentText("روش پرداخت را انتخاب کنید:");
+        dialog.setHeaderText("سفارش شما با موفقیت ثبت شد. لطفاً روش پرداخت را انتخاب کنید.");
+        dialog.setContentText("روش پرداخت:");
 
         dialog.showAndWait().ifPresent(selected -> {
-            if ("پرداخت با کارت".equals(selected)) {
-                handleCardPayment();
-            } else if ("پرداخت با کیف پول".equals(selected)) {
-                handleWalletPayment(getCurrentOrderTotalPrice());
+            String method = "";
+            if ("پرداخت با کیف پول".equals(selected)) {
+                method = "WALLET";
+            } else if ("پرداخت با کارت".equals(selected)) {
+                method = "ONLINE";
+            }
+
+            if (!method.isEmpty()) {
+                processPayment(orderId, method);
             }
         });
     }
 
-    private void handleCardPayment() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("CardPayment-view.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("پرداخت با کارت");
-            stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "خطا", "خطا در باز کردن فرم پرداخت!");
-        }
-    }
-
-    private void handleWalletPayment(long amount) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/WalletPayment-view.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("پرداخت با کیف پول");
-            stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "خطا", "خطا در باز کردن فرم پرداخت با کیف پول!");
-        }
+    private void processPayment(long orderId, String method) {
+        PaymentRequest paymentRequest = new PaymentRequest(orderId, method);
+        new Thread(() -> {
+            ApiResponse response = ApiService.makePayment(paymentRequest);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    showAlert(Alert.AlertType.INFORMATION, "موفقیت", "پرداخت با موفقیت انجام شد!");
+                    Stage stage = (Stage) submitAndPayButton.getScene().getWindow();
+                    stage.close();
+                } else {
+                    String errorMessage = "پرداخت ناموفق بود.";
+                    try {
+                        JsonObject errorJson = new Gson().fromJson(response.getBody(), JsonObject.class);
+                        if (errorJson != null && errorJson.has("error")) {
+                            errorMessage = errorJson.get("error").getAsString();
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Could not parse error response: " + response.getBody());
+                    }
+                    showAlert(Alert.AlertType.ERROR, "خطا در پرداخت", errorMessage);
+                }
+            });
+        }).start();
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String content) {

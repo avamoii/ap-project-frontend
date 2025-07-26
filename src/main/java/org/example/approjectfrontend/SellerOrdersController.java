@@ -27,7 +27,11 @@ import java.util.List;
 public class SellerOrdersController {
     @FXML private Label restaurantNameLabel;
     @FXML private TableView<OrderDTO> ordersTable;
-    @FXML private TableColumn<OrderDTO, String> buyerColumn, itemsColumn, addressColumn, mobileColumn, statusColumn;
+    @FXML private TableColumn<OrderDTO, String> buyerColumn;
+    @FXML private TableColumn<OrderDTO, String> itemsColumn;
+    @FXML private TableColumn<OrderDTO, String> addressColumn;
+    @FXML private TableColumn<OrderDTO, String> mobileColumn;
+    @FXML private TableColumn<OrderDTO, String> statusColumn;
     @FXML private TableColumn<OrderDTO, Integer> totalPriceColumn;
     @FXML private TableColumn<OrderDTO, Void> actionsColumn;
 
@@ -62,11 +66,11 @@ public class SellerOrdersController {
         ordersTable.setItems(ordersData);
 
         // تعریف ستون‌ها
-        buyerColumn.setCellValueFactory(data -> new SimpleStringProperty("کاربر " + data.getValue().getCustomerId())); // نام خریدار در DTO نیست
+        buyerColumn.setCellValueFactory(data -> new SimpleStringProperty("کاربر " + data.getValue().getCustomerId()));
         itemsColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getItemIds().size() + " آیتم"));
         totalPriceColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getPayPrice()).asObject());
         addressColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getDeliveryAddress()));
-        mobileColumn.setCellValueFactory(data -> new SimpleStringProperty("N/A")); // شماره تلفن خریدار در DTO نیست
+        mobileColumn.setCellValueFactory(data -> new SimpleStringProperty("N/A")); // اطلاعات تلفن در OrderDTO نیست
         statusColumn.setCellValueFactory(data -> new SimpleStringProperty(getStatusInPersian(data.getValue().getStatus())));
 
         setActionsColumn();
@@ -95,11 +99,11 @@ public class SellerOrdersController {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                     setGraphic(null);
                 } else {
                     OrderDTO order = getTableView().getItems().get(getIndex());
-                    // دکمه‌ها فقط برای سفارشات جدید فعال باشند
+                    // دکمه‌ها فقط برای سفارشاتی که منتظر تایید هستند فعال باشند
                     boolean isActionable = "WAITING_VENDOR".equalsIgnoreCase(order.getStatus());
                     acceptBtn.setDisable(!isActionable);
                     rejectBtn.setDisable(!isActionable);
@@ -130,11 +134,11 @@ public class SellerOrdersController {
     private String getStatusInPersian(String status) {
         if (status == null) return "نامشخص";
         return switch (status.toUpperCase()) {
-            case "SUBMITTED" -> "ثبت شده";
+            case "SUBMITTED" -> "ثبت شده (پرداخت نشده)";
             case "UNPAID_AND_CANCELLED" -> "پرداخت نشده و لغو شده";
             case "WAITING_VENDOR" -> "در انتظار تایید";
             case "CANCELLED" -> "لغو شده";
-            case "FINDING_COURIER" -> "در جستجوی پیک";
+            case "FINDING_COURIER" -> "آماده ارسال";
             case "ON_THE_WAY" -> "در مسیر";
             case "COMPLETED" -> "تکمیل شده";
             default -> status;
@@ -143,7 +147,7 @@ public class SellerOrdersController {
 
     @FXML
     private void backToHome(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("SellerHome-view.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/org/example/approjectfrontend/SellerHome-view.fxml"));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(root));
     }
