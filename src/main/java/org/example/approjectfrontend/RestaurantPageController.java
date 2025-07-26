@@ -7,7 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.*;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,8 +18,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -68,25 +66,28 @@ public class RestaurantPageController {
             private final Label keywordsLabel = new Label();
 
             {
+                // تنظیمات ردیف اصلی (نام، اسپینر، دکمه)
+                spinner.setPrefWidth(80);
                 HBox.setHgrow(nameAndPrice, Priority.ALWAYS);
                 topHBox.setAlignment(Pos.CENTER_LEFT);
                 topHBox.getChildren().addAll(nameAndPrice, spinner, detailsButton);
 
+                // تنظیمات لیبل‌های جزئیات
                 descriptionLabel.setWrapText(true);
                 descriptionLabel.setStyle("-fx-text-fill: #555; -fx-padding: 0 0 0 10;");
                 keywordsLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #777; -fx-padding: 0 0 0 10;");
 
+                // مخفی کردن لیبل‌های جزئیات در ابتدا
                 descriptionLabel.setVisible(false);
                 descriptionLabel.setManaged(false);
                 keywordsLabel.setVisible(false);
                 keywordsLabel.setManaged(false);
 
+                // اضافه کردن همه چیز به کانتینر اصلی
                 mainVBox.getChildren().addAll(topHBox, descriptionLabel, keywordsLabel);
                 mainVBox.setPadding(new Insets(5));
 
-                spinner.setPrefWidth(80);
-                HBox.setHgrow(nameAndPrice, Priority.ALWAYS);
-                box.setAlignment(Pos.CENTER_LEFT);
+                // اتصال رویدادها
                 spinner.valueProperty().addListener((obs, oldVal, newVal) -> updateTotalPrice());
 
                 detailsButton.setOnAction(event -> {
