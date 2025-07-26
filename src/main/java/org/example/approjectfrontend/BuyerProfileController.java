@@ -45,7 +45,7 @@ public class BuyerProfileController implements Initializable {
         saveButton.setOnAction(event -> handleSaveProfile());
         logoutButton.setOnAction(event -> handleLogout());
         homeBtn.setOnAction(e -> navigateToPage(e, "BuyerHome-view.fxml"));
-        historyBtn.setOnAction(e -> navigateToPage(e, "OrderHistory-view.fxml"));
+        historyBtn.setOnAction(this::handleHistoryClick);
         profileBtn.setDisable(true);
         rechargeWalletButton.setOnAction(event -> showRechargeDialog());
         populateUserData();
@@ -71,14 +71,12 @@ public class BuyerProfileController implements Initializable {
                     return;
                 }
 
-                // ارسال درخواست به سرور
                 new Thread(() -> {
                     ApiResponse response = ApiService.topUpWallet(amount);
                     Platform.runLater(() -> {
                         if (response.getStatusCode() == 200) {
                             messageLabel.setStyle("-fx-text-fill: green;");
                             messageLabel.setText("کیف پول با موفقیت شارژ شد!");
-                            // پروفایل را مجدداً بارگذاری می‌کنیم تا موجودی جدید نمایش داده شود
                             populateUserData();
                         } else {
                             messageLabel.setStyle("-fx-text-fill: red;");
@@ -108,7 +106,6 @@ public class BuyerProfileController implements Initializable {
                     if (freshUser.getEmail() != null) emailField.setText(freshUser.getEmail());
                     if (freshUser.getAddress() != null) addressField.setText(freshUser.getAddress());
 
-                    // نمایش موجودی واقعی کیف پول
                     if (freshUser.getWalletBalance() != null) {
                         updateWalletDisplay(freshUser.getWalletBalance());
                     } else {
@@ -174,6 +171,28 @@ public class BuyerProfileController implements Initializable {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void handleHistoryClick(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("انتخاب نوع تاریخچه");
+        alert.setHeaderText("کدام تاریخچه را می‌خواهید مشاهده کنید؟");
+
+        ButtonType ordersBtn = new ButtonType("تاریخچه سفارشات");
+        ButtonType transactionsBtn = new ButtonType("تاریخچه تراکنش‌ها");
+        ButtonType cancelBtn = new ButtonType("انصراف", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(ordersBtn, transactionsBtn, cancelBtn);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        result.ifPresent(buttonType -> {
+            if (buttonType == ordersBtn) {
+                navigateToPage(event, "OrderHistory-view.fxml");
+            } else if (buttonType == transactionsBtn) {
+                navigateToPage(event, "TransactionHistory-view.fxml");
+            }
+        });
     }
 
     private void navigateToPage(ActionEvent event, String fxmlFile) {

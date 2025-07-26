@@ -1,50 +1,106 @@
 package org.example.approjectfrontend;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.example.approjectfrontend.api.ApiResponse;
+import org.example.approjectfrontend.api.ApiService;
+import org.example.approjectfrontend.api.TransactionDTO;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 public class TransactionHistoryController {
-    @FXML
-    private Button profileBtn;
+    @FXML private Button profileBtn;
     @FXML private Button homeBtn;
-    @FXML
-    private Button historyBtn;
+    @FXML private Button historyBtn;
+    @FXML private ListView<TransactionDTO> transactionsListView;
+
+    private final ObservableList<TransactionDTO> transactionList = FXCollections.observableArrayList();
+
     @FXML
     public void initialize() {
-        homeBtn.setOnAction(e -> goToHome());
-        historyBtn.setOnAction(e -> handleHistoryClick());
-        profileBtn.setOnAction(e -> goToProfile());
+        historyBtn.setStyle("-fx-background-color: #1e7e44;");
+        transactionsListView.setItems(transactionList);
+
+        transactionsListView.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(TransactionDTO transaction, boolean empty) {
+                super.updateItem(transaction, empty);
+                if (empty || transaction == null) {
+                    setGraphic(null);
+                } else {
+                    VBox box = new VBox(5);
+                    box.setStyle("-fx-padding: 10; -fx-background-color: #fcfcff; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;");
+                    Label amountLabel = new Label("مبلغ: " + transaction.getAmount() + " تومان");
+                    Label typeLabel = new Label("نوع: " + getTransactionTypeInPersian(transaction.getType()));
+                    Label dateLabel = new Label("تاریخ: " + transaction.getCreatedAt().substring(0, 10));
+
+                    if (transaction.getAmount() > 0) {
+                        amountLabel.setStyle("-fx-text-fill: green;");
+                    } else {
+                        amountLabel.setStyle("-fx-text-fill: red;");
+                    }
+
+                    box.getChildren().addAll(amountLabel, typeLabel, dateLabel);
+                    setGraphic(box);
+                }
+            }
+        });
+
+        loadTransactionHistory();
     }
+
+    private void loadTransactionHistory() {
+        new Thread(() -> {
+            ApiResponse response = ApiService.getTransactionHistory();
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    List<TransactionDTO> transactions = new Gson().fromJson(response.getBody(), new TypeToken<List<TransactionDTO>>() {}.getType());
+                    transactionList.setAll(transactions);
+                    if (transactions.isEmpty()) {
+                        transactionsListView.setPlaceholder(new Label("شما تاکنون تراکنشی نداشته‌اید."));
+                    }
+                } else {
+                    transactionsListView.setPlaceholder(new Label("خطا در دریافت تاریخچه تراکنش‌ها."));
+                    System.err.println("Error fetching transaction history: " + response.getBody());
+                }
+            });
+        }).start();
+    }
+
+    private String getTransactionTypeInPersian(String type) {
+        if (type == null) return "نامشخص";
+        return switch (type.toUpperCase()) {
+            case "DEPOSIT" -> "واریز";
+            case "WITHDRAWAL" -> "برداشت";
+            case "PAYMENT" -> "پرداخت سفارش";
+            default -> type;
+        };
+    }
+
+    @FXML
     private void goToProfile() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("BuyerProfile-view.fxml"));
-            // فرض: دستیابی به stage از طریق یک کامپوننت صفحه فعلی
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            e.printStackTrace(); // برای رفع خطاها
-        }
+        navigateToPage("BuyerProfile-view.fxml");
     }
+
+    @FXML
     private void goToHome() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("BuyerHome-view.fxml"));
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        navigateToPage("BuyerHome-view.fxml");
     }
+
+    @FXML
     private void handleHistoryClick() {
-        // ساخت یک دیالوگ با دو گزینه
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("انتخاب نوع تاریخچه");
         alert.setHeaderText("کدام تاریخچه را می‌خواهید مشاهده کنید؟");
@@ -59,30 +115,21 @@ public class TransactionHistoryController {
 
         if (result.isPresent()) {
             if (result.get() == ordersBtn) {
-                goToOrderHistory();
+                navigateToPage("OrderHistory-view.fxml");
             } else if (result.get() == transactionsBtn) {
-                goToTransactionHistory();
+                // Already here, do nothing
             }
         }
     }
-    private void goToOrderHistory() {
+
+    private void navigateToPage(String fxmlFile) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("OrderHistory-view.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlFile));
             Stage stage = (Stage) profileBtn.getScene().getWindow();
             stage.setScene(new Scene(root));
-        } catch (Exception e) {
+            stage.show();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    private void goToTransactionHistory() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("TransactionHistory-view.fxml"));
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 }
