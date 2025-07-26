@@ -533,4 +533,26 @@ public class ApiService {
             return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
         }
     }
+    /**
+     * تاریخچه ارسال‌های یک پیک را از سرور دریافت می‌کند.
+     * @return ApiResponse شامل لیست سفارشات یا پیام خطا.
+     */
+    public static ApiResponse getDeliveryHistory() {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/deliveries/history"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
 }

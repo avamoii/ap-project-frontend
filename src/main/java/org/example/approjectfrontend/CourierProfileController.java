@@ -25,19 +25,15 @@ import java.util.ResourceBundle;
 
 public class CourierProfileController implements Initializable {
 
-    @FXML
-    private ImageView profileImageView;
-    @FXML
-    private Button uploadButton;
-    @FXML
-    private TextField usernameField, emailField, phoneField, bankNameField, accountNumberField;
-    @FXML
-    private Button saveButton;
-    @FXML
-    private Button logoutButton;
-    @FXML
-    private Label messageLabel;
-
+    @FXML private ImageView profileImageView;
+    @FXML private Button uploadButton;
+    @FXML private TextField usernameField, emailField, phoneField, bankNameField, accountNumberField;
+    @FXML private Button saveButton;
+    @FXML private Button logoutButton;
+    @FXML private Label messageLabel;
+    @FXML private Button homeBtn;
+    @FXML private Button profileBtn;
+    @FXML private Button historyBtn; // دکمه جدید
     private File profileImageFile = null;
 
     @Override
@@ -45,6 +41,9 @@ public class CourierProfileController implements Initializable {
         uploadButton.setOnAction(event -> chooseProfileImage());
         saveButton.setOnAction(event -> handleSaveProfile());
         logoutButton.setOnAction(event -> handleLogout());
+        homeBtn.setOnAction(e -> goToHome());
+        profileBtn.setDisable(true);
+        historyBtn.setOnAction(e -> goToHistory()); // رویداد کلیک برای دکمه تاریخچه
         populateUserData();
     }
 
@@ -145,6 +144,24 @@ public class CourierProfileController implements Initializable {
         if (selectedFile != null) {
             profileImageFile = selectedFile;
             profileImageView.setImage(new Image(selectedFile.toURI().toString()));
+        }
+    }
+
+    private void goToHome() {
+        navigateToPage("CourierHome-view.fxml");
+    }
+
+    private void goToHistory() {
+        navigateToPage("CourierHistory-view.fxml");
+    }
+
+    private void navigateToPage(String fxmlFile) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlFile));
+            Stage stage = (Stage) homeBtn.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

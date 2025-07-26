@@ -24,23 +24,21 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class CourierHomeController implements Initializable {
-    @FXML
-    private Button homeBtn;
-    @FXML
-    private Button profileBtn;
-    @FXML
-    private ListView<OrderDTO> deliveriesListView;
+    @FXML private Button homeBtn;
+    @FXML private Button profileBtn;
+    @FXML private Button historyBtn; // دکمه جدید
+    @FXML private ListView<OrderDTO> deliveriesListView;
 
     private final ObservableList<OrderDTO> availableDeliveries = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        homeBtn.setOnAction(e -> goToHome());
+        homeBtn.setDisable(true);
         profileBtn.setOnAction(e -> goToProfile());
+        historyBtn.setOnAction(e -> goToHistory()); // رویداد کلیک برای دکمه تاریخچه
 
         deliveriesListView.setItems(availableDeliveries);
 
-        // تنظیم نحوه نمایش هر آیتم در لیست
         deliveriesListView.setCellFactory(list -> new ListCell<>() {
             @Override
             protected void updateItem(OrderDTO order, boolean empty) {
@@ -48,7 +46,6 @@ public class CourierHomeController implements Initializable {
                 if (empty || order == null) {
                     setGraphic(null);
                 } else {
-                    // ساخت کارت گرافیکی برای هر سفارش
                     VBox infoBox = new VBox(
                             new Label("سفارش #" + order.getId()),
                             new Label("آدرس: " + order.getDeliveryAddress()),
@@ -68,12 +65,9 @@ public class CourierHomeController implements Initializable {
         loadAvailableDeliveries();
     }
 
-    /**
-     * لیست سفارشات قابل ارسال را از سرور دریافت و نمایش می‌دهد.
-     */
     private void loadAvailableDeliveries() {
         availableDeliveries.clear();
-        deliveriesListView.setPlaceholder(new ProgressIndicator()); // نمایش لودینگ
+        deliveriesListView.setPlaceholder(new ProgressIndicator());
 
         new Thread(() -> {
             ApiResponse response = ApiService.getAvailableDeliveries();
@@ -92,27 +86,18 @@ public class CourierHomeController implements Initializable {
         }).start();
     }
 
-    /**
-     * درخواست قبول سفارش را به سرور ارسال می‌کند.
-     * @param order سفارشی که باید قبول شود.
-     * @param button دکمه‌ای که کلیک شده تا غیرفعال شود.
-     */
     private void acceptOrder(OrderDTO order, Button button) {
         button.setDisable(true);
         button.setText("در حال پردازش...");
 
         new Thread(() -> {
-            // --- تغییر اصلی اینجاست ---
-            // وضعیت باید با حروف بزرگ ارسال شود تا با Enum در بک‌اند مطابقت داشته باشد.
             ApiResponse response = ApiService.updateDeliveryStatus(order.getId(), "ACCEPTED");
             Platform.runLater(() -> {
                 if (response.getStatusCode() == 200) {
                     showAlert(Alert.AlertType.INFORMATION, "موفقیت", "سفارش #" + order.getId() + " با موفقیت به شما اختصاص یافت.");
-                    // لیست را رفرش می‌کنیم تا سفارش قبول‌شده حذف شود
                     loadAvailableDeliveries();
                 } else {
                     showAlert(Alert.AlertType.ERROR, "خطا", "خطا در قبول سفارش: " + response.getBody());
-                    // در صورت خطا، دکمه را دوباره فعال می‌کنیم
                     button.setDisable(false);
                     button.setText("قبول کردن سفارش");
                 }
@@ -129,18 +114,24 @@ public class CourierHomeController implements Initializable {
     }
 
     private void goToHome() {
-        // چون در همین صفحه هستیم، لیست را رفرش می‌کنیم
         loadAvailableDeliveries();
     }
 
     private void goToProfile() {
+        navigateToPage("courierProfile-view.fxml");
+    }
+
+    private void goToHistory() {
+        navigateToPage("CourierHistory-view.fxml");
+    }
+
+    private void navigateToPage(String fxmlFile) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("courierProfile-view.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) profileBtn.getScene().getWindow();
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlFile));
+            Stage stage = (Stage) homeBtn.getScene().getWindow();
             stage.setScene(new Scene(root));
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

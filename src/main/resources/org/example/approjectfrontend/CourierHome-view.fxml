@@ -13,6 +13,7 @@
         <HBox alignment="CENTER" style="-fx-background-color: transparent; -fx-padding: 20 0 8 0;">
             <HBox alignment="CENTER" maxWidth="340" spacing="18" style="-fx-background-color: #54C16E; -fx-padding: 9 32 9 32; -fx-background-radius: 20;">
                 <Button fx:id="homeBtn" minHeight="28" minWidth="70" style="-fx-background-radius: 10; -fx-font-size: 14px; -fx-text-fill: white; -fx-background-color: transparent;" text="خانه" />
+                <Button fx:id="historyBtn" minHeight="28" minWidth="70" style="-fx-background-radius: 10; -fx-font-size: 14px; -fx-text-fill: white; -fx-background-color: transparent;" text="تاریخچه" />
                 <Button fx:id="profileBtn" minHeight="28" minWidth="70" style="-fx-background-radius: 10; -fx-font-size: 14px; -fx-text-fill: white; -fx-background-color: transparent;" text="پروفایل" />
             </HBox>
         </HBox>
