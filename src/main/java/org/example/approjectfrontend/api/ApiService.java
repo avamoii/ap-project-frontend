@@ -7,6 +7,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.*;
 
 public class ApiService {
 
@@ -382,6 +383,46 @@ public class ApiService {
                     .uri(URI.create(API_BASE_URL + "/orders/" + orderId))
                     .header("Authorization", "Bearer " + token)
                     .GET()
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+    // --- متدهای جدید برای فروشنده ---
+    public static ApiResponse getRestaurantOrders(long restaurantId) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/restaurants/" + restaurantId + "/orders"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+
+    public static ApiResponse updateOrderStatus(long orderId, String status) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            String jsonBody = gson.toJson(Map.of("status", status));
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/restaurants/orders/" + orderId))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
