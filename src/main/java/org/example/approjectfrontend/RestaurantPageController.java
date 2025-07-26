@@ -21,16 +21,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.example.approjectfrontend.api.ApiResponse;
-import org.example.approjectfrontend.api.ApiService;
-import org.example.approjectfrontend.api.FoodItemDTO;
-import org.example.approjectfrontend.api.RestaurantDTO;
-
+import org.example.approjectfrontend.api.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -172,16 +168,44 @@ public class RestaurantPageController {
 
     @FXML
     private void handleOrderButton() {
-        Map<FoodItemDTO, Integer> selectedItems = itemSpinners.entrySet().stream()
-                .filter(entry -> entry.getValue().getValue() > 0)
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue()));
+        String address = addressField.getText().trim();
+        if (address.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "خطا", "لطفاً آدرس تحویل را وارد کنید.");
+            return;
+        }
 
-        if (selectedItems.isEmpty()) {
+        // ۱. جمع‌آوری آیتم‌های انتخاب شده (تعداد > ۰)
+        List<OrderItemRequestDTO> orderedItems = new ArrayList<>();
+        for (Map.Entry<FoodItemDTO, Spinner<Integer>> entry : itemSpinners.entrySet()) {
+            if (entry.getValue().getValue() > 0) {
+                orderedItems.add(new OrderItemRequestDTO(entry.getKey().getId(), entry.getValue().getValue()));
+            }
+        }
+
+        if (orderedItems.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "خطا", "لطفاً حداقل یک آیتم از منو را انتخاب کنید.");
             return;
         }
 
-        showAlert(Alert.AlertType.INFORMATION, "موفقیت", "سفارش شما با موفقیت ثبت شد (شبیه‌سازی شده).");
+        // ۲. ساختن آبجکت درخواست
+        SubmitOrderRequest orderRequest = new SubmitOrderRequest();
+        orderRequest.setVendorId(currentRestaurant.getId());
+        orderRequest.setDeliveryAddress(address);
+        orderRequest.setItems(orderedItems);
+        orderRequest.setCouponId(null); // <-- فعلاً کوپن را null ارسال می‌کنیم
+
+        // ۳. ارسال درخواست به سرور در یک ترد جدید
+        new Thread(() -> {
+            ApiResponse response = ApiService.submitOrder(orderRequest);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    showAlert(Alert.AlertType.INFORMATION, "موفقیت", "سفارش شما با موفقیت ثبت شد!");
+                    // می‌توانید صفحه را ببندید یا به صفحه تاریخچه سفارشات بروید
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "خطا", "خطا در ثبت سفارش: " + response.getBody());
+                }
+            });
+        }).start();
     }
 
     private void showPaymentMethodDialog() {
@@ -236,4 +260,6 @@ public class RestaurantPageController {
         alert.setContentText(content);
         alert.showAndWait();
     }
+
+
 }
