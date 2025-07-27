@@ -5,6 +5,7 @@ import java.util.List;
 
 /**
  * این کلاس مدل داده برای یک سفارش است که از سرور دریافت می‌شود.
+ * حالا شامل شناسه نظر (ratingId) نیز می‌باشد.
  */
 public class OrderDTO {
     @SerializedName("id") private Long id;
@@ -23,6 +24,9 @@ public class OrderDTO {
     @SerializedName("created_at") private String createdAt;
     @SerializedName("updated_at") private String updatedAt;
 
+    // --- فیلد جدید برای شناسه نظر ---
+    @SerializedName("rating_id") private Long ratingId;
+
     // Getters
     public Long getId() { return id; }
     public String getDeliveryAddress() { return deliveryAddress; }
@@ -39,4 +43,5 @@ public class OrderDTO {
     public String getStatus() { return status; }
     public String getCreatedAt() { return createdAt; }
     public String getUpdatedAt() { return updatedAt; }
+    public Long getRatingId() { return ratingId; } // Getter برای فیلد جدید
 }
