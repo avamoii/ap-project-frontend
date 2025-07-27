@@ -28,7 +28,7 @@
     </VBox>
     <HBox alignment="CENTER" spacing="0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Button onAction="#goToHome" prefHeight="40.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="خانه" HBox.hgrow="ALWAYS" />
-        <Button onAction="#goToHome" prefHeight="40.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="رستوران من" HBox.hgrow="ALWAYS" />
+        <Button  prefHeight="40.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="رستوران من" HBox.hgrow="ALWAYS" />
         <Button onAction="#goToProfile" prefHeight="40.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="پروفایل" HBox.hgrow="ALWAYS" />
     </HBox>
 </AnchorPane>
