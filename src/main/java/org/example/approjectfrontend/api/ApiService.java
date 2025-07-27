@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ApiService {
 
-    private static final String API_BASE_URL = "http://localhost:1214";
+    private static final String API_BASE_URL = "http://localhost:1215";
     private static final HttpClient client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(10))
@@ -572,6 +572,63 @@ public class ApiService {
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + token)
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+    // --- Favorites Methods ---
+    public static ApiResponse getFavorites() {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/buyer/favorites"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+
+    public static ApiResponse addFavorite(long restaurantId) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/buyer/favorites/" + restaurantId))
+                    .header("Authorization", "Bearer " + token)
+                    .PUT(HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+        }
+    }
+
+    public static ApiResponse removeFavorite(long restaurantId) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) {
+            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        }
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + "/buyer/favorites/" + restaurantId))
+                    .header("Authorization", "Bearer " + token)
+                    .DELETE()
                     .build();
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());

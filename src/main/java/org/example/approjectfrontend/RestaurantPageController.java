@@ -46,13 +46,14 @@ public class RestaurantPageController {
     @FXML private TextField couponCodeField;
     @FXML private Button applyCouponButton;
     @FXML private Label couponStatusLabel;
+    @FXML private ToggleButton favoriteButton;
 
     private Coupon appliedCoupon = null; // یا فقط تخفیف عددی، بسته به پیاده‌سازی تو
 
     private RestaurantDTO currentRestaurant;
     private final ObservableList<FoodItemDTO> allItems = FXCollections.observableArrayList();
     private final Map<FoodItemDTO, Spinner<Integer>> itemSpinners = new HashMap<>();
-
+    private List<Long> favoriteRestaurantIds = new ArrayList<>();
     public void initialize() {
         menuListView.setCellFactory(list -> new ListCell<>() {
             private final VBox mainVBox = new VBox(5);
@@ -130,6 +131,7 @@ public class RestaurantPageController {
             addressField.setText(restaurant.getAddress());
         }
         loadFullMenu(restaurant.getId());
+        checkFavoriteStatus();
     }
 
     private void loadFullMenu(long restaurantId) {
@@ -237,6 +239,66 @@ public class RestaurantPageController {
             });
         }).start();
     }
+    @FXML
+    private void handleFavoriteChange(ActionEvent event) {
+        if (currentRestaurant == null) return;
+
+        boolean isSelected = favoriteButton.isSelected();
+        favoriteButton.setDisable(true); // غیرفعال کردن دکمه تا پایان عملیات
+
+        new Thread(() -> {
+            ApiResponse response;
+            if (isSelected) {
+                response = ApiService.addFavorite(currentRestaurant.getId());
+            } else {
+                response = ApiService.removeFavorite(currentRestaurant.getId());
+            }
+
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200 || response.getStatusCode() == 201) {
+                    // به‌روزرسانی لیست علاقه‌مندی‌ها و وضعیت دکمه
+                    checkFavoriteStatus();
+                } else {
+                    // در صورت خطا، وضعیت دکمه را به حالت قبل برمی‌گردانیم
+                    favoriteButton.setSelected(!isSelected);
+                    showAlert(Alert.AlertType.ERROR, "خطا", "خطا در تغییر وضعیت علاقه‌مندی: " + response.getBody());
+                }
+                favoriteButton.setDisable(false); // فعال کردن مجدد دکمه
+            });
+        }).start();
+    }
+    private void updateFavoriteButtonState() {
+        if (currentRestaurant != null && favoriteRestaurantIds.contains(currentRestaurant.getId())) {
+            favoriteButton.setSelected(true);
+            favoriteButton.setText("حذف از علاقه‌مندی‌ها");
+        } else {
+            favoriteButton.setSelected(false);
+            favoriteButton.setText("افزودن به علاقه‌مندی‌ها");
+        }
+    }
+    private void checkFavoriteStatus() {
+        new Thread(() -> {
+            ApiResponse response = ApiService.getFavorites();
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    // پاسخ سرور یک آبجکت JSON است که کلید data آن حاوی لیست است
+                    JsonObject bodyJson = new Gson().fromJson(response.getBody(), JsonObject.class);
+                    JsonElement dataElement = bodyJson.get("data");
+
+                    List<RestaurantDTO> favorites = new Gson().fromJson(dataElement, new TypeToken<List<RestaurantDTO>>() {}.getType());
+
+                    if (favorites != null) {
+                        favoriteRestaurantIds = favorites.stream().map(RestaurantDTO::getId).collect(Collectors.toList());
+                    } else {
+                        favoriteRestaurantIds = new ArrayList<>();
+                    }
+                    updateFavoriteButtonState();
+                }
+            });
+        }).start();
+    }
+
+
 
     private void showPaymentMethodDialog(long orderId) {
         ChoiceDialog<String> dialog = new ChoiceDialog<>("پرداخت با کیف پول", "پرداخت با کیف پول", "پرداخت با کارت");
