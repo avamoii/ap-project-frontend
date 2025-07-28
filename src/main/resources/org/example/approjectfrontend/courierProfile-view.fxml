@@ -11,7 +11,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.approjectfrontend.CourierProfileController"
-            prefHeight="600" prefWidth="400"
+            prefHeight="600.0" prefWidth="733.0"
             style="-fx-background-color: linear-gradient(to bottom, #f7f7f7, #eaeaea);">
 
     <center>

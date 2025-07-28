@@ -173,7 +173,7 @@ public class SellerProfileController implements Initializable {
 
     @FXML
     private void goToMyRestaurant(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("SellerHome-view.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("RegisterRestaurant-view.fxml"));
         Scene scene = ((Node) event.getSource()).getScene();
         scene.setRoot(root);
     }

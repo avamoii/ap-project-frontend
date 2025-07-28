@@ -7,23 +7,82 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.SellerHomeController">
+<AnchorPane prefHeight="600.0" prefWidth="733.0"
+            xmlns="http://javafx.com/javafx/23.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.approjectfrontend.SellerHomeController"
+            style="-fx-background-color: linear-gradient(to bottom, #ededed, #f7f7f7);">
 
-    <VBox spacing="10" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <VBox spacing="10"
+          AnchorPane.bottomAnchor="54.0"
+          AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0"
+          AnchorPane.topAnchor="0.0">
         <padding>
             <Insets bottom="10" left="10" right="10" top="10" />
         </padding>
 
-        <Button fx:id="addNewRestaurantButton" onAction="#goToRegisterRestaurantPage" prefWidth="Infinity" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14px;" text="+ افزودن رستوران جدید" />
+        <Button fx:id="addNewRestaurantButton"
+                onAction="#goToRegisterRestaurantPage"
+                prefWidth="Infinity"
+                style="-fx-background-color: #191919;
+                   -fx-text-fill: #fff;
+                   -fx-font-size: 15px;
+                   -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                   -fx-font-weight: bold;
+                   -fx-background-radius: 12;
+                   -fx-cursor: hand;"
+                text="+ افزودن رستوران جدید"/>
 
-        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-            <VBox fx:id="restaurantsVBox" spacing="10" />
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                    style="-fx-background: transparent;">
+            <VBox fx:id="restaurantsVBox"
+                  spacing="10" />
         </ScrollPane>
     </VBox>
 
-    <HBox alignment="CENTER" spacing="0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-        <Button fx:id="homeButton" onAction="#goToHome" prefHeight="40.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="خانه" HBox.hgrow="ALWAYS" />
-        <Button fx:id="myRestaurantButton" onAction="#goToHome" prefHeight="40.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="رستوران من" HBox.hgrow="ALWAYS" />
-        <Button fx:id="profileButton" onAction="#goToProfile" prefHeight="40.0" style="-fx-background-color: #43b649; -fx-text-fill: white; -fx-background-radius: 0;" text="پروفایل" HBox.hgrow="ALWAYS" />
+    <HBox alignment="CENTER" spacing="0"
+          style="-fx-background-color: linear-gradient(to top,#ededed,#d7d7d7);
+               -fx-border-color: #ddd;
+               -fx-border-width: 1 0 0 0;"
+          AnchorPane.bottomAnchor="0.0"
+          AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0">
+
+        <!-- دکمه "خانه" مشکی (فعال) -->
+        <Button fx:id="homeButton"
+                onAction="#goToHome" prefHeight="40.0"
+                style="-fx-background-color: #191919;
+                   -fx-background-radius: 14;
+                   -fx-text-fill: #fff;
+                   -fx-font-size: 16px;
+                   -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                   -fx-font-weight: bold;
+                   -fx-cursor: hand;"
+                text="خانه"
+                HBox.hgrow="ALWAYS" />
+
+
+        <Button fx:id="myRestaurantButton"
+                onAction="#goToRegisterRestaurantPage" prefHeight="40.0"
+                style="-fx-background-color: transparent;
+                   -fx-text-fill: #191919;
+                   -fx-font-size: 16px;
+                   -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                   -fx-font-weight: bold;
+                   -fx-cursor: hand;"
+                text="رستوران من"
+                HBox.hgrow="ALWAYS" />
+
+        <Button fx:id="profileButton"
+                onAction="#goToProfile" prefHeight="40.0"
+                style="-fx-background-color: transparent;
+                   -fx-text-fill: #191919;
+                   -fx-font-size: 16px;
+                   -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                   -fx-font-weight: bold;
+                   -fx-cursor: hand;"
+                text="پروفایل"
+                HBox.hgrow="ALWAYS" />
     </HBox>
 </AnchorPane>

@@ -1,40 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.approjectfrontend.AdminOrdersController"
-      spacing="18"
-      alignment="TOP_CENTER"
-      style="-fx-background-color: linear-gradient(to bottom right, #f5fbff 67%, #e6f2fb 100%);
-             -fx-padding: 32 40 32 40;">
+<?import javafx.scene.layout.VBox?>
 
-    <Label text="لیست سفارش‌ها"
-           style="-fx-font-size: 21px;
-                  -fx-font-family: 'Vazirmatn', Tahoma, Arial;
-                  -fx-font-weight: bold;
-                  -fx-text-fill: #206094;
-                  -fx-padding: 0 0 12 0;"/>
+<VBox alignment="TOP_CENTER" spacing="18" style="-fx-background-color: linear-gradient(to bottom right, #f5fbff 67%, #e6f2fb 100%);              -fx-padding: 32 40 32 40;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.AdminOrdersController">
 
-    <TableView fx:id="ordersTable"
-               prefHeight="420"
-               prefWidth="650"
-               style="-fx-background-color: #fff;
-                      -fx-border-color: #bbddf7;
-                      -fx-border-radius: 10;
-                      -fx-background-radius: 10;
-                      -fx-effect: dropshadow(three-pass-box, #a6d5fa, 8, 0.18, 0.0, 2.0);">
+    <Label style="-fx-font-size: 21px;                   -fx-font-family: 'Vazirmatn', Tahoma, Arial;                   -fx-font-weight: bold;                   -fx-text-fill: #206094;                   -fx-padding: 0 0 12 0;" text="لیست سفارش‌ها" />
+
+    <TableView fx:id="ordersTable" prefHeight="420" prefWidth="650" style="-fx-background-color: #fff;                       -fx-border-color: #bbddf7;                       -fx-border-radius: 10;                       -fx-background-radius: 10;                       -fx-effect: dropshadow(three-pass-box, #a6d5fa, 8, 0.18, 0.0, 2.0);">
         <columns>
             <!-- ستون شماره ردیف (سریال) -->
-            <TableColumn fx:id="colSerial" text="ردیف" prefWidth="48" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colId" text="شناسه" prefWidth="60" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colUser" text="کاربر" prefWidth="120" style="-fx-alignment: CENTER_LEFT;"/>
-            <TableColumn fx:id="colRestaurant" text="رستوران" prefWidth="125" style="-fx-alignment: CENTER_LEFT;"/>
-            <TableColumn fx:id="colStatus" text="وضعیت" prefWidth="90" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colAmount" text="مبلغ" prefWidth="80" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colSerial" prefWidth="118.39997100830078" style="-fx-alignment: CENTER;" text="ردیف" />
+            <TableColumn fx:id="colId" prefWidth="94.4000244140625" style="-fx-alignment: CENTER;" text="شناسه" />
+            <TableColumn fx:id="colUser" prefWidth="96.800048828125" style="-fx-alignment: CENTER_LEFT;" text="کاربر" />
+            <TableColumn fx:id="colRestaurant" prefWidth="118.4000244140625" style="-fx-alignment: CENTER_LEFT;" text="رستوران" />
+            <TableColumn fx:id="colStatus" prefWidth="108.79995727539062" style="-fx-alignment: CENTER;" text="وضعیت" />
+            <TableColumn fx:id="colAmount" prefWidth="112.79998779296875" style="-fx-alignment: CENTER;" text="مبلغ" />
         </columns>
     </TableView>
 </VBox>

@@ -11,26 +11,54 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane style="-fx-background-color: #f8f8f8; -fx-background-radius: 12;"
-            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.RestaurantPageController" prefWidth="600" prefHeight="480">
-    <VBox spacing="10" alignment="TOP_CENTER" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" style="-fx-padding: 15;">
+<AnchorPane style="-fx-background-color: linear-gradient(to bottom,#ededed,#f7f7f7); -fx-background-radius: 16;"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.approjectfrontend.RestaurantPageController"
+            prefHeight="600.0" prefWidth="733.0">
+    <VBox spacing="16" alignment="TOP_CENTER"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+          AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+          style="-fx-padding: 28;">
 
+        <!-- هدر رستوران -->
         <HBox spacing="16" alignment="CENTER_LEFT">
-            <ImageView fx:id="logoView" fitHeight="64" fitWidth="64" pickOnBounds="true" preserveRatio="true" />
-            <Label fx:id="nameLabel" style="-fx-font-size: 22px; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
-            <ToggleButton fx:id="favoriteButton" text="افزودن به علاقه‌مندی‌ها" onAction="#handleFavoriteChange" />
+            <ImageView fx:id="logoView" fitHeight="64" fitWidth="64"
+                       pickOnBounds="true" preserveRatio="true"
+                       style="-fx-background-radius: 16; -fx-effect: dropshadow(gaussian,#eeeeee,8,0,0,0);" />
+            <Label fx:id="nameLabel"
+                   style="-fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-size: 23px; -fx-font-weight: bold; -fx-text-fill: #191919;" HBox.hgrow="ALWAYS"/>
+            <ToggleButton fx:id="favoriteButton"
+                          text="افزودن به علاقه‌مندی‌ها"
+                          style="-fx-background-color: transparent; -fx-text-fill: #111; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-cursor: hand;"/>
         </HBox>
 
-        <ListView fx:id="menuListView" prefHeight="200" style="-fx-font-size: 15px;" />
-        <TextField fx:id="addressField" promptText="آدرس خود را وارد کنید..." prefWidth="320" style="-fx-background-color: #f3fff3; -fx-background-radius: 4;" />
+        <!-- منو غذا -->
+        <ListView fx:id="menuListView" prefHeight="200"
+                  style="-fx-background-color: #fff; -fx-background-radius: 10; -fx-border-color: #e3e3e3; -fx-border-width: 1; -fx-font-size: 15px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold;" />
 
-        <HBox spacing="10" alignment="CENTER" maxWidth="320">
-            <TextField fx:id="couponCodeField" promptText="کد تخفیف (اختیاری)" HBox.hgrow="ALWAYS"/>
-            <Button fx:id="applyCouponButton" text="اعمال" onAction="#handleApplyCoupon"/>
+        <!-- آدرس -->
+        <TextField fx:id="addressField"
+                   promptText="آدرس خود را وارد کنید..."
+                   prefWidth="320"
+                   style="-fx-background-color: #fafafa; -fx-background-radius: 8; -fx-border-color: #e3e3e3; -fx-border-width: 1; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold;" />
+        <!-- کد تخفیف -->
+        <HBox spacing="8" alignment="CENTER" maxWidth="320">
+            <TextField fx:id="couponCodeField"
+                       promptText="کد تخفیف (اختیاری)"
+                       style="-fx-background-color: #fafafa; -fx-background-radius: 8; -fx-border-color: #e3e3e3; -fx-border-width: 1; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold;" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="applyCouponButton" text="اعمال" onAction="#handleApplyCoupon"
+                    style="-fx-background-color: #191919; -fx-text-fill: #fff; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-background-radius: 10;"/>
         </HBox>
-        <Label fx:id="couponStatusLabel" style="-fx-font-size: 12px;"/>
-        <Label fx:id="totalPriceLabel" text="هزینه کل: ۰ تومان" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-        <Button fx:id="submitAndPayButton" text="ثبت و پرداخت" maxWidth="160" style="-fx-font-size: 15px; -fx-background-color: #44c767; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;" onAction="#handleSubmitAndPay" />
-        <Button fx:id="backButton" text="بازگشت" onAction="#handleBackButton" maxWidth="250" style="-fx-font-size: 15px; -fx-background-color: #f0ad4e; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;" />
+
+        <Label fx:id="couponStatusLabel" style="-fx-font-size: 12px; -fx-font-family: 'Vazirmatn', Tahoma, Arial;"/>
+        <Label fx:id="totalPriceLabel"
+               text="هزینه کل: ۰ تومان"
+               style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Vazirmatn', Tahoma, Arial;"/>
+        <!-- دکمه ثبت و پرداخت -->
+        <Button fx:id="submitAndPayButton" text="ثبت و پرداخت" maxWidth="180"
+                style="-fx-font-size: 15px; -fx-background-color: #191919; -fx-text-fill: white; -fx-background-radius: 13; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold;" onAction="#handleSubmitAndPay" />
+        <!-- دکمه بازگشت (حذف رنگ زرد) -->
+        <Button fx:id="backButton" text="بازگشت" onAction="#handleBackButton" maxWidth="200"
+                style="-fx-font-size: 15px; -fx-background-color: transparent; -fx-text-fill: #191919; -fx-border-color: #bbb; -fx-border-radius: 10; -fx-font-weight: bold; -fx-font-family: 'Vazirmatn', Tahoma, Arial;" />
     </VBox>
 </AnchorPane>

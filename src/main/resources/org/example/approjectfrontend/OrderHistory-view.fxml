@@ -1,49 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="600.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.OrderHistoryController">
-    <VBox spacing="10" style="-fx-padding: 10;" AnchorPane.bottomAnchor="50" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <Label text="تاریخچه سفارشات" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+<AnchorPane prefHeight="600.0" prefWidth="733.0" style="-fx-background-color: linear-gradient(to bottom,#f7f7f7,#ededed);" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.OrderHistoryController">
 
-        <SplitPane fx:id="mainSplitPane" dividerPositions="1.0" VBox.vgrow="ALWAYS">
-            <!-- سمت چپ: لیست سفارشات -->
-            <ListView fx:id="ordersListView" maxWidth="2000"/>
+    <VBox spacing="18" AnchorPane.bottomAnchor="56" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <Label style="-fx-font-size: 20px; -fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-font-weight: bold; -fx-text-fill:#222;" text="تاریخچه سفارشات" />
 
-            <!-- سمت راست: جزئیات سفارش (در ابتدا مخفی) -->
-            <VBox fx:id="detailsPane" spacing="10" style="-fx-padding: 10;" minWidth="220">
-                <Label text="جزئیات سفارش" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-                <Separator/>
-                <GridPane hgap="10" vgap="8">
-                    <Label text="شماره سفارش:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="orderIdLabel" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                    <Label text="وضعیت:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="statusLabel" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                    <Label text="مبلغ کل:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="priceLabel" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                    <Label text="آدرس تحویل:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="addressLabel" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+        <SplitPane fx:id="mainSplitPane" dividerPositions="0.4" style="-fx-background-radius:13; -fx-padding:0;" VBox.vgrow="ALWAYS">
+
+            <!-- لیست سفارش‌ها -->
+            <ListView fx:id="ordersListView" prefHeight="499.0" prefWidth="308.0" style="-fx-background-color:#fff;                        -fx-border-color:#e1e1e1;                        -fx-background-radius:11;                        -fx-border-radius:11;                        -fx-font-family:'Vazirmatn',Tahoma,Arial;" />
+
+            <!-- جزئیات سفارش -->
+            <VBox fx:id="detailsPane" minWidth="240" spacing="14" style="-fx-background-color:#fff;                        -fx-background-radius:13;                        -fx-effect:dropshadow(three-pass-box,#d8d8d8,12,0.09,0,3);                        -fx-padding:20 14 20 14;">
+                <Label style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-text-fill:#232323;" text="جزئیات سفارش" />
+                <Separator style="-fx-background-color:#ffe;" />
+                <GridPane hgap="8" vgap="7">
+                    <Label style="-fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-font-weight: bold;" text="شماره سفارش:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <Label fx:id="orderIdLabel" style="-fx-font-family:'Vazirmatn',Tahoma,Arial;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <Label style="-fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-font-weight: bold;" text="وضعیت:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <Label fx:id="statusLabel" style="-fx-font-family:'Vazirmatn',Tahoma,Arial;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <Label style="-fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-font-weight: bold;" text="مبلغ کل:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                    <Label fx:id="priceLabel" style="-fx-font-family:'Vazirmatn',Tahoma,Arial;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <Label style="-fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-font-weight: bold;" text="آدرس تحویل:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                    <Label fx:id="addressLabel" style="-fx-font-family:'Vazirmatn',Tahoma,Arial;" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+               <columnConstraints>
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
                 </GridPane>
-                <Separator/>
-                <Label text="آیتم‌های سفارش:" style="-fx-font-weight: bold;"/>
-                <ListView fx:id="itemsListView" prefHeight="150"/>
+                <Separator />
+                <Label style="-fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-font-weight: bold;" text="آیتم‌های سفارش:" />
+                <ListView fx:id="itemsListView" prefHeight="110" style="-fx-background-color:#fafafa;                            -fx-border-color:#e3e3e3;                            -fx-background-radius:8;                            -fx-border-radius:8;                            -fx-font-family:'Vazirmatn',Tahoma,Arial;" />
             </VBox>
         </SplitPane>
     </VBox>
 
-    <!-- نوار ناوبری پایین صفحه -->
-    <HBox alignment="CENTER" prefHeight="40.0" spacing="0" style="-fx-background-color: #27ae60;" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-        <Button fx:id="profileBtn" onAction="#goToProfile" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;" text="پروفایل" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="homeBtn" onAction="#goToHome" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;" text="خانه" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="historyBtn" style="-fx-background-color: #1e7e44; -fx-text-fill: white; -fx-font-size: 18px;" text="تاریخچه" HBox.hgrow="ALWAYS"/>
-    </HBox>
+    <!-- نوار ناوبری پایین --><HBox alignment="CENTER" prefHeight="58.0" spacing="0" style="-fx-background-color: linear-gradient(to top,#ededed,#d7d7d7);              -fx-border-color: #ccc;              -fx-border-width: 1 0 0 0;              -fx-effect: dropshadow(three-pass-box, #cccccc, 7, 0.13, 0, 1);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+
+    <Button fx:id="profileBtn" style="-fx-background-radius:8px;                -fx-font-size: 16px;                -fx-font-family:'Vazirmatn',Tahoma,Arial;                -fx-font-weight: bold;                -fx-text-fill: #191919;                -fx-background-color: transparent;                -fx-cursor: hand;" text="پروفایل" />
+
+    <Button fx:id="homeBtn" style="-fx-background-radius:8px;                -fx-font-size: 16px;                -fx-font-family:'Vazirmatn',Tahoma,Arial;                -fx-font-weight: bold;                -fx-text-fill: #191919;                -fx-background-color: transparent;                -fx-cursor: hand;" text="خانه" />
+
+    <Button fx:id="historyBtn" style="-fx-background-radius:8px;                -fx-font-size: 16px;                -fx-font-family:'Vazirmatn',Tahoma,Arial;                -fx-font-weight: bold;                -fx-text-fill: #fff;                -fx-background-color: #191919;                -fx-cursor:hand;" text="تاریخچه" />
+</HBox>
+
 </AnchorPane>

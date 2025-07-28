@@ -8,22 +8,73 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.approjectfrontend.MenuManagerController"
-      spacing="10" alignment="TOP_CENTER" style="-fx-padding: 20;">
+      spacing="16"
+      alignment="TOP_CENTER"
+      style="-fx-padding: 32 28 28 28;
+             -fx-background-color: linear-gradient(to bottom,#f7f7f7,#ededed);
+             -fx-background-radius: 16;
+             -fx-effect: dropshadow(three-pass-box,#d8d8d8,13,0.11,0,2);" prefHeight="600.0" prefWidth="733.0">
 
-    <Label fx:id="restaurantNameLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-    <Separator/>
+    <!-- نام رستوران -->
+    <Label fx:id="restaurantNameLabel"
+           style="-fx-font-size: 21px;
+                  -fx-font-weight: bold;
+                  -fx-font-family:'Vazirmatn',Tahoma,Arial;
+                  -fx-text-fill:#232323;" />
 
-    <Label text="منوهای موجود (برای مشاهده آیتم‌ها، روی منو دوبار کلیک کنید)" style="-fx-font-size: 16px;"/>
-    <ListView fx:id="menusListView" VBox.vgrow="ALWAYS"/>
+    <Separator style="-fx-background-color:#eee;"/>
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="newMenuTitleField" promptText="عنوان منوی جدید" HBox.hgrow="ALWAYS"/>
-        <Button onAction="#handleCreateMenu" text="ایجاد منوی جدید" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+    <!-- راهنمای کاربر -->
+    <Label text="منوهای موجود (برای مشاهده آیتم‌ها، روی منو دوبار کلیک کنید)"
+           style="-fx-font-size: 15.5px; -fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-text-fill:#3f3f3f;" />
+
+    <!-- لیست منوها -->
+    <ListView fx:id="menusListView"
+              VBox.vgrow="ALWAYS"
+              style="-fx-background-color:#fff;
+                     -fx-border-radius:10;
+                     -fx-background-radius:10;
+                     -fx-border-color: #dadada;
+                     -fx-font-family:'Vazirmatn',Tahoma,Arial;
+                     -fx-font-size:14px;"/>
+
+    <!-- ساخت منوی جدید -->
+    <HBox spacing="9" alignment="CENTER_LEFT">
+        <TextField fx:id="newMenuTitleField"
+                   promptText="عنوان منوی جدید"
+                   HBox.hgrow="ALWAYS"
+                   style="-fx-background-color:#fafafa;
+                          -fx-border-radius:8;
+                          -fx-background-radius:8;
+                          -fx-border-color:#dadada;
+                          -fx-font-family:'Vazirmatn',Tahoma,Arial;"/>
+        <Button onAction="#handleCreateMenu"
+                text="ایجاد منوی جدید"
+                style="-fx-background-color:#191919;
+                       -fx-text-fill:#fff;
+                       -fx-background-radius:7;
+                       -fx-font-family:'Vazirmatn',Tahoma,Arial;
+                       -fx-font-weight:bold;
+                       -fx-cursor: hand;"/>
     </HBox>
 
-    <Label fx:id="messageLabel" managed="false" visible="false"/>
-    <Button onAction="#handleGoBack" text="بازگشت به لیست رستوران‌ها" style="-fx-background-color: #f0ad4e; -fx-text-fill: white;"/>
+    <!-- پیام (خطا یا موفقیت) -->
+    <Label fx:id="messageLabel"
+           managed="false"
+           visible="false"
+           style="-fx-font-size:13.5px; -fx-text-fill:#e74c3c; -fx-font-family:'Vazirmatn',Tahoma,Arial;"/>
+
+    <!-- بازگشت -->
+    <Button onAction="#handleGoBack"
+            text="بازگشت به لیست رستوران‌ها"
+            style="-fx-background-color:#fafafa;
+                   -fx-border-color:#fbbe6b;
+                   -fx-text-fill:#b07b02;
+                   -fx-background-radius:7;
+                   -fx-border-radius:7;
+                   -fx-font-family:'Vazirmatn',Tahoma,Arial;
+                   -fx-cursor: hand;"/>
 </VBox>

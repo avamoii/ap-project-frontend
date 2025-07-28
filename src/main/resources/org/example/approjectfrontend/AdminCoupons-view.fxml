@@ -1,49 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.approjectfrontend.AdminCouponsController"
-      spacing="18"
-      alignment="TOP_CENTER"
-      style="-fx-background-color: linear-gradient(to bottom right, #f5fbff 67%, #e6f2fb 100%);
-             -fx-padding: 32 40 32 40;">
 
-    <Label text="لیست کدهای تخفیف"
-           style="-fx-font-size:21px; -fx-font-family:'Vazirmatn', Tahoma, Arial;
-                  -fx-font-weight:bold; -fx-text-fill:#206094; -fx-padding: 0 0 12 0;"/>
+<VBox alignment="TOP_CENTER" spacing="18" style="-fx-background-color: linear-gradient(to bottom right, #f5fbff 67%, #e6f2fb 100%);              -fx-padding: 32 40 32 40;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.AdminCouponsController">
 
-    <TableView fx:id="couponsTable"
-               prefHeight="420" prefWidth="770"
-               style="-fx-background-color: #fff; -fx-border-color: #bbddf7;
-                      -fx-border-radius: 10; -fx-background-radius: 10;
-                      -fx-effect: dropshadow(three-pass-box, #a6d5fa, 8, 0.18, 0, 2);">
+    <Label style="-fx-font-size:21px; -fx-font-family:'Vazirmatn', Tahoma, Arial;                   -fx-font-weight:bold; -fx-text-fill:#206094; -fx-padding: 0 0 12 0;" text="لیست کدهای تخفیف" />
+
+    <TableView fx:id="couponsTable" prefHeight="420" prefWidth="770" style="-fx-background-color: #fff; -fx-border-color: #bbddf7;                       -fx-border-radius: 10; -fx-background-radius: 10;                       -fx-effect: dropshadow(three-pass-box, #a6d5fa, 8, 0.18, 0, 2);">
 
         <columns>
-            <TableColumn fx:id="colSerial"        text="ردیف"       prefWidth="45" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colId"            text="ID"         prefWidth="50" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colCouponCode"    text="کد"         prefWidth="100" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colType"          text="نوع"        prefWidth="80" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colValue"         text="مقدار"      prefWidth="70" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colMinPrice"      text="حداقل خرید" prefWidth="90" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colUserCount"     text="تعداد مجاز" prefWidth="80" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colStartDate"     text="شروع"       prefWidth="90" style="-fx-alignment: CENTER;"/>
-            <TableColumn fx:id="colEndDate" text="پایان" prefWidth="90" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colSerial" prefWidth="64.0" style="-fx-alignment: CENTER;" text="ردیف" />
+            <TableColumn fx:id="colId" prefWidth="67.20001983642578" style="-fx-alignment: CENTER;" text="ID" />
+            <TableColumn fx:id="colCouponCode" prefWidth="65.5999755859375" style="-fx-alignment: CENTER;" text="کد" />
+            <TableColumn fx:id="colType" prefWidth="80" style="-fx-alignment: CENTER;" text="نوع" />
+            <TableColumn fx:id="colValue" prefWidth="84.800048828125" style="-fx-alignment: CENTER;" text="مقدار" />
+            <TableColumn fx:id="colMinPrice" prefWidth="100.79998779296875" style="-fx-alignment: CENTER;" text="حداقل خرید" />
+            <TableColumn fx:id="colUserCount" prefWidth="102.39993286132812" style="-fx-alignment: CENTER;" text="تعداد مجاز" />
+            <TableColumn fx:id="colStartDate" prefWidth="94.4000244140625" style="-fx-alignment: CENTER;" text="شروع" />
+            <TableColumn fx:id="colEndDate" prefWidth="112.79998779296875" style="-fx-alignment: CENTER;" text="پایان" />
         </columns>
     </TableView>
 
-    <HBox spacing="16" alignment="CENTER">
-        <Button text="افزودن" fx:id="btnAddCoupon"
-                style="-fx-background-color:linear-gradient(to right,#44eab5,#24b3dc);-fx-background-radius:7;-fx-font-family:'Vazirmatn',Tahoma;-fx-font-size:14;-fx-text-fill:#fff;-fx-font-weight:bold;"/>
-        <Button text="ویرایش" fx:id="btnEditCoupon"
-                style="-fx-background-color:#ddeefd;-fx-background-radius:7;-fx-font-family:'Vazirmatn';-fx-font-size:13;-fx-text-fill:#1167a8;-fx-font-weight:bold;"/>
-        <Button text="حذف" fx:id="btnDeleteCoupon"
-                style="-fx-background-color:#f43f5e;-fx-background-radius:7;-fx-font-family:'Vazirmatn';-fx-font-size:13;-fx-text-fill:#fff;-fx-font-weight:bold;"/>
+    <HBox alignment="CENTER" spacing="16">
+        <Button fx:id="btnAddCoupon" style="-fx-background-color:linear-gradient(to right,#44eab5,#24b3dc);-fx-background-radius:7;-fx-font-family:'Vazirmatn',Tahoma;-fx-font-size:14;-fx-text-fill:#fff;-fx-font-weight:bold;" text="افزودن" />
+        <Button fx:id="btnEditCoupon" style="-fx-background-color:#ddeefd;-fx-background-radius:7;-fx-font-family:'Vazirmatn';-fx-font-size:13;-fx-text-fill:#1167a8;-fx-font-weight:bold;" text="ویرایش" />
+        <Button fx:id="btnDeleteCoupon" style="-fx-background-color:#f43f5e;-fx-background-radius:7;-fx-font-family:'Vazirmatn';-fx-font-size:13;-fx-text-fill:#fff;-fx-font-weight:bold;" text="حذف" />
     </HBox>
 
 </VBox>

@@ -1,33 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.approjectfrontend.FoodItemDetailsController"
-      spacing="10" alignment="TOP_CENTER" style="-fx-padding: 20; -fx-background-color: #ffffff;">
+<VBox alignment="TOP_CENTER" prefHeight="573.0" prefWidth="390.0" spacing="10" style="-fx-padding: 20; -fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.FoodItemDetailsController">
 
-    <ImageView fx:id="itemImageView" fitHeight="150" fitWidth="200" preserveRatio="true"/>
+    <ImageView fx:id="itemImageView" fitHeight="150" fitWidth="200" preserveRatio="true" />
 
-    <Label fx:id="nameLabel" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
-    <Label fx:id="descriptionLabel" wrapText="true" style="-fx-font-size: 14px;"/>
+    <Label fx:id="nameLabel" style="-fx-font-size: 22px; -fx-font-weight: bold;" />
+    <Label fx:id="descriptionLabel" style="-fx-font-size: 14px;" wrapText="true" />
 
-    <HBox spacing="10" alignment="CENTER">
-        <Label text="قیمت:" style="-fx-font-weight: bold;"/>
-        <Label fx:id="priceLabel"/>
+    <HBox alignment="CENTER" spacing="10">
+        <Label style="-fx-font-weight: bold;" text="قیمت:" />
+        <Label fx:id="priceLabel" />
     </HBox>
 
-    <HBox spacing="10" alignment="CENTER">
-        <Label text="موجودی:" style="-fx-font-weight: bold;"/>
-        <Label fx:id="supplyLabel"/>
+    <HBox alignment="CENTER" spacing="10">
+        <Label style="-fx-font-weight: bold;" text="موجودی:" />
+        <Label fx:id="supplyLabel" />
     </HBox>
 
-    <HBox spacing="10" alignment="CENTER">
-        <Label text="کلمات کلیدی:" style="-fx-font-weight: bold;"/>
-        <Label fx:id="keywordsLabel"/>
+    <HBox alignment="CENTER" spacing="10">
+        <Label style="-fx-font-weight: bold;" text="کلمات کلیدی:" />
+        <Label fx:id="keywordsLabel" />
     </HBox>
 
 </VBox>

@@ -10,35 +10,37 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.RestaurantMenuController">
+<AnchorPane prefHeight="600.0" prefWidth="733.0" style="-fx-background-color: linear-gradient(to bottom,#ededed,#f7f7f7);" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.RestaurantMenuController">
 
-    <SplitPane dividerPositions="0.5" orientation="HORIZONTAL" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+    <SplitPane dividerPositions="0.5" orientation="HORIZONTAL" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+
         <!-- فرم افزودن آیتم (سمت چپ) -->
-        <VBox maxWidth="400" minWidth="250" prefWidth="320" spacing="10">
+        <VBox maxWidth="400" minWidth="250" prefWidth="320" spacing="10" style="-fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold;">
             <HBox spacing="10">
-                <TextField fx:id="itemNameField" prefWidth="90" promptText="نام آیتم" />
-                <TextField fx:id="itemDescField" prefWidth="120" promptText="توضیحات" />
+                <TextField fx:id="itemNameField" prefWidth="90" promptText="نام آیتم" style="-fx-background-radius: 10; -fx-font-family: 'Vazirmatn', Tahoma, Arial;" />
+                <TextField fx:id="itemDescField" prefWidth="120" promptText="توضیحات" style="-fx-background-radius: 10; -fx-font-family: 'Vazirmatn', Tahoma, Arial;" />
             </HBox>
             <HBox spacing="10">
-                <TextField fx:id="itemPriceField" prefWidth="70" promptText="قیمت" />
-                <TextField fx:id="itemSupplyField" prefWidth="60" promptText="موجودی" />
-                <TextField fx:id="itemKeywordsField" prefWidth="110" promptText="کلمات کلیدی (مثلاً: پیتزا,ایتالیایی)" />
+                <TextField fx:id="itemPriceField" prefWidth="70" promptText="قیمت" style="-fx-background-radius: 10; -fx-font-family: 'Vazirmatn', Tahoma, Arial;" />
+                <TextField fx:id="itemSupplyField" prefWidth="60" promptText="موجودی" style="-fx-background-radius: 10; -fx-font-family: 'Vazirmatn', Tahoma, Arial;" />
+                <TextField fx:id="itemKeywordsField" prefWidth="110" promptText="کلمات کلیدی (مثلاً: پیتزا,ایتالیایی)" style="-fx-background-radius: 10; -fx-font-family: 'Vazirmatn', Tahoma, Arial;" />
             </HBox>
             <HBox spacing="10">
-                <Button fx:id="chooseImageBtn" onAction="#handleChooseImage" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="انتخاب عکس" />
-                <Button fx:id="addItemBtn" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="افزودن آیتم" />
-                <Button fx:id="clearMenuBtn" style="-fx-background-color: #d9534f; -fx-text-fill: white;" text="حذف کل منو" />
+                <Button fx:id="chooseImageBtn" onAction="#handleChooseImage" style="-fx-background-color: #191919; -fx-text-fill: #fff; -fx-background-radius: 12; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold;" text="انتخاب عکس" />
+                <Button fx:id="addItemBtn" style="-fx-background-color: #191919; -fx-text-fill: #fff; -fx-background-radius: 12; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold;" text="افزودن آیتم" />
+                <Button fx:id="clearMenuBtn" style="-fx-background-color: #e85a5a; -fx-text-fill: #fff; -fx-background-radius: 12; -fx-font-family: 'Vazirmatn', Tahoma, Arial;" text="حذف کل منو" />
             </HBox>
-         <ImageView  fx:id="itemImageView" fitHeight="76.0" fitWidth="86.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="itemImageView" fitHeight="76.0" fitWidth="86.0" pickOnBounds="true" preserveRatio="true" style="-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, #ccc, 5,0,0,1);" />
         </VBox>
+
         <!-- جدول نمایش منو (سمت راست) -->
-        <TableView fx:id="menuTable" prefWidth="540">
+        <TableView fx:id="menuTable" prefWidth="540" style="-fx-background-radius: 12; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold;">
             <columns>
-                <TableColumn fx:id="colName" text="نام" />
-                <TableColumn fx:id="colPrice" text="قیمت" />
-                <TableColumn fx:id="colSupply" text="موجودی" />
-                <TableColumn fx:id="colEdit" text="ویرایش" />
-                <TableColumn fx:id="colDelete" text="حذف" />
+                <TableColumn fx:id="colName" prefWidth="67.19995422363263" text="نام" />
+                <TableColumn fx:id="colPrice" prefWidth="65.60003662109375" text="قیمت" />
+                <TableColumn fx:id="colSupply" prefWidth="68.800048828125" text="موجودی" />
+                <TableColumn fx:id="colEdit" minWidth="0.0" prefWidth="79.19993591308594" text="ویرایش" />
+                <TableColumn fx:id="colDelete" prefWidth="76.0" text="حذف" />
             </columns>
         </TableView>
     </SplitPane>

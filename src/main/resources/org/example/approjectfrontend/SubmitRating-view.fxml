@@ -1,23 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.SubmitRatingController" spacing="15" style="-fx-padding: 20; -fx-background-color: #fafafa;" alignment="CENTER">
-    <Label text="ثبت نظر برای سفارش" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-    <Label fx:id="orderIdLabel" text="سفارش #..."/>
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.approjectfrontend.SubmitRatingController"
+      spacing="20"
+      alignment="CENTER"
+      style="-fx-padding: 32 24;
+             -fx-background-color: linear-gradient(to bottom,#ededed,#f7f7f7);
+             -fx-background-radius: 18;
+             -fx-effect: dropshadow(gaussian,rgba(180,180,180,0.10),14,0,0,2);
+             " prefHeight="600.0" prefWidth="733.0">
 
-    <Label text="امتیاز شما (از ۱ تا ۵):"/>
-    <Slider fx:id="ratingSlider" min="1" max="5" blockIncrement="1" majorTickUnit="1" minorTickCount="0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="3"/>
-    <Label fx:id="ratingValueLabel" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+    <Label text="ثبت نظر برای سفارش"
+           style="-fx-font-size: 22px;
+                  -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #191919;"/>
 
-    <Label text="نظر شما:"/>
-    <TextArea fx:id="commentArea" promptText="نظر خود را اینجا بنویسید..." wrapText="true"/>
+    <Label fx:id="orderIdLabel"
+           text="سفارش #..."
+           style="-fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                  -fx-font-size: 16px;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #242424;"/>
 
-    <Button fx:id="submitButton" text="ثبت نهایی نظر" onAction="#handleSubmitRating" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
-    <Label fx:id="messageLabel" style="-fx-text-fill: red;"/>
+    <Label text="امتیاز شما (از ۱ تا ۵):"
+           style="-fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                  -fx-font-size: 15px;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #1d1d1d;"/>
+    <Slider fx:id="ratingSlider" min="1" max="5" blockIncrement="1"
+            majorTickUnit="1" minorTickCount="0"
+            showTickLabels="true" showTickMarks="true" snapToTicks="true"
+            value="3"
+            style=""/>
+    <Label fx:id="ratingValueLabel"
+           style="-fx-font-size: 14px;
+                  -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #191919;"/>
+
+    <Label text="نظر شما:"
+           style="-fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                  -fx-font-size: 15px;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #1d1d1d;"/>
+    <TextArea fx:id="commentArea"
+              promptText="نظر خود را اینجا بنویسید..."
+              wrapText="true"
+              style="-fx-background-color: #fff;
+                     -fx-background-radius: 10;
+                     -fx-border-color: #e3e3e3;
+                     -fx-border-width: 1.1;
+                     -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                     -fx-font-size: 15px;
+                     -fx-font-weight: bold;"/>
+
+    <Button fx:id="submitButton" text="ثبت نهایی نظر" onAction="#handleSubmitRating"
+            style="-fx-background-color: #191919;
+                   -fx-text-fill: #fff;
+                   -fx-font-size: 16px;
+                   -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                   -fx-font-weight: bold;
+                   -fx-background-radius: 12;
+                   -fx-cursor: hand;
+                   -fx-padding: 6 0;
+                   -fx-min-width: 160;"/>
+    <Label fx:id="messageLabel"
+           style="-fx-text-fill: #d10d3b;
+                  -fx-font-family: 'Vazirmatn', Tahoma, Arial;
+                  -fx-font-size: 14px;"/>
 </VBox>

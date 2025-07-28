@@ -1,34 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.approjectfrontend.AdminUsersController"
-      spacing="18"
-      alignment="TOP_CENTER"
-      style="-fx-background-color: linear-gradient(to bottom right, #f3f8fd 60%, #d6e0f7 100%); -fx-padding: 32 40 32 40;">
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
 
-    <Label text="لیست کاربران"
-           style="-fx-font-size: 22px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-text-fill: #255DA4;"/>
+<VBox alignment="TOP_CENTER" spacing="18" style="-fx-background-color: linear-gradient(to bottom right, #f3f8fd 60%, #d6e0f7 100%); -fx-padding: 32 40 32 40;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.AdminUsersController">
 
-    <TableView fx:id="usersTable"
-               prefHeight="420"
-               prefWidth="720"
-               style="-fx-background-color: #fff; -fx-border-color: #c3d5ee; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, #8aaae5, 8, 0.2, 0.0, 2.0);">
+    <Label style="-fx-font-size: 22px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-text-fill: #255DA4;" text="لیست کاربران" />
+
+    <TableView fx:id="usersTable" prefHeight="420" prefWidth="720" style="-fx-background-color: #fff; -fx-border-color: #c3d5ee; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, #8aaae5, 8, 0.2, 0.0, 2.0);">
         <columns>
             <!-- ستون شماره ردیف -->
-            <TableColumn fx:id="colSerial" text="ردیف" prefWidth="48" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colSerial" prefWidth="103.20001220703125" style="-fx-alignment: CENTER;" text="ردیف" />
             <!-- ستون شناسه کاربر -->
-            <TableColumn fx:id="colId" text="شناسه" prefWidth="65" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colId" prefWidth="81.60000610351562" style="-fx-alignment: CENTER;" text="شناسه" />
             <!-- ستون نام -->
-            <TableColumn fx:id="colName" text="نام" prefWidth="130" style="-fx-alignment: CENTER_LEFT;"/>
+            <TableColumn fx:id="colName" prefWidth="89.5999755859375" style="-fx-alignment: CENTER_LEFT;" text="نام" />
             <!-- ستون ایمیل -->
-            <TableColumn fx:id="colEmail" text="ایمیل" prefWidth="185" style="-fx-alignment: CENTER_LEFT;"/>
+            <TableColumn fx:id="colEmail" prefWidth="237.60003662109375" style="-fx-alignment: CENTER_LEFT;" text="ایمیل" />
             <!-- ستون وضعیت -->
-            <TableColumn fx:id="colStatus" text="وضعیت" prefWidth="100" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colStatus" prefWidth="107.99993896484375" style="-fx-alignment: CENTER;" text="وضعیت" />
             <!-- ستون عملیات -->
-            <TableColumn fx:id="colActions" text="عملیات" prefWidth="140" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colActions" prefWidth="100.800048828125" style="-fx-alignment: CENTER;" text="عملیات" />
         </columns>
     </TableView>
 </VBox>

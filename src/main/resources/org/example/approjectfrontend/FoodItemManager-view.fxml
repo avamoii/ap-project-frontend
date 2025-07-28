@@ -1,39 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.FoodItemManagerController">
-    <SplitPane dividerPositions="0.6" orientation="HORIZONTAL" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
-        <VBox minWidth="380.0" spacing="10" style="-fx-padding: 10;">
-            <Label fx:id="menuTitleLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+<AnchorPane prefHeight="600.0" prefWidth="733.0" style="-fx-background-color: linear-gradient(to bottom,#f7f7f7,#ebebeb);" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.FoodItemManagerController">
+
+    <SplitPane dividerPositions="0.52" orientation="HORIZONTAL" style="-fx-background-radius:18; -fx-padding:0;" AnchorPane.bottomAnchor="18" AnchorPane.leftAnchor="18" AnchorPane.rightAnchor="18" AnchorPane.topAnchor="18">
+
+        <!-- بخش فرم افزودن/ویرایش -->
+        <VBox minWidth="340.0" spacing="16" style="-fx-background-color: #fff; -fx-background-radius:18; -fx-effect: dropshadow(three-pass-box,#cdcdcd,14,0.10,0,2); -fx-padding:24 17 24 17;">
+
+            <Label fx:id="menuTitleLabel" style="-fx-font-size: 18.5px; -fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-font-weight: bold; -fx-text-fill:#232323;" />
+
             <HBox spacing="10">
-                <TextField fx:id="itemNameField" promptText="نام آیتم" HBox.hgrow="ALWAYS" />
-                <TextField fx:id="itemDescField" promptText="توضیحات" HBox.hgrow="ALWAYS" />
+                <TextField fx:id="itemNameField" promptText="نام آیتم" style="-fx-background-color: #fafafa; -fx-border-color: #dedede; -fx-border-radius:7; -fx-background-radius:7; -fx-font-family:'Vazirmatn',Tahoma,Arial;" HBox.hgrow="ALWAYS" />
+                <TextField fx:id="itemDescField" promptText="توضیحات" style="-fx-background-color: #fafafa; -fx-border-color: #dedede; -fx-border-radius:7; -fx-background-radius:7; -fx-font-family:'Vazirmatn',Tahoma,Arial;" HBox.hgrow="ALWAYS" />
             </HBox>
+
             <HBox spacing="10">
-                <TextField fx:id="itemPriceField" promptText="قیمت" />
-                <TextField fx:id="itemSupplyField" promptText="موجودی" />
+                <TextField fx:id="itemPriceField" promptText="قیمت" style="-fx-background-color: #fafafa; -fx-border-color: #dedede; -fx-border-radius:7; -fx-background-radius:7; -fx-font-family:'Vazirmatn',Tahoma,Arial;" />
+                <TextField fx:id="itemSupplyField" promptText="موجودی" style="-fx-background-color: #fafafa; -fx-border-color: #dedede; -fx-border-radius:7; -fx-background-radius:7; -fx-font-family:'Vazirmatn',Tahoma,Arial;" />
             </HBox>
-            <TextField fx:id="itemKeywordsField" promptText="کلمات کلیدی (با کاما جدا کنید)" />
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <Button fx:id="chooseImageBtn" onAction="#handleChooseImage" style="-fx-background-color: #5cb85c; -fx-text-fill: white;" text="انتخاب عکس" />
-                <Button fx:id="addItemBtn" onAction="#handleAddOrEditItem" style="-fx-background-color: #337ab7; -fx-text-fill: white;" text="افزودن آیتم" />
-                <Button onAction="#handleGoBackToMenus" style="-fx-background-color: #f0ad4e; -fx-text-fill: white;" text="بازگشت به لیست منوها" />
+
+            <TextField fx:id="itemKeywordsField" promptText="کلمات کلیدی (با کاما جدا کنید)" style="-fx-background-color: #fafafa; -fx-border-color:#dedede; -fx-border-radius:7; -fx-background-radius:7; -fx-font-family:'Vazirmatn',Tahoma,Arial;" />
+
+            <HBox alignment="CENTER_RIGHT" spacing="9">
+                <Button fx:id="chooseImageBtn" onAction="#handleChooseImage" prefHeight="30.0" prefWidth="175.0" style="-fx-background-color:#fff; -fx-border-color:#888; -fx-text-fill:#222; -fx-background-radius:8; -fx-border-radius:8; -fx-font-weight:bold; -fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-cursor: hand;" text="انتخاب عکس" />
+                <Button fx:id="addItemBtn" onAction="#handleAddOrEditItem" prefHeight="27.0" prefWidth="141.0" style="-fx-background-color:#191919; -fx-text-fill:#fff; -fx-background-radius:8; -fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-font-weight:bold; -fx-cursor: hand;" text="افزودن " />
+                <Button onAction="#handleGoBackToMenus" prefHeight="30.0" prefWidth="203.0" style="-fx-background-color:#fff3; -fx-border-color:#f1ba51; -fx-text-fill:#ba7301; -fx-background-radius:8; -fx-border-radius:8; -fx-font-family:'Vazirmatn',Tahoma,Arial; -fx-cursor: hand;" text="بازگشت به منو" />
             </HBox>
-            <ImageView fx:id="itemImageView" fitHeight="76.0" fitWidth="86.0" pickOnBounds="true" preserveRatio="true" />
-            <Label fx:id="messageLabel" managed="false" visible="false" wrapText="true"/>
+
+            <ImageView fx:id="itemImageView" fitHeight="74.0" fitWidth="84.0" pickOnBounds="true" preserveRatio="true" style="-fx-background-radius:8;-fx-effect:dropshadow(three-pass-box,#eeecee,4,0.08,0,1);" />
+
+            <Label fx:id="messageLabel" managed="false" style="-fx-text-fill:#168151; -fx-font-family:'Vazirmatn',Tahoma,Arial;" visible="false" wrapText="true" />
         </VBox>
-        <TableView fx:id="menuTable">
+
+        <!-- جدول منو -->
+        <TableView fx:id="menuTable" prefHeight="463.0" prefWidth="436.0" style="-fx-background-color:#fff; -fx-border-radius:14; -fx-background-radius:14; -fx-effect: dropshadow(three-pass-box, #e3e3e3, 12, 0.07, 0, 1); -fx-font-family:'Vazirmatn',Tahoma,Arial;">
             <columns>
-                <TableColumn fx:id="colName" prefWidth="100.0" text="نام" />
-                <TableColumn fx:id="colPrice" prefWidth="75.0" text="قیمت" />
-                <TableColumn fx:id="colSupply" prefWidth="75.0" text="موجودی" />
-                <TableColumn fx:id="colEdit" prefWidth="60.0" text="ویرایش" />
-                <TableColumn fx:id="colDelete" prefWidth="60.0" text="حذف" />
+                <TableColumn fx:id="colName" prefWidth="60.000000762939635" text="نام" />
+                <TableColumn fx:id="colPrice" prefWidth="62.400020599365234" text="قیمت" />
+                <TableColumn fx:id="colSupply" prefWidth="60.0" text="موجودی" />
+                <TableColumn fx:id="colEdit" prefWidth="80.80000305175781" text="ویرایش" />
+                <TableColumn fx:id="colDelete" prefWidth="70.4000244140625" text="حذف" />
             </columns>
         </TableView>
+
     </SplitPane>
 </AnchorPane>

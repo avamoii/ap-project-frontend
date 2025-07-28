@@ -1,45 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.approjectfrontend.AdminTransactionsController"
-      spacing="18"
-      alignment="TOP_CENTER"
-      style="-fx-background-color: linear-gradient(to bottom right, #f6fafc 65%, #e6f2fb 100%);
-             -fx-padding: 32 40 32 40;">
+<?import javafx.scene.layout.VBox?>
 
-    <Label text="تراکنش‌های مالی"
-           style="-fx-font-size: 21px;
-                  -fx-font-family: 'Vazirmatn', Tahoma, Arial;
-                  -fx-font-weight: bold;
-                  -fx-text-fill: #207088;
-                  -fx-padding: 0 0 12 0;"/>
+<VBox alignment="TOP_CENTER" spacing="18" style="-fx-background-color: linear-gradient(to bottom right, #f6fafc 65%, #e6f2fb 100%);              -fx-padding: 32 40 32 40;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.AdminTransactionsController">
 
-    <TableView fx:id="transactionsTable"
-               prefHeight="420"
-               prefWidth="540"
-               style="-fx-background-color: #fff;
-                      -fx-border-color: #b7c9ea;
-                      -fx-border-radius: 10;
-                      -fx-background-radius: 10;
-                      -fx-effect: dropshadow(three-pass-box, #acd5ea, 7, 0.17, 0.0, 1.8);">
+    <Label style="-fx-font-size: 21px;                   -fx-font-family: 'Vazirmatn', Tahoma, Arial;                   -fx-font-weight: bold;                   -fx-text-fill: #207088;                   -fx-padding: 0 0 12 0;" text="تراکنش‌های مالی" />
+
+    <TableView fx:id="transactionsTable" prefHeight="420" prefWidth="540" style="-fx-background-color: #fff;                       -fx-border-color: #b7c9ea;                       -fx-border-radius: 10;                       -fx-background-radius: 10;                       -fx-effect: dropshadow(three-pass-box, #acd5ea, 7, 0.17, 0.0, 1.8);">
         <columns>
             <!-- ستون ردیف (شماره سریال) -->
-            <TableColumn fx:id="colSerial" text="ردیف" prefWidth="48" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colSerial" prefWidth="76.79998779296875" style="-fx-alignment: CENTER;" text="ردیف" />
             <!-- ستون شناسه تراکنش -->
-            <TableColumn fx:id="colId" text="شناسه" prefWidth="52" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colId" prefWidth="77.60004425048828" style="-fx-alignment: CENTER;" text="شناسه" />
             <!-- ستون شماره سفارش -->
-            <TableColumn fx:id="colOrderId" text="شماره سفارش" prefWidth="95" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colOrderId" prefWidth="104.79998779296875" style="-fx-alignment: CENTER;" text="شماره سفارش" />
             <!-- ستون مبلغ -->
-            <TableColumn fx:id="colAmount" text="مبلغ" prefWidth="90" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colAmount" prefWidth="88.00006103515625" style="-fx-alignment: CENTER;" text="مبلغ" />
             <!-- ستون وضعیت -->
-            <TableColumn fx:id="colStatus" text="وضعیت" prefWidth="98" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colStatus" prefWidth="97.60003662109375" style="-fx-alignment: CENTER;" text="وضعیت" />
             <!-- ستون تاریخ -->
-            <TableColumn fx:id="colDate" text="تاریخ" prefWidth="120" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colDate" prefWidth="96.80001831054688" style="-fx-alignment: CENTER;" text="تاریخ" />
         </columns>
     </TableView>
 </VBox>

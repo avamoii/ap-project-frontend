@@ -11,7 +11,7 @@
 <VBox xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.approjectfrontend.SignupController"
       alignment="CENTER" spacing="18"
-      style="-fx-background-color: linear-gradient(to bottom, #f2f2f2, #e0e0e0); -fx-min-height: 100vh;">
+      style="-fx-background-color: linear-gradient(to bottom, #f2f2f2, #e0e0e0); -fx-min-height: 100vh;" prefHeight="600.0" prefWidth="733.0">
 
    <VBox alignment="CENTER" spacing="14"
          style="-fx-background-color: white; -fx-padding: 34; -fx-border-radius: 18px; -fx-background-radius: 18px; -fx-effect: dropshadow(three-pass-box, #bbb, 15, 0.16, 0, 4);">
