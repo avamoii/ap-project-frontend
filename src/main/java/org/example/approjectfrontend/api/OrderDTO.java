@@ -19,8 +19,9 @@ public class OrderDTO {
     @SerializedName("status") private String status;
     @SerializedName("created_at") private String createdAt;
     @SerializedName("updated_at") private String updatedAt;
+    @SerializedName("customer_name") private String customerName;
+    @SerializedName("restaurant_name") private String restaurantName;
 
-    // --- فیلد جدید برای شناسه نظر ---
     @SerializedName("rating_id") private Long ratingId;
 
     // Getters
@@ -39,5 +40,7 @@ public class OrderDTO {
     public String getStatus() { return status; }
     public String getCreatedAt() { return createdAt; }
     public String getUpdatedAt() { return updatedAt; }
-    public Long getRatingId() { return ratingId; } // Getter برای فیلد جدید
+    public Long getRatingId() { return ratingId; }
+    public String getCustomerName() { return customerName; }
+    public String getRestaurantName() { return restaurantName; }
 }

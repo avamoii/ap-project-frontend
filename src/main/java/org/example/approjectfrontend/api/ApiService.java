@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ApiService {
 
-    private static final String API_BASE_URL = "http://localhost:1216"; // پورت به 1215 اصلاح شد
+    private static final String API_BASE_URL = "http://localhost:1216";
     private static final HttpClient client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(10))
@@ -21,7 +21,6 @@ public class ApiService {
     // --- متدهای احراز هویت ---
     public static ApiResponse register(RegisterRequest requestData) {
         String jsonBody = gson.toJson(requestData);
-        // تمام پیشوندهای /api حذف شدند تا با بک‌اند هماهنگ شوند
         return sendPostRequest("/auth/register", jsonBody, false);
     }
 
@@ -36,18 +35,19 @@ public class ApiService {
     }
 
     // --- متدهای پروفایل ---
-    public static ApiResponse getProfile() {
-        return sendGetRequestWithAuth("/auth/profile");
+    public static ApiResponse getUserProfile() {
+        return sendGetRequestWithAuth("/profile");
     }
 
     public static ApiResponse updateProfile(UpdateProfileRequest profileData) {
         String jsonBody = gson.toJson(profileData);
-        return sendPutRequestWithAuth("/auth/profile", jsonBody);
+        return sendPutRequestWithAuth("/profile", jsonBody);
     }
 
     // --- متدهای خریدار ---
     public static ApiResponse getVendors() {
-        return sendPostRequestWithAuth("/vendors", "{}");
+        // **این نسخه صحیح است که از GET استفاده می‌کند**
+        return sendGetRequestWithAuth("/vendors");
     }
 
     public static ApiResponse getRestaurantMenu(long restaurantId) {
@@ -85,27 +85,30 @@ public class ApiService {
     }
 
     // --- متدهای عمومی (کیف پول، پرداخت، تراکنش، نظرات) ---
-    public static ApiResponse topUpWallet(int amount) {
-        TopUpWalletRequest requestData = new TopUpWalletRequest(amount);
-        String jsonBody = gson.toJson(requestData);
-        return sendPostRequestWithAuth("/wallet/top-up", jsonBody);
+    public static ApiResponse topUpWallet(TopUpWalletRequest topUpRequest) {
+        String jsonBody = gson.toJson(topUpRequest);
+        return sendPostRequestWithAuth("/wallet/deposit", jsonBody);
     }
 
     public static ApiResponse makePayment(PaymentRequest paymentRequest) {
         String jsonBody = gson.toJson(paymentRequest);
-        return sendPostRequestWithAuth("/payment/online", jsonBody);
+        return sendPostRequestWithAuth("/payment", jsonBody);
     }
 
     public static ApiResponse getTransactionHistory() {
         return sendGetRequestWithAuth("/transactions");
     }
 
+    public static ApiResponse checkCoupon(String couponCode) {
+        return sendGetRequestWithAuth("/coupons?coupon_code=" + couponCode);
+    }
+
+    // --- متدهای نظرات ---
     public static ApiResponse submitRating(SubmitRatingRequest ratingData) {
         String jsonBody = gson.toJson(ratingData);
         return sendPostRequestWithAuth("/ratings", jsonBody);
     }
 
-    // --- متدهای جدید ---
     public static ApiResponse getRatingDetails(long ratingId) {
         return sendGetRequestWithAuth("/ratings/" + ratingId);
     }
@@ -176,8 +179,39 @@ public class ApiService {
         return sendDeleteRequestWithAuth("/restaurants/" + restaurantId + "/menu/" + menuTitle + "/" + itemId);
     }
 
+    // --- متدهای ادمین ---
+    public static ApiResponse getAdminUsers() {
+        return sendGetRequestWithAuth("/admin/users");
+    }
+    public static ApiResponse updateUserStatus(long userId, String status) {
+        String jsonBody = gson.toJson(Map.of("status", status));
+        return sendPatchRequestWithAuth("/admin/users/" + userId + "/status", jsonBody);
+    }
+    public static ApiResponse getAdminOrders() {
+        return sendGetRequestWithAuth("/admin/orders");
+    }
+    public static ApiResponse getAdminTransactions() {
+        return sendGetRequestWithAuth("/admin/transactions");
+    }
+    public static ApiResponse getAdminCoupons() {
+        return sendGetRequestWithAuth("/admin/coupons");
+    }
+
+    public static ApiResponse createCoupon(CreateCouponRequest couponData) {
+        String jsonBody = gson.toJson(couponData);
+        return sendPostRequestWithAuth("/admin/coupons", jsonBody);
+    }
+    public static ApiResponse updateCoupon(long couponId, CreateCouponRequest couponData) {
+        String jsonBody = gson.toJson(couponData);
+        return sendPutRequestWithAuth("/admin/coupons/" + couponId, jsonBody);
+    }
+
+    public static ApiResponse deleteCoupon(long couponId) {
+        return sendDeleteRequestWithAuth("/admin/coupons/" + couponId);
+    }
+
     // =======================================================================================
-    // --- متدهای کمکی برای ارسال درخواست‌ها (برای جلوگیری از تکرار کد) ---
+    // --- متدهای کمکی برای ارسال درخواست‌ها ---
     // =======================================================================================
 
     private static ApiResponse sendGetRequestWithAuth(String path) {
@@ -191,7 +225,7 @@ public class ApiService {
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
         } catch (Exception e) {
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+            return new ApiResponse(503, "{\"error\":\"Could not connect to the server.\"}");
         }
     }
 
@@ -209,7 +243,7 @@ public class ApiService {
             HttpResponse<String> httpResponse = client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
         } catch (Exception e) {
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+            return new ApiResponse(503, "{\"error\":\"Could not connect to the server.\"}");
         }
     }
 
@@ -230,7 +264,7 @@ public class ApiService {
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
         } catch (Exception e) {
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+            return new ApiResponse(503, "{\"error\":\"Could not connect to the server.\"}");
         }
     }
 
@@ -246,7 +280,7 @@ public class ApiService {
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
         } catch (Exception e) {
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+            return new ApiResponse(503, "{\"error\":\"Could not connect to the server.\"}");
         }
     }
 
@@ -261,7 +295,7 @@ public class ApiService {
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
         } catch (Exception e) {
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+            return new ApiResponse(503, "{\"error\":\"Could not connect to the server.\"}");
         }
     }
 }

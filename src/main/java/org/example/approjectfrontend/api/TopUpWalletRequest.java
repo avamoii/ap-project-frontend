@@ -2,14 +2,22 @@ package org.example.approjectfrontend.api;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * این کلاس مدل داده برای ارسال درخواست شارژ کیف پول به سرور است.
- */
 public class TopUpWalletRequest {
     @SerializedName("amount")
-    private final Integer amount;
+    private Integer amount;
 
-    public TopUpWalletRequest(Integer amount) {
+    /**
+     * A no-argument constructor is added to allow instantiation
+     * with `new TopUpWalletRequest()`.
+     */
+    public TopUpWalletRequest() {
+    }
+
+    /**
+     * The missing setter method is added so the amount can be set
+     * after the object is created.
+     */
+    public void setAmount(Integer amount) {
         this.amount = amount;
     }
 

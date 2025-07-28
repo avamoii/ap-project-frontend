@@ -98,7 +98,7 @@ public class LoginController {
     }
 
     private void goToHomeByRole(String role) {
-        String fxmlPath = "";
+        String fxmlPath;
         switch (role) {
             case "buyer":
                 fxmlPath = "/org/example/approjectfrontend/BuyerHome-view.fxml";
@@ -108,6 +108,11 @@ public class LoginController {
                 break;
             case "courier":
                 fxmlPath = "/org/example/approjectfrontend/CourierHome-view.fxml";
+                break;
+            // --- **تغییر اصلی و کلیدی اینجاست** ---
+            // یک case جدید برای نقش ادمین اضافه می‌کنیم
+            case "admin":
+                fxmlPath = "/org/example/approjectfrontend/AdminDashboard-view.fxml";
                 break;
             default:
                 messageLabel.setStyle("-fx-text-fill: red;");

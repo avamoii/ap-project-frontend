@@ -10,9 +10,10 @@ public class UserDTO {
     @SerializedName("address") private String address;
     @SerializedName("email") private String email;
     @SerializedName("bank_info") private BankInfoDTO bankInfo;
-
-    // --- فیلد جدید برای موجودی کیف پول ---
     @SerializedName("wallet_balance") private Integer walletBalance;
+
+    // --- فیلد جدید برای وضعیت کاربر ---
+    @SerializedName("status") private String status; // PENDING, APPROVED, REJECTED
 
     // Getters
     public long getId() { return id; }
@@ -22,7 +23,8 @@ public class UserDTO {
     public String getAddress() { return address; }
     public String getEmail() { return email; }
     public BankInfoDTO getBankInfo() { return bankInfo; }
-    public Integer getWalletBalance() { return walletBalance; } // Getter برای فیلد جدید
+    public Integer getWalletBalance() { return walletBalance; }
+    public String getStatus() { return status; } // Getter برای فیلد جدید
 
     // Setters
     public void setFullName(String fullName) { this.fullName = fullName; }
@@ -30,5 +32,6 @@ public class UserDTO {
     public void setAddress(String address) { this.address = address; }
     public void setEmail(String email) { this.email = email; }
     public void setBankInfo(BankInfoDTO bankInfo) { this.bankInfo = bankInfo; }
-    public void setWalletBalance(Integer walletBalance) { this.walletBalance = walletBalance; } // Setter برای فیلد جدید
+    public void setWalletBalance(Integer walletBalance) { this.walletBalance = walletBalance; }
+    public void setStatus(String status) { this.status = status; } // Setter برای فیلد جدید
 }

@@ -27,6 +27,7 @@ import org.example.approjectfrontend.api.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -44,14 +45,16 @@ public class RestaurantPageController {
     @FXML private Button submitAndPayButton;
     @FXML private Button backButton;
     @FXML private ToggleButton favoriteButton;
+    @FXML private TextField couponCodeField;
+    @FXML private Button applyCouponButton;
+    @FXML private Label couponStatusLabel;
 
     private RestaurantDTO currentRestaurant;
     private final ObservableList<FoodItemDTO> allItems = FXCollections.observableArrayList();
     private final Map<FoodItemDTO, Spinner<Integer>> itemSpinners = new HashMap<>();
-    private List<Long> favoriteRestaurantIds = new ArrayList<>();
+    private Coupon appliedCoupon = null;
 
     public void initialize() {
-        // (این متد بدون تغییر باقی می‌ماند)
         menuListView.setCellFactory(list -> new ListCell<>() {
             private final VBox mainVBox = new VBox(5);
             private final HBox topHBox = new HBox(10);
@@ -115,73 +118,10 @@ public class RestaurantPageController {
             byte[] decodedBytes = Base64.getDecoder().decode(restaurant.getLogoBase64());
             logoView.setImage(new Image(new ByteArrayInputStream(decodedBytes)));
         }
-        if (restaurant.getAddress() != null) {
-            addressField.setText(restaurant.getAddress());
-        }
         loadFullMenu(restaurant.getId());
-        // --- تغییر کلیدی: وضعیت اولیه دکمه را از سرور می‌خوانیم ---
         checkFavoriteStatus();
     }
 
-    // --- متد جدید برای بررسی وضعیت رستوران در لیست علاقه‌مندی‌ها ---
-    private void checkFavoriteStatus() {
-        favoriteButton.setDisable(true); // غیرفعال کردن دکمه تا زمان دریافت پاسخ
-        new Thread(() -> {
-            ApiResponse response = ApiService.getFavorites();
-            Platform.runLater(() -> {
-                if (response.getStatusCode() == 200) {
-                    List<RestaurantDTO> favorites = new Gson().fromJson(response.getBody(), new TypeToken<List<RestaurantDTO>>() {}.getType());
-                    boolean isFavorite = favorites.stream().anyMatch(r -> r.getId().equals(currentRestaurant.getId()));
-                    updateFavoriteButtonState(isFavorite);
-                }
-                favoriteButton.setDisable(false); // فعال کردن مجدد دکمه
-            });
-        }).start();
-    }
-
-    // --- متد جدید برای مدیریت کلیک روی دکمه ---
-    @FXML
-    private void handleFavoriteChange(ActionEvent event) {
-        if (currentRestaurant == null) return;
-
-        boolean addToFavorites = favoriteButton.isSelected();
-        favoriteButton.setDisable(true);
-
-        new Thread(() -> {
-            ApiResponse response;
-            if (addToFavorites) {
-                response = ApiService.addFavorite(currentRestaurant.getId());
-            } else {
-                response = ApiService.removeFavorite(currentRestaurant.getId());
-            }
-
-            Platform.runLater(() -> {
-                if (response.getStatusCode() == 200) {
-                    updateFavoriteButtonState(addToFavorites);
-                } else {
-                    // در صورت خطا، دکمه را به حالت اولیه برمی‌گردانیم
-                    favoriteButton.setSelected(!addToFavorites);
-                    showAlert(Alert.AlertType.ERROR, "خطا", "خطا در تغییر وضعیت علاقه‌مندی‌ها.");
-                }
-                favoriteButton.setDisable(false);
-            });
-        }).start();
-    }
-
-    // --- متد جدید برای به‌روزرسانی ظاهر دکمه ---
-    private void updateFavoriteButtonState(boolean isFavorite) {
-        if (isFavorite) {
-            favoriteButton.setSelected(true);
-            favoriteButton.setText("حذف از علاقه‌مندی‌ها");
-            favoriteButton.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white;"); // رنگ قرمز برای حذف
-        } else {
-            favoriteButton.setSelected(false);
-            favoriteButton.setText("افزودن به علاقه‌مندی‌ها");
-            favoriteButton.setStyle("-fx-background-color: #5cb85c; -fx-text-fill: white;"); // رنگ سبز برای افزودن
-        }
-    }
-
-    // (بقیه متدهای کلاس بدون تغییر باقی می‌مانند)
     private void loadFullMenu(long restaurantId) {
         new Thread(() -> {
             ApiResponse response = ApiService.getRestaurantMenu(restaurantId);
@@ -197,7 +137,82 @@ public class RestaurantPageController {
                         }
                     }
                     menuListView.setItems(allItems);
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "خطا", "خطا در دریافت منوی رستوران.");
                 }
+            });
+        }).start();
+    }
+
+    private void checkFavoriteStatus() {
+        favoriteButton.setDisable(true);
+        new Thread(() -> {
+            ApiResponse response = ApiService.getFavorites();
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    List<RestaurantDTO> favorites = new Gson().fromJson(response.getBody(), new TypeToken<List<RestaurantDTO>>() {}.getType());
+                    boolean isFavorite = favorites.stream().anyMatch(r -> r.getId().equals(currentRestaurant.getId()));
+                    updateFavoriteButtonState(isFavorite);
+                }
+                favoriteButton.setDisable(false);
+            });
+        }).start();
+    }
+
+    @FXML
+    private void handleFavoriteChange(ActionEvent event) {
+        if (currentRestaurant == null) return;
+        boolean addToFavorites = favoriteButton.isSelected();
+        favoriteButton.setDisable(true);
+
+        new Thread(() -> {
+            ApiResponse response = addToFavorites ? ApiService.addFavorite(currentRestaurant.getId()) : ApiService.removeFavorite(currentRestaurant.getId());
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    updateFavoriteButtonState(addToFavorites);
+                } else {
+                    favoriteButton.setSelected(!addToFavorites);
+                    showAlert(Alert.AlertType.ERROR, "خطا", "خطا در تغییر وضعیت علاقه‌مندی‌ها.");
+                }
+                favoriteButton.setDisable(false);
+            });
+        }).start();
+    }
+
+    private void updateFavoriteButtonState(boolean isFavorite) {
+        if (isFavorite) {
+            favoriteButton.setSelected(true);
+            favoriteButton.setText("حذف از علاقه‌مندی‌ها");
+            favoriteButton.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white;");
+        } else {
+            favoriteButton.setSelected(false);
+            favoriteButton.setText("افزودن به علاقه‌مندی‌ها");
+            favoriteButton.setStyle("-fx-background-color: #5cb85c; -fx-text-fill: white;");
+        }
+    }
+
+    @FXML
+    private void handleApplyCoupon() {
+        String code = couponCodeField.getText().trim();
+        if (code.isEmpty()) {
+            appliedCoupon = null;
+            couponStatusLabel.setText("");
+            updateTotalPrice();
+            return;
+        }
+        new Thread(() -> {
+            ApiResponse response = ApiService.checkCoupon(code);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    appliedCoupon = new Gson().fromJson(response.getBody(), Coupon.class);
+                    couponStatusLabel.setText("کد تخفیف با موفقیت اعمال شد.");
+                    couponStatusLabel.setStyle("-fx-text-fill: green;");
+                } else {
+                    appliedCoupon = null;
+                    couponStatusLabel.setText("کد تخفیف نامعتبر است.");
+                    couponStatusLabel.setStyle("-fx-text-fill: red;");
+                }
+                updateTotalPrice();
             });
         }).start();
     }
@@ -207,7 +222,23 @@ public class RestaurantPageController {
         for (Map.Entry<FoodItemDTO, Spinner<Integer>> entry : itemSpinners.entrySet()) {
             total += (long) entry.getKey().getPrice() * entry.getValue().getValue();
         }
-        totalPriceLabel.setText("هزینه کل: " + total + " تومان");
+
+        if (appliedCoupon != null && appliedCoupon.getValue() != null) {
+            // --- **تغییر اصلی اینجاست** ---
+            if ("FIXED".equalsIgnoreCase(appliedCoupon.getType())) {
+                // تبدیل BigDecimal به long قبل از تفریق
+                total -= appliedCoupon.getValue().longValue();
+            } else if ("PERCENT".equalsIgnoreCase(appliedCoupon.getType())) {
+                // استفاده از BigDecimal برای محاسبه دقیق تخفیف درصدی
+                BigDecimal totalDecimal = BigDecimal.valueOf(total);
+                BigDecimal discountPercent = appliedCoupon.getValue();
+                BigDecimal hundred = BigDecimal.valueOf(100);
+
+                BigDecimal discountAmount = totalDecimal.multiply(discountPercent).divide(hundred, BigDecimal.ROUND_HALF_UP);
+                total -= discountAmount.longValue();
+            }
+        }
+        totalPriceLabel.setText(String.format("هزینه کل: %,d تومان", Math.max(0, total)));
     }
 
     @FXML
@@ -230,6 +261,9 @@ public class RestaurantPageController {
         }
 
         SubmitOrderRequest orderRequest = new SubmitOrderRequest(address, currentRestaurant.getId(), selectedItems);
+        if (appliedCoupon != null) {
+            orderRequest.setCouponId(appliedCoupon.getId());
+        }
 
         new Thread(() -> {
             ApiResponse response = ApiService.submitOrder(orderRequest);
@@ -247,20 +281,12 @@ public class RestaurantPageController {
     private void showPaymentMethodDialog(long orderId) {
         ChoiceDialog<String> dialog = new ChoiceDialog<>("پرداخت با کیف پول", "پرداخت با کیف پول", "پرداخت با کارت");
         dialog.setTitle("انتخاب روش پرداخت");
-        dialog.setHeaderText("سفارش شما با موفقیت ثبت شد. لطفاً روش پرداخت را انتخاب کنید.");
+        dialog.setHeaderText("سفارش شما با موفقیت ثبت شد.");
         dialog.setContentText("روش پرداخت:");
 
         dialog.showAndWait().ifPresent(selected -> {
-            String method = "";
-            if ("پرداخت با کیف پول".equals(selected)) {
-                method = "WALLET";
-            } else if ("پرداخت با کارت".equals(selected)) {
-                method = "ONLINE";
-            }
-
-            if (!method.isEmpty()) {
-                processPayment(orderId, method);
-            }
+            String method = "پرداخت با کیف پول".equals(selected) ? "WALLET" : "ONLINE";
+            processPayment(orderId, method);
         });
     }
 
@@ -274,11 +300,24 @@ public class RestaurantPageController {
                     Stage stage = (Stage) submitAndPayButton.getScene().getWindow();
                     stage.close();
                 } else {
-                    showAlert(Alert.AlertType.ERROR, "خطا در پرداخت", "پرداخت ناموفق بود.");
+                    // --- **تغییر اصلی اینجاست** ---
+                    // پیام خطا را از پاسخ JSON بک‌اند می‌خوانیم و نمایش می‌دهیم
+                    String errorMessage = "پرداخت ناموفق بود.";
+                    try {
+                        JsonObject errorJson = new Gson().fromJson(response.getBody(), JsonObject.class);
+                        if (errorJson != null && errorJson.has("error")) {
+                            errorMessage = errorJson.get("error").getAsString();
+                        }
+                    } catch (Exception e) {
+                        // اگر پاسخ JSON نبود، خود پاسخ را نمایش بده
+                        errorMessage = response.getBody();
+                    }
+                    showAlert(Alert.AlertType.ERROR, "خطا در پرداخت", errorMessage);
                 }
             });
         }).start();
     }
+
 
     private void showAlert(Alert.AlertType alertType, String title, String content) {
         Alert alert = new Alert(alertType);

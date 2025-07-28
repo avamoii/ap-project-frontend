@@ -8,13 +8,12 @@ module org.example.approjectfrontend {
     requires org.kordamp.bootstrapfx.core;
     requires java.net.http;
     requires java.desktop;
-
-    // خط زیر را اضافه کنید
     requires com.google.gson;
 
-    opens org.example.approjectfrontend to javafx.fxml;
+    // --- **تغییر اصلی اینجاست** ---
+    // این خط به Gson اجازه می‌دهد به کلاس‌های شما دسترسی داشته باشد
+    opens org.example.approjectfrontend to com.google.gson, javafx.fxml;
 
-    // این خط را اضافه کنید تا Gson بتواند به کلاس‌های شما در پکیج api دسترسی داشته باشد
     opens org.example.approjectfrontend.api to com.google.gson;
 
     exports org.example.approjectfrontend;
