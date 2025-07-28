@@ -8,31 +8,56 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.approjectfrontend.CourierProfileController"
+            prefHeight="600" prefWidth="400"
+            style="-fx-background-color: linear-gradient(to bottom, #f7f7f7, #eaeaea);">
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.CourierProfileController" prefHeight="600" prefWidth="400" style="-fx-background-color: #f6fff6;">
     <center>
-        <VBox alignment="CENTER" spacing="16">
+        <VBox alignment="CENTER" spacing="16"
+              style="-fx-background-color: white; -fx-background-radius: 24px; -fx-effect: dropshadow(three-pass-box, #bbbbbb, 16, 0.16, 0, 4);">
             <padding>
-                <Insets bottom="20" left="32" right="32" top="28" />
+                <Insets bottom="22" left="38" right="38" top="30"/>
             </padding>
-            <ImageView fx:id="profileImageView" fitHeight="100" fitWidth="100" style="-fx-background-radius: 50;" />
-            <Button fx:id="uploadButton" style="-fx-background-color: #54C16E; -fx-text-fill: white; -fx-background-radius: 15; -fx-font-size: 13;" text="انتخاب عکس" />
-            <TextField fx:id="usernameField" promptText="نام کاربری" style="-fx-background-radius: 10;" />
-            <TextField fx:id="emailField" promptText="ایمیل" style="-fx-background-radius: 10;" />
-            <TextField fx:id="phoneField" promptText="شماره تماس" style="-fx-background-radius: 10;" />
-            <TextField fx:id="bankNameField" promptText="نام بانک" style="-fx-background-radius: 10;" />
-            <TextField fx:id="accountNumberField" promptText="شماره اکانت" style="-fx-background-radius: 10;" />
-            <Button fx:id="saveButton" style="-fx-background-color: #54C16E; -fx-text-fill: white; -fx-background-radius: 15; -fx-font-size: 13;" text="ذخیره پروفایل" />
-            <Button fx:id="logoutButton" style="-fx-background-color: #e85a5a; -fx-text-fill: white; -fx-background-radius: 15; -fx-font-size: 13;" text="خروج از حساب کاربری" />
-            <Label fx:id="messageLabel" style="-fx-font-size: 13;" textFill="green" />
+            <ImageView fx:id="profileImageView" fitHeight="100" fitWidth="100"
+                       style="-fx-background-radius: 50%; -fx-border-radius: 50%; -fx-effect: dropshadow(three-pass-box, #bdbdbd, 8, 0.06, 0, 2);"/>
+            <Button fx:id="uploadButton"
+                    style="-fx-background-color: #111; -fx-text-fill: #fff; -fx-background-radius: 14; -fx-font-size: 14px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-cursor: hand;"
+                    text="انتخاب عکس"/>
+            <TextField fx:id="usernameField" promptText="نام کاربری"
+                       style="-fx-background-color: #fafafa; -fx-border-color: #d1d1d1; -fx-border-radius: 7px; -fx-background-radius: 7px; -fx-font-size: 15px; -fx-font-family: 'Vazirmatn', Tahoma, Arial;"/>
+            <TextField fx:id="emailField" promptText="ایمیل"
+                       style="-fx-background-color: #fafafa; -fx-border-color: #d1d1d1; -fx-border-radius: 7px; -fx-background-radius: 7px; -fx-font-size: 15px; -fx-font-family: 'Vazirmatn', Tahoma, Arial;"/>
+            <TextField fx:id="phoneField" promptText="شماره تماس"
+                       style="-fx-background-color: #fafafa; -fx-border-color: #d1d1d1; -fx-border-radius: 7px; -fx-background-radius: 7px; -fx-font-size: 15px; -fx-font-family: 'Vazirmatn', Tahoma, Arial;"/>
+            <TextField fx:id="bankNameField" promptText="نام بانک"
+                       style="-fx-background-color: #fafafa; -fx-border-color: #d1d1d1; -fx-border-radius: 7px; -fx-background-radius: 7px; -fx-font-size: 15px; -fx-font-family: 'Vazirmatn', Tahoma, Arial;"/>
+            <TextField fx:id="accountNumberField" promptText="شماره اکانت"
+                       style="-fx-background-color: #fafafa; -fx-border-color: #d1d1d1; -fx-border-radius: 7px; -fx-background-radius: 7px; -fx-font-size: 15px; -fx-font-family: 'Vazirmatn', Tahoma, Arial;"/>
+            <Button fx:id="saveButton"
+                    style="-fx-background-color: #111; -fx-text-fill: white; -fx-background-radius: 14; -fx-font-size: 15px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-cursor: hand;"
+                    text="ذخیره پروفایل"/>
+            <Button fx:id="logoutButton"
+                    style="-fx-background-color: #fff; -fx-border-color: #d22; -fx-text-fill: #d22; -fx-background-radius: 14; -fx-border-radius: 14; -fx-font-size: 14px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-cursor: hand;"
+                    text="خروج از حساب کاربری"/>
+            <Label fx:id="messageLabel"
+                   style="-fx-font-size: 13px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-text-fill: #109540;"/>
         </VBox>
     </center>
+
     <bottom>
-        <HBox alignment="CENTER" style="-fx-background-color: transparent; -fx-padding: 20 0 8 0;">
-            <HBox alignment="CENTER" maxWidth="340" spacing="18" style="-fx-background-color: #54C16E; -fx-padding: 9 32 9 32; -fx-background-radius: 20;">
-                <Button fx:id="homeBtn" minHeight="28" minWidth="70" style="-fx-background-radius: 10; -fx-font-size: 14px; -fx-text-fill: white; -fx-background-color: transparent;" text="خانه" />
-                <Button fx:id="historyBtn" minHeight="28" minWidth="70" style="-fx-background-radius: 10; -fx-font-size: 14px; -fx-text-fill: white; -fx-background-color: transparent;" text="تاریخچه" />
-                <Button fx:id="profileBtn" minHeight="28" minWidth="70" style="-fx-background-radius: 10; -fx-font-size: 14px; -fx-text-fill: white; -fx-background-color: transparent;" text="پروفایل" />
+        <HBox alignment="CENTER"
+              style="-fx-background-color: linear-gradient(to top, #ededed, #d7d7d7); -fx-padding: 20 0 8 0; -fx-border-color: #ccc; -fx-border-width: 1px 0 0 0;">
+            <HBox alignment="CENTER" maxWidth="340" spacing="19"
+                  style="-fx-background-color: #fff; -fx-background-radius: 18px; -fx-effect: dropshadow(three-pass-box, #cccccc, 7, 0.13, 0, 1);">
+
+                <Button fx:id="homeBtn" minHeight="31" minWidth="75"
+                        style="-fx-background-radius: 8px; -fx-font-size: 15px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-text-fill: #222; -fx-background-color: transparent;" text="خانه"/>
+                <Button fx:id="historyBtn" minHeight="31" minWidth="75"
+                        style="-fx-background-radius: 8px; -fx-font-size: 15px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-text-fill: #222; -fx-background-color: transparent;" text="تاریخچه"/>
+                <Button fx:id="profileBtn" minHeight="31" minWidth="75"
+                        style="-fx-background-radius: 8px; -fx-font-size: 15px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-background-color: #111; -fx-text-fill: white;" text="پروفایل"/>
             </HBox>
         </HBox>
     </bottom>
