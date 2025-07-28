@@ -3,10 +3,6 @@ package org.example.approjectfrontend.api;
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
-/**
- * این کلاس مدل داده برای یک سفارش است که از سرور دریافت می‌شود.
- * حالا شامل شناسه نظر (ratingId) نیز می‌باشد.
- */
 public class OrderDTO {
     @SerializedName("id") private Long id;
     @SerializedName("delivery_address") private String deliveryAddress;

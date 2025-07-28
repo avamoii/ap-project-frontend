@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ApiService {
 
-    private static final String API_BASE_URL = "http://localhost:1215"; // پورت به 1215 اصلاح شد
+    private static final String API_BASE_URL = "http://localhost:1216"; // پورت به 1215 اصلاح شد
     private static final HttpClient client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(10))
@@ -105,14 +105,19 @@ public class ApiService {
         return sendPostRequestWithAuth("/ratings", jsonBody);
     }
 
+    // --- متدهای جدید ---
     public static ApiResponse getRatingDetails(long ratingId) {
         return sendGetRequestWithAuth("/ratings/" + ratingId);
     }
-//
-//    public static ApiResponse updateRating(long ratingId, UpdateRatingRequest ratingData) {
-//        String jsonBody = gson.toJson(ratingData);
-//        return sendPutRequestWithAuth("/ratings/" + ratingId, jsonBody);
-//    }
+
+    public static ApiResponse updateRating(long ratingId, UpdateRatingRequest ratingData) {
+        String jsonBody = gson.toJson(ratingData);
+        return sendPutRequestWithAuth("/ratings/" + ratingId, jsonBody);
+    }
+
+    public static ApiResponse deleteRating(long ratingId) {
+        return sendDeleteRequestWithAuth("/ratings/" + ratingId);
+    }
 
     // --- متدهای پیک ---
     public static ApiResponse getAvailableDeliveries() {

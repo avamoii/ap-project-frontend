@@ -16,17 +16,20 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.approjectfrontend.api.ApiResponse;
 import org.example.approjectfrontend.api.ApiService;
-import org.example.approjectfrontend.api.FoodItemDTO;
 import org.example.approjectfrontend.api.RestaurantDTO;
 import org.example.approjectfrontend.util.SessionManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class BuyerHomeController implements Initializable {
@@ -41,20 +44,19 @@ public class BuyerHomeController implements Initializable {
     @FXML
     private VBox restaurantListVBox;
     @FXML
-    private VBox favoritesVBox; // [جدید] اتصال به VBox علاقه‌مندی‌ها در FXML
+    private VBox favoritesVBox;
 
     private List<RestaurantDTO> allRestaurants;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loadRestaurants();
-        loadFavorites(); // [جدید] فراخوانی متد برای بارگذاری علاقه‌مندی‌ها
+        loadFavorites();
 
         homeBtn.setDisable(true);
         searchField.textProperty().addListener((obs, oldValue, newValue) -> handleSearch());
     }
 
-    // [اصلاح] متدهای زیر برای رفع خطای LoadException اضافه شده‌اند
     @FXML
     private void goToProfile(ActionEvent event) {
         navigateToPage(event, "BuyerProfile-view.fxml");
@@ -115,7 +117,6 @@ public class BuyerHomeController implements Initializable {
         }).start();
     }
 
-    // [جدید] متد برای بارگذاری و نمایش رستوران‌های مورد علاقه
     private void loadFavorites() {
         favoritesVBox.getChildren().clear();
         favoritesVBox.setAlignment(Pos.CENTER);
@@ -136,7 +137,6 @@ public class BuyerHomeController implements Initializable {
         }).start();
     }
 
-    // [اصلاح] این متد اکنون عمومی‌تر شده تا برای هر دو لیست استفاده شود
     private void displayRestaurants(List<RestaurantDTO> restaurants, VBox container, String emptyMessage) {
         container.getChildren().clear();
         if (restaurants == null || restaurants.isEmpty()) {
@@ -204,7 +204,21 @@ public class BuyerHomeController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle(restaurant.getName());
             stage.setScene(new Scene(root));
-            stage.show();
+
+            // --- **تغییر اصلی و کلیدی اینجاست** ---
+            // 1. پنجره جدید را به عنوان یک پنجره "Modal" باز می‌کنیم تا پنجره اصلی غیرفعال شود.
+            Stage owner = (Stage) profileBtn.getScene().getWindow();
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(owner);
+
+            // 2. به جای stage.show() از stage.showAndWait() استفاده می‌کنیم.
+            //    این کار باعث می‌شود کد در همین نقطه متوقف شود تا زمانی که پنجره رستوران بسته شود.
+            stage.showAndWait();
+
+            // 3. پس از اینکه کاربر پنجره رستوران را بست، این خط اجرا می‌شود
+            //    و لیست علاقه‌مندی‌ها را مجدداً از سرور بارگذاری می‌کند تا به‌روز شود.
+            System.out.println("Restaurant page closed. Refreshing favorites...");
+            loadFavorites();
 
         } catch (Exception e) {
             e.printStackTrace();
