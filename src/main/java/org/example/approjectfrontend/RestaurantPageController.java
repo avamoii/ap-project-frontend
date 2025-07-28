@@ -9,31 +9,25 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.approjectfrontend.api.*;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RestaurantPageController {
 
@@ -120,6 +114,23 @@ public class RestaurantPageController {
         }
         loadFullMenu(restaurant.getId());
         checkFavoriteStatus();
+        loadUserProfile();
+    }
+
+    private void loadUserProfile() {
+        new Thread(() -> {
+            ApiResponse response = ApiService.getUserProfile();
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    UserDTO user = new Gson().fromJson(response.getBody(), UserDTO.class);
+                    if (user != null && user.getAddress() != null && !user.getAddress().isEmpty()) {
+                        addressField.setText(user.getAddress());
+                    }
+                } else {
+                    System.err.println("Failed to load user profile for address pre-fill.");
+                }
+            });
+        }).start();
     }
 
     private void loadFullMenu(long restaurantId) {
@@ -164,7 +175,6 @@ public class RestaurantPageController {
         if (currentRestaurant == null) return;
         boolean addToFavorites = favoriteButton.isSelected();
         favoriteButton.setDisable(true);
-
         new Thread(() -> {
             ApiResponse response = addToFavorites ? ApiService.addFavorite(currentRestaurant.getId()) : ApiService.removeFavorite(currentRestaurant.getId());
             Platform.runLater(() -> {
@@ -222,18 +232,13 @@ public class RestaurantPageController {
         for (Map.Entry<FoodItemDTO, Spinner<Integer>> entry : itemSpinners.entrySet()) {
             total += (long) entry.getKey().getPrice() * entry.getValue().getValue();
         }
-
         if (appliedCoupon != null && appliedCoupon.getValue() != null) {
-            // --- **تغییر اصلی اینجاست** ---
             if ("FIXED".equalsIgnoreCase(appliedCoupon.getType())) {
-                // تبدیل BigDecimal به long قبل از تفریق
                 total -= appliedCoupon.getValue().longValue();
             } else if ("PERCENT".equalsIgnoreCase(appliedCoupon.getType())) {
-                // استفاده از BigDecimal برای محاسبه دقیق تخفیف درصدی
                 BigDecimal totalDecimal = BigDecimal.valueOf(total);
                 BigDecimal discountPercent = appliedCoupon.getValue();
                 BigDecimal hundred = BigDecimal.valueOf(100);
-
                 BigDecimal discountAmount = totalDecimal.multiply(discountPercent).divide(hundred, BigDecimal.ROUND_HALF_UP);
                 total -= discountAmount.longValue();
             }
@@ -272,7 +277,17 @@ public class RestaurantPageController {
                     OrderDTO createdOrder = new Gson().fromJson(response.getBody(), OrderDTO.class);
                     showPaymentMethodDialog(createdOrder.getId());
                 } else {
-                    showAlert(Alert.AlertType.ERROR, "خطا", "خطا در ثبت سفارش.");
+                    // --- **تغییر اصلی اینجاست: نمایش خطای واقعی** ---
+                    String errorMessage = "خطا در ثبت سفارش.";
+                    try {
+                        JsonObject errorJson = new Gson().fromJson(response.getBody(), JsonObject.class);
+                        if (errorJson != null && errorJson.has("error")) {
+                            errorMessage = errorJson.get("error").getAsString();
+                        }
+                    } catch (Exception e) {
+                        errorMessage = response.getBody(); // اگر پاسخ JSON نبود
+                    }
+                    showAlert(Alert.AlertType.ERROR, "خطا", errorMessage);
                 }
             });
         }).start();
@@ -283,7 +298,6 @@ public class RestaurantPageController {
         dialog.setTitle("انتخاب روش پرداخت");
         dialog.setHeaderText("سفارش شما با موفقیت ثبت شد.");
         dialog.setContentText("روش پرداخت:");
-
         dialog.showAndWait().ifPresent(selected -> {
             String method = "پرداخت با کیف پول".equals(selected) ? "WALLET" : "ONLINE";
             processPayment(orderId, method);
@@ -300,8 +314,6 @@ public class RestaurantPageController {
                     Stage stage = (Stage) submitAndPayButton.getScene().getWindow();
                     stage.close();
                 } else {
-                    // --- **تغییر اصلی اینجاست** ---
-                    // پیام خطا را از پاسخ JSON بک‌اند می‌خوانیم و نمایش می‌دهیم
                     String errorMessage = "پرداخت ناموفق بود.";
                     try {
                         JsonObject errorJson = new Gson().fromJson(response.getBody(), JsonObject.class);
@@ -309,7 +321,6 @@ public class RestaurantPageController {
                             errorMessage = errorJson.get("error").getAsString();
                         }
                     } catch (Exception e) {
-                        // اگر پاسخ JSON نبود، خود پاسخ را نمایش بده
                         errorMessage = response.getBody();
                     }
                     showAlert(Alert.AlertType.ERROR, "خطا در پرداخت", errorMessage);
@@ -317,7 +328,6 @@ public class RestaurantPageController {
             });
         }).start();
     }
-
 
     private void showAlert(Alert.AlertType alertType, String title, String content) {
         Alert alert = new Alert(alertType);

@@ -36,17 +36,17 @@ public class ApiService {
 
     // --- متدهای پروفایل ---
     public static ApiResponse getUserProfile() {
-        return sendGetRequestWithAuth("/profile");
+        return sendGetRequestWithAuth("/auth/profile");
     }
 
     public static ApiResponse updateProfile(UpdateProfileRequest profileData) {
         String jsonBody = gson.toJson(profileData);
-        return sendPutRequestWithAuth("/profile", jsonBody);
+        return sendPutRequestWithAuth("/auth/profile", jsonBody);
     }
 
     // --- متدهای خریدار ---
     public static ApiResponse getVendors() {
-        // **این نسخه صحیح است که از GET استفاده می‌کند**
+
         return sendGetRequestWithAuth("/vendors");
     }
 
@@ -87,12 +87,12 @@ public class ApiService {
     // --- متدهای عمومی (کیف پول، پرداخت، تراکنش، نظرات) ---
     public static ApiResponse topUpWallet(TopUpWalletRequest topUpRequest) {
         String jsonBody = gson.toJson(topUpRequest);
-        return sendPostRequestWithAuth("/wallet/deposit", jsonBody);
+        return sendPostRequestWithAuth("/wallet/top-up", jsonBody);
     }
 
     public static ApiResponse makePayment(PaymentRequest paymentRequest) {
         String jsonBody = gson.toJson(paymentRequest);
-        return sendPostRequestWithAuth("/payment", jsonBody);
+        return sendPostRequestWithAuth("/payment/online", jsonBody);
     }
 
     public static ApiResponse getTransactionHistory() {
@@ -208,6 +208,24 @@ public class ApiService {
 
     public static ApiResponse deleteCoupon(long couponId) {
         return sendDeleteRequestWithAuth("/admin/coupons/" + couponId);
+    }
+    public static ApiResponse listItems() {
+        // طبق تعریف بک‌اند، این متد باید با POST و بدنه خالی ارسال شود
+        return sendPostRequestWithAuth("/items", "{}");
+    }
+
+
+    // --- متدهای صاحب رستوران ---
+
+    public static ApiResponse updateRestaurant(long restaurantId, CreateRestaurantRequest restaurantData) {
+        String jsonBody = gson.toJson(restaurantData);
+        return sendPutRequestWithAuth("/restaurants/" + restaurantId, jsonBody);
+    }
+
+    // --- متدهای ادمین ---
+
+    public static ApiResponse getCouponDetailsAdmin(long couponId) {
+        return sendGetRequestWithAuth("/admin/coupons/" + couponId);
     }
 
     // =======================================================================================

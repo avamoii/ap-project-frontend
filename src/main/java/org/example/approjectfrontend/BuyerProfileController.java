@@ -9,15 +9,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
-import org.example.approjectfrontend.api.ApiResponse;
-import org.example.approjectfrontend.api.ApiService;
-import org.example.approjectfrontend.api.TopUpWalletRequest;
-import org.example.approjectfrontend.api.UserDTO;
+import org.example.approjectfrontend.api.*;
 import org.example.approjectfrontend.util.SessionManager;
 
 import java.io.IOException;
@@ -26,23 +20,32 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class BuyerProfileController implements Initializable {
-    @FXML private Label nameLabel;
-    @FXML private Label emailLabel;
-    @FXML private Label phoneLabel;
-    @FXML private Label addressLabel;
+    // --- فیلدهای FXML بر اساس فایل جدید شما ---
+    @FXML private TextField usernameField;
+    @FXML private TextField emailField;
+    @FXML private TextField addressField;
+    @FXML private TextField phoneField;
     @FXML private Label walletBalanceLabel;
+    @FXML private Label messageLabel;
+    @FXML private Button saveButton;
+    @FXML private Button logoutButton;
+    @FXML private Button rechargeWalletButton;
     @FXML private Button homeBtn;
     @FXML private Button historyBtn;
     @FXML private Button profileBtn;
-    @FXML private Button chargeWalletButton;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        profileBtn.setStyle("-fx-background-color: #1e7e44;");
+        profileBtn.setStyle("-fx-background-color: #191919; -fx-text-fill: #fff;");
         homeBtn.setOnAction(e -> navigateToPage(e, "BuyerHome-view.fxml"));
-        historyBtn.setOnAction(e -> navigateToPage(e, "BuyerHistory-view.fxml"));
+        // **توجه:** نام فایل تاریخچه سفارشات BuyerHistory-view.fxml است
+        historyBtn.setOnAction(e -> navigateToPage(e, "OrderHistory-view.fxml"));
 
-        // Load user data when the page is initialized
+        // اتصال رویدادها به دکمه‌های جدید
+        saveButton.setOnAction(e -> handleUpdateProfile());
+        logoutButton.setOnAction(e -> handleLogout(e));
+        rechargeWalletButton.setOnAction(e -> handleChargeWallet());
+
         loadUserProfile();
     }
 
@@ -54,7 +57,7 @@ public class BuyerProfileController implements Initializable {
                     UserDTO user = new Gson().fromJson(response.getBody(), UserDTO.class);
                     updateUI(user);
                 } else {
-                    showAlert(Alert.AlertType.ERROR, "Error", "Failed to load user profile.");
+                    showAlert(Alert.AlertType.ERROR, "خطا", "خطا در دریافت اطلاعات پروفایل.");
                 }
             });
         }).start();
@@ -62,51 +65,76 @@ public class BuyerProfileController implements Initializable {
 
     private void updateUI(UserDTO user) {
         if (user == null) return;
-        nameLabel.setText(user.getFullName());
-        emailLabel.setText(user.getEmail());
-        phoneLabel.setText(user.getPhoneNumber());
-        addressLabel.setText(user.getAddress() != null ? user.getAddress() : "Not set");
-        walletBalanceLabel.setText(String.format("%,d Toman", user.getWalletBalance()));
+        usernameField.setText(user.getFullName());
+        emailField.setText(user.getEmail());
+        phoneField.setText(user.getPhoneNumber());
+        addressField.setText(user.getAddress() != null ? user.getAddress() : "");
+        walletBalanceLabel.setText(String.format("موجودی کیف پول: %,d تومان", user.getWalletBalance()));
+    }
+
+    @FXML
+    private void handleUpdateProfile() {
+        UpdateProfileRequest requestData = new UpdateProfileRequest();
+        requestData.setFullName(usernameField.getText());
+        requestData.setEmail(emailField.getText());
+        requestData.setAddress(addressField.getText());
+
+        new Thread(() -> {
+            ApiResponse response = ApiService.updateProfile(requestData);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    messageLabel.setText("پروفایل با موفقیت به‌روز شد.");
+                    messageLabel.setStyle("-fx-text-fill: #218838;");
+                } else {
+                    messageLabel.setText("خطا در به‌روزرسانی پروفایل.");
+                    messageLabel.setStyle("-fx-text-fill: #d22;");
+                }
+            });
+        }).start();
     }
 
     @FXML
     private void handleChargeWallet() {
         TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Charge Wallet");
-        dialog.setHeaderText("Enter the amount you want to add to your wallet.");
-        dialog.setContentText("Amount (Toman):");
+        dialog.setTitle("شارژ کیف پول");
+        dialog.setHeaderText("مبلغ مورد نظر برای افزایش موجودی را وارد کنید.");
+        dialog.setContentText("مبلغ (تومان):");
 
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(amountStr -> {
             try {
                 int amount = Integer.parseInt(amountStr);
                 if (amount <= 0) {
-                    showAlert(Alert.AlertType.ERROR, "Invalid Amount", "Please enter a positive number.");
+                    showAlert(Alert.AlertType.ERROR, "مبلغ نامعتبر", "لطفاً یک عدد مثبت وارد کنید.");
                     return;
                 }
 
-                // Create the request object
                 TopUpWalletRequest topUpRequest = new TopUpWalletRequest();
                 topUpRequest.setAmount(amount);
 
-                // Call the ApiService in a new thread
                 new Thread(() -> {
                     ApiResponse response = ApiService.topUpWallet(topUpRequest);
                     Platform.runLater(() -> {
                         if (response.getStatusCode() == 200) {
-                            showAlert(Alert.AlertType.INFORMATION, "Success", "Your wallet has been charged successfully.");
-                            // Refresh the profile to show the new balance
-                            loadUserProfile();
+                            showAlert(Alert.AlertType.INFORMATION, "موفق", "کیف پول شما با موفقیت شارژ شد.");
+                            loadUserProfile(); // رفرش کردن اطلاعات برای نمایش موجودی جدید
                         } else {
-                            showAlert(Alert.AlertType.ERROR, "Failed", "Could not charge the wallet. " + response.getBody());
+                            showAlert(Alert.AlertType.ERROR, "ناموفق", "خطا در شارژ کیف پول: " + response.getBody());
                         }
                     });
                 }).start();
 
             } catch (NumberFormatException e) {
-                showAlert(Alert.AlertType.ERROR, "Invalid Input", "Please enter a valid number.");
+                showAlert(Alert.AlertType.ERROR, "ورودی نامعتبر", "لطفاً فقط عدد وارد کنید.");
             }
         });
+    }
+
+    @FXML
+    private void handleLogout(ActionEvent event) {
+        SessionManager.getInstance().clear();
+        new Thread(ApiService::logout).start();
+        navigateToPage(event, "Login-view.fxml");
     }
 
     private void navigateToPage(ActionEvent event, String fxmlFile) {
