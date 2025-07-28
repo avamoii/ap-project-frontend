@@ -12,9 +12,9 @@ public class MainApplication extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("Main.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
-        stage.setTitle("snapfood");
+        stage.setTitle("bananafood");
         stage.setScene(scene);
-        stage.setWidth(400);
+        stage.setWidth(733);
         stage.setHeight(600);
         stage.show();
     }
