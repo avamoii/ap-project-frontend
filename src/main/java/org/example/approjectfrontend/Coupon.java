@@ -1,71 +1,46 @@
 package org.example.approjectfrontend;
 
+import com.google.gson.annotations.SerializedName;
+import java.math.BigDecimal;
+
+// این کلاس مدل داده‌های کوپن است که در جدول نمایش داده می‌شود
 public class Coupon {
+
+    // --- تغییر اصلی: استفاده از @SerializedName برای هماهنگی با بک‌اند ---
+    @SerializedName("id")
     private Long id;
-    private String coupon_code;
-    private String type; // "fixed" یا "percent"
-    private Integer value;
-    private Integer min_price;
-    private Integer user_count;
-    private String start_date;  // بهتره String بذاری اگر تاریخ به فرمت yyyy-MM-dd میاد
-    private String end_date;
+    @SerializedName("couponCode")
+    private String couponCode;
+    @SerializedName("type")
+    private String type; // "FIXED" or "PERCENT"
+    @SerializedName("value")
+    private BigDecimal value;
+    @SerializedName("minPrice")
+    private Integer minPrice;
+    @SerializedName("userCount")
+    private Integer userCount;
+    @SerializedName("startDate")
+    private String startDate;
+    @SerializedName("endDate")
+    private String endDate;
 
-    public Coupon() {}
+    // Getters
+    public Long getId() { return id; }
+    public String getCouponCode() { return couponCode; }
+    public String getType() { return type; }
+    public BigDecimal getValue() { return value; }
+    public Integer getMinPrice() { return minPrice; }
+    public Integer getUserCount() { return userCount; }
+    public String getStartDate() { return startDate; }
+    public String getEndDate() { return endDate; }
 
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCoupon_code() {
-        return coupon_code;
-    }
-    public void setCoupon_code(String coupon_code) {
-        this.coupon_code = coupon_code;
-    }
-
-    public String getType() {
-        return type;
-    }
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Integer getValue() {
-        return value;
-    }
-    public void setValue(Integer value) {
-        this.value = value;
-    }
-
-    public Integer getMin_price() {
-        return min_price;
-    }
-    public void setMin_price(Integer min_price) {
-        this.min_price = min_price;
-    }
-
-    public Integer getUser_count() {
-        return user_count;
-    }
-    public void setUser_count(Integer user_count) {
-        this.user_count = user_count;
-    }
-
-    public String getStart_date() {
-        return start_date;
-    }
-    public void setStart_date(String start_date) {
-        this.start_date = start_date;
-    }
-
-    public String getEnd_date() {
-        return end_date;
-    }
-    public void setEnd_date(String end_date) {
-        this.end_date = end_date;
-    }
+    // Setters (برای استفاده در PropertyValueFactory)
+    public void setId(Long id) { this.id = id; }
+    public void setCouponCode(String couponCode) { this.couponCode = couponCode; }
+    public void setType(String type) { this.type = type; }
+    public void setValue(BigDecimal value) { this.value = value; }
+    public void setMinPrice(Integer minPrice) { this.minPrice = minPrice; }
+    public void setUserCount(Integer userCount) { this.userCount = userCount; }
+    public void setStartDate(String startDate) { this.startDate = startDate; }
+    public void setEndDate(String endDate) { this.endDate = endDate; }
 }
-

@@ -16,16 +16,20 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.approjectfrontend.api.ApiResponse;
 import org.example.approjectfrontend.api.ApiService;
-import org.example.approjectfrontend.api.FoodItemDTO;
 import org.example.approjectfrontend.api.RestaurantDTO;
+import org.example.approjectfrontend.util.SessionManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class BuyerHomeController implements Initializable {
@@ -39,23 +43,37 @@ public class BuyerHomeController implements Initializable {
     private TextField searchField;
     @FXML
     private VBox restaurantListVBox;
+    @FXML
+    private VBox favoritesVBox;
+
     private List<RestaurantDTO> allRestaurants;
-    private List<FoodItemDTO> allFoodItems;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loadRestaurants();
-        profileBtn.setOnAction(e -> navigateToPage(new ActionEvent(e.getSource(), e.getTarget()), "BuyerProfile-view.fxml"));
-        // --- تغییر اصلی اینجاست ---
-        // به جای ناوبری مستقیم، ابتدا دیالوگ انتخاب را نمایش می‌دهیم
-        historyBtn.setOnAction(e -> showHistoryChoiceDialog());
+        loadFavorites();
+
         homeBtn.setDisable(true);
         searchField.textProperty().addListener((obs, oldValue, newValue) -> handleSearch());
     }
 
-    /**
-     * یک دیالوگ برای انتخاب بین تاریخچه سفارشات و تراکنش‌ها نمایش می‌دهد و بر اساس انتخاب کاربر عمل می‌کند.
-     */
+    @FXML
+    private void goToProfile(ActionEvent event) {
+        navigateToPage(event, "BuyerProfile-view.fxml");
+    }
+
+    @FXML
+    private void goToHistory(ActionEvent event) {
+        showHistoryChoiceDialog();
+    }
+
+    @FXML
+    private void logout(ActionEvent event) {
+        SessionManager.getInstance().clear();
+        new Thread(ApiService::logout).start();
+        navigateToPage(event, "login-view.fxml");
+    }
+
     private void showHistoryChoiceDialog() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("انتخاب نوع تاریخچه");
@@ -76,38 +94,59 @@ public class BuyerHomeController implements Initializable {
             } else if (result.get() == transactionsBtn) {
                 navigateToPage(new ActionEvent(historyBtn, null), "TransactionHistory-view.fxml");
             }
-            // اگر کاربر انصراف را بزند، در همین صفحه باقی می‌ماند.
         }
     }
 
     private void loadRestaurants() {
         restaurantListVBox.getChildren().clear();
         restaurantListVBox.setAlignment(Pos.CENTER);
+        restaurantListVBox.getChildren().add(new ProgressIndicator());
 
         new Thread(() -> {
             ApiResponse response = ApiService.getVendors();
             Platform.runLater(() -> {
                 if (response.getStatusCode() == 200) {
-                    restaurantListVBox.setAlignment(Pos.TOP_LEFT);
                     Gson gson = new Gson();
                     allRestaurants = gson.fromJson(response.getBody(), new TypeToken<List<RestaurantDTO>>() {}.getType());
-                    showRestaurants(allRestaurants);
+                    displayRestaurants(allRestaurants, restaurantListVBox, "رستورانی یافت نشد.");
                 } else {
+                    restaurantListVBox.getChildren().clear();
                     restaurantListVBox.getChildren().add(new Label("خطا در دریافت لیست رستوران‌ها."));
                 }
             });
         }).start();
     }
 
-    private void showRestaurants(List<RestaurantDTO> restaurants) {
-        restaurantListVBox.getChildren().clear();
+    private void loadFavorites() {
+        favoritesVBox.getChildren().clear();
+        favoritesVBox.setAlignment(Pos.CENTER);
+        favoritesVBox.getChildren().add(new ProgressIndicator());
+
+        new Thread(() -> {
+            ApiResponse response = ApiService.getFavorites();
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    Gson gson = new Gson();
+                    List<RestaurantDTO> favoriteRestaurants = gson.fromJson(response.getBody(), new TypeToken<List<RestaurantDTO>>() {}.getType());
+                    displayRestaurants(favoriteRestaurants, favoritesVBox, "هنوز رستوران مورد علاقه‌ای اضافه نکرده‌اید.");
+                } else {
+                    favoritesVBox.getChildren().clear();
+                    favoritesVBox.getChildren().add(new Label("خطا در دریافت علاقه‌مندی‌ها."));
+                }
+            });
+        }).start();
+    }
+
+    private void displayRestaurants(List<RestaurantDTO> restaurants, VBox container, String emptyMessage) {
+        container.getChildren().clear();
         if (restaurants == null || restaurants.isEmpty()) {
-            restaurantListVBox.setAlignment(Pos.CENTER);
-            restaurantListVBox.getChildren().add(new Label("رستورانی یافت نشد."));
+            container.setAlignment(Pos.CENTER);
+            container.getChildren().add(new Label(emptyMessage));
         } else {
+            container.setAlignment(Pos.TOP_LEFT);
             for (RestaurantDTO restaurant : restaurants) {
                 HBox card = buildRestaurantCard(restaurant);
-                restaurantListVBox.getChildren().add(card);
+                container.getChildren().add(card);
             }
         }
     }
@@ -118,7 +157,7 @@ public class BuyerHomeController implements Initializable {
         if (allRestaurants == null) return;
 
         if (searchText.isEmpty()) {
-            showRestaurants(allRestaurants);
+            displayRestaurants(allRestaurants, restaurantListVBox, "رستورانی یافت نشد.");
             return;
         }
 
@@ -126,7 +165,7 @@ public class BuyerHomeController implements Initializable {
                 .filter(r -> r.getName() != null && r.getName().toLowerCase().contains(searchText))
                 .collect(Collectors.toList());
 
-        showRestaurants(filteredRestaurants);
+        displayRestaurants(filteredRestaurants, restaurantListVBox, "هیچ رستورانی با این نام یافت نشد.");
     }
 
     private HBox buildRestaurantCard(RestaurantDTO restaurant) {
@@ -137,8 +176,12 @@ public class BuyerHomeController implements Initializable {
 
         ImageView logoView = new ImageView();
         if (restaurant.getLogoBase64() != null && !restaurant.getLogoBase64().isEmpty()) {
-            byte[] decodedBytes = Base64.getDecoder().decode(restaurant.getLogoBase64());
-            logoView.setImage(new Image(new ByteArrayInputStream(decodedBytes)));
+            try {
+                byte[] decodedBytes = Base64.getDecoder().decode(restaurant.getLogoBase64());
+                logoView.setImage(new Image(new ByteArrayInputStream(decodedBytes)));
+            } catch (Exception e) {
+                // Handle error
+            }
         }
         logoView.setFitHeight(40);
         logoView.setFitWidth(40);
@@ -161,7 +204,21 @@ public class BuyerHomeController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle(restaurant.getName());
             stage.setScene(new Scene(root));
-            stage.show();
+
+            // --- **تغییر اصلی و کلیدی اینجاست** ---
+            // 1. پنجره جدید را به عنوان یک پنجره "Modal" باز می‌کنیم تا پنجره اصلی غیرفعال شود.
+            Stage owner = (Stage) profileBtn.getScene().getWindow();
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(owner);
+
+            // 2. به جای stage.show() از stage.showAndWait() استفاده می‌کنیم.
+            //    این کار باعث می‌شود کد در همین نقطه متوقف شود تا زمانی که پنجره رستوران بسته شود.
+            stage.showAndWait();
+
+            // 3. پس از اینکه کاربر پنجره رستوران را بست، این خط اجرا می‌شود
+            //    و لیست علاقه‌مندی‌ها را مجدداً از سرور بارگذاری می‌کند تا به‌روز شود.
+            System.out.println("Restaurant page closed. Refreshing favorites...");
+            loadFavorites();
 
         } catch (Exception e) {
             e.printStackTrace();

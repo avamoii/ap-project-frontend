@@ -1,27 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
-
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.VBox?>
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.BuyerHomeController">
-    <TextField fx:id="searchField"
-               promptText="جستجو..."
-               AnchorPane.topAnchor="20.0"
-               AnchorPane.leftAnchor="50.0"
-               AnchorPane.rightAnchor="50.0"
-               prefHeight="36.0"/>
 
-    <!-- لیست رستوران‌ها -->
-    <ScrollPane fitToWidth="true" AnchorPane.topAnchor="70.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.bottomAnchor="70.0">
-        <VBox fx:id="restaurantListVBox" spacing="10" style="-fx-padding:10;" />
-    </ScrollPane>
-    <HBox alignment="CENTER" layoutX="164.0" layoutY="360.0" prefHeight="14.0" prefWidth="273.0" spacing="0" style="-fx-background-color: #27ae60;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="164.0" AnchorPane.rightAnchor="163.20000000000005">
-        <Button fx:id="profileBtn" prefHeight="40.0" prefWidth="142.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-pref-width: 180px;" text="پروفایل" />
-        <Button fx:id="homeBtn" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-pref-width: 180px;" text="خانه" />
-        <Button fx:id="historyBtn" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-pref-width: 180px;" text="تاریخچه" />
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.BuyerHomeController">
+    <VBox spacing="10" AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="60.0">
+        <!-- بخش جستجو -->
+        <TextField fx:id="searchField" onKeyReleased="#handleSearch" promptText="جستجو..." prefHeight="36.0" />
+
+        <!-- [جدید] بخش رستوران‌های مورد علاقه -->
+        <TitledPane animated="false" text="رستوران‌های مورد علاقه" collapsible="false">
+            <ScrollPane prefHeight="180.0" fitToWidth="true">
+                <VBox fx:id="favoritesVBox" spacing="10" style="-fx-padding:10;" />
+            </ScrollPane>
+        </TitledPane>
+
+        <!-- بخش همه رستوران‌ها -->
+        <Label text="همه رستوران‌ها" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true">
+            <VBox fx:id="restaurantListVBox" spacing="10" style="-fx-padding:10;" />
+        </ScrollPane>
+    </VBox>
+
+    <!-- منوی پایین صفحه -->
+    <HBox alignment="CENTER" spacing="10" style="-fx-background-color: #27ae60;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" prefHeight="50.0">
+        <!-- [اصلاح] onAction برای دکمه‌ها اضافه شد -->
+        <Button fx:id="profileBtn" onAction="#goToProfile" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;" text="پروفایل" />
+        <Button fx:id="homeBtn" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;" text="خانه" />
+        <Button fx:id="historyBtn" onAction="#goToHistory" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;" text="تاریخچه" />
+        <Button onAction="#logout" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;" text="خروج" />
     </HBox>
 </AnchorPane>

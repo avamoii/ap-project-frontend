@@ -11,573 +11,291 @@ import java.util.Map;
 
 public class ApiService {
 
-    private static final String API_BASE_URL = "http://localhost:1214";
+    private static final String API_BASE_URL = "http://localhost:1216";
     private static final HttpClient client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(10))
             .build();
     private static final Gson gson = new Gson();
 
-    // ... (متدهای قبلی بدون تغییر باقی می‌مانند) ...
-
+    // --- متدهای احراز هویت ---
     public static ApiResponse register(RegisterRequest requestData) {
-        try {
-            String jsonBody = gson.toJson(requestData);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/auth/register"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+        String jsonBody = gson.toJson(requestData);
+        return sendPostRequest("/auth/register", jsonBody, false);
     }
 
     public static ApiResponse login(String phone, String password) {
-        try {
-            LoginRequest loginData = new LoginRequest(phone, password);
-            String jsonBody = gson.toJson(loginData);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/auth/login"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+        LoginRequest loginData = new LoginRequest(phone, password);
+        String jsonBody = gson.toJson(loginData);
+        return sendPostRequest("/auth/login", jsonBody, false);
     }
 
     public static ApiResponse logout() {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(200, "{\"message\":\"Already logged out.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/auth/logout"))
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+        return sendPostRequestWithAuth("/auth/logout", "");
     }
 
-    public static ApiResponse getProfile() {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/auth/profile"))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+    // --- متدهای پروفایل ---
+    public static ApiResponse getUserProfile() {
+        return sendGetRequestWithAuth("/profile");
     }
 
     public static ApiResponse updateProfile(UpdateProfileRequest profileData) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            String jsonBody = gson.toJson(profileData);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/auth/profile"))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+        String jsonBody = gson.toJson(profileData);
+        return sendPutRequestWithAuth("/profile", jsonBody);
     }
 
-    public static ApiResponse createRestaurant(CreateRestaurantRequest restaurantData) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            String jsonBody = gson.toJson(restaurantData);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/restaurants"))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
-    }
-
-    public static ApiResponse getMyRestaurants() {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/restaurants/mine"))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
-    }
-
-    public static ApiResponse updateRestaurant(Long restaurantId, UpdateRestaurantRequest restaurantData) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            String jsonBody = gson.toJson(restaurantData);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/restaurants/" + restaurantId))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
-    }
-
+    // --- متدهای خریدار ---
     public static ApiResponse getVendors() {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/vendors"))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString("{}"))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+        // **این نسخه صحیح است که از GET استفاده می‌کند**
+        return sendGetRequestWithAuth("/vendors");
     }
 
     public static ApiResponse getRestaurantMenu(long restaurantId) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/vendors/" + restaurantId))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
-    }
-
-    public static ApiResponse createMenu(long restaurantId, String title) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null) return new ApiResponse(401, "{\"error\":\"Not logged in\"}");
-        try {
-            String jsonBody = gson.toJson(new CreateMenuRequest(title));
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/restaurants/" + restaurantId + "/menu"))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"Server connection error\"}");
-        }
-    }
-
-    public static ApiResponse addFoodItem(long restaurantId, String menuTitle, AddFoodItemRequest itemData) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null) return new ApiResponse(401, "{\"error\":\"Not logged in\"}");
-        try {
-            String jsonBody = gson.toJson(itemData);
-            String url = API_BASE_URL + "/restaurants/" + restaurantId + "/menu/" + menuTitle + "/item";
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"Server connection error\"}");
-        }
-    }
-
-    public static ApiResponse updateFoodItem(long restaurantId, long itemId, UpdateFoodItemRequest itemData) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null) return new ApiResponse(401, "{\"error\":\"Not logged in\"}");
-        try {
-            String jsonBody = gson.toJson(itemData);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/restaurants/" + restaurantId + "/item/" + itemId))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            return new ApiResponse(0, "{\"error\":\"Server connection error\"}");
-        }
-    }
-
-    public static ApiResponse removeItemFromMenu(long restaurantId, String menuTitle, long itemId) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null) return new ApiResponse(401, "{\"error\":\"Not logged in\"}");
-        try {
-            String url = API_BASE_URL + "/restaurants/" + restaurantId + "/menu/" + menuTitle + "/" + itemId;
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Authorization", "Bearer " + token)
-                    .DELETE()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            return new ApiResponse(0, "{\"error\":\"Server connection error\"}");
-        }
-    }
-
-    public static ApiResponse deleteFoodItem(long restaurantId, long itemId) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null) return new ApiResponse(401, "{\"error\":\"Not logged in\"}");
-        try {
-            String url = API_BASE_URL + "/restaurants/" + restaurantId + "/item/" + itemId;
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Authorization", "Bearer " + token)
-                    .DELETE()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            return new ApiResponse(0, "{\"error\":\"Server connection error\"}");
-        }
+        return sendGetRequestWithAuth("/vendors/" + restaurantId);
     }
 
     public static ApiResponse getFoodItemDetails(long itemId) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/items/" + itemId))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+        return sendGetRequestWithAuth("/items/" + itemId);
     }
 
     public static ApiResponse submitOrder(SubmitOrderRequest orderData) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            String jsonBody = gson.toJson(orderData);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/orders"))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
-    }
-
-    public static ApiResponse getOrderHistory() {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/orders/history"))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+        String jsonBody = gson.toJson(orderData);
+        return sendPostRequestWithAuth("/orders", jsonBody);
     }
 
     public static ApiResponse getOrderDetails(long orderId) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/orders/" + orderId))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+        return sendGetRequestWithAuth("/orders/" + orderId);
     }
 
-    // --- متدهای جدید برای فروشنده ---
+    public static ApiResponse getOrderHistory() {
+        return sendGetRequestWithAuth("/orders/history");
+    }
+
+    // --- متدهای علاقه‌مندی‌ها ---
+    public static ApiResponse getFavorites() {
+        return sendGetRequestWithAuth("/favorites");
+    }
+
+    public static ApiResponse addFavorite(long restaurantId) {
+        return sendPutRequestWithAuth("/favorites/" + restaurantId, "");
+    }
+
+    public static ApiResponse removeFavorite(long restaurantId) {
+        return sendDeleteRequestWithAuth("/favorites/" + restaurantId);
+    }
+
+    // --- متدهای عمومی (کیف پول، پرداخت، تراکنش، نظرات) ---
+    public static ApiResponse topUpWallet(TopUpWalletRequest topUpRequest) {
+        String jsonBody = gson.toJson(topUpRequest);
+        return sendPostRequestWithAuth("/wallet/deposit", jsonBody);
+    }
+
+    public static ApiResponse makePayment(PaymentRequest paymentRequest) {
+        String jsonBody = gson.toJson(paymentRequest);
+        return sendPostRequestWithAuth("/payment", jsonBody);
+    }
+
+    public static ApiResponse getTransactionHistory() {
+        return sendGetRequestWithAuth("/transactions");
+    }
+
+    public static ApiResponse checkCoupon(String couponCode) {
+        return sendGetRequestWithAuth("/coupons?coupon_code=" + couponCode);
+    }
+
+    // --- متدهای نظرات ---
+    public static ApiResponse submitRating(SubmitRatingRequest ratingData) {
+        String jsonBody = gson.toJson(ratingData);
+        return sendPostRequestWithAuth("/ratings", jsonBody);
+    }
+
+    public static ApiResponse getRatingDetails(long ratingId) {
+        return sendGetRequestWithAuth("/ratings/" + ratingId);
+    }
+
+    public static ApiResponse updateRating(long ratingId, UpdateRatingRequest ratingData) {
+        String jsonBody = gson.toJson(ratingData);
+        return sendPutRequestWithAuth("/ratings/" + ratingId, jsonBody);
+    }
+
+    public static ApiResponse deleteRating(long ratingId) {
+        return sendDeleteRequestWithAuth("/ratings/" + ratingId);
+    }
+
+    // --- متدهای پیک ---
+    public static ApiResponse getAvailableDeliveries() {
+        return sendGetRequestWithAuth("/deliveries/available");
+    }
+
+    public static ApiResponse updateDeliveryStatus(long orderId, String status) {
+        String jsonBody = gson.toJson(Map.of("status", status));
+        return sendPatchRequestWithAuth("/deliveries/" + orderId, jsonBody);
+    }
+
+    public static ApiResponse getDeliveryHistory() {
+        return sendGetRequestWithAuth("/deliveries/history");
+    }
+
+    // --- متدهای صاحب رستوران ---
+    public static ApiResponse createRestaurant(CreateRestaurantRequest restaurantData) {
+        String jsonBody = gson.toJson(restaurantData);
+        return sendPostRequestWithAuth("/restaurants", jsonBody);
+    }
+
+    public static ApiResponse createMenu(long restaurantId, String menuTitle) {
+        CreateMenuRequest menuRequest = new CreateMenuRequest(menuTitle);
+        String requestBody = gson.toJson(menuRequest);
+        return sendPostRequestWithAuth("/restaurants/" + restaurantId + "/menu", requestBody);
+    }
+
+    public static ApiResponse getMyRestaurants() {
+        return sendGetRequestWithAuth("/restaurants/mine");
+    }
+
     public static ApiResponse getRestaurantOrders(long restaurantId) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/restaurants/" + restaurantId + "/orders"))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+        return sendGetRequestWithAuth("/restaurants/" + restaurantId + "/orders");
     }
 
     public static ApiResponse updateOrderStatus(long orderId, String status) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            String jsonBody = gson.toJson(Map.of("status", status));
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/restaurants/orders/" + orderId))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+        String jsonBody = gson.toJson(Map.of("status", status));
+        return sendPatchRequestWithAuth("/restaurants/orders/" + orderId, jsonBody);
     }
-    // --- متد جدید برای شارژ کیف پول ---
-    public static ApiResponse topUpWallet(int amount) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            TopUpWalletRequest requestData = new TopUpWalletRequest(amount);
-            String jsonBody = gson.toJson(requestData);
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/wallet/top-up"))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+
+    public static ApiResponse addFoodItem(long restaurantId, String menuTitle, AddFoodItemRequest itemData) {
+        String jsonBody = gson.toJson(itemData);
+        return sendPostRequestWithAuth("/restaurants/" + restaurantId + "/menu/" + menuTitle + "/item", jsonBody);
     }
-    public static ApiResponse makePayment(PaymentRequest paymentRequest) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            String jsonBody = gson.toJson(paymentRequest);
-            // اندپوینت شما /payment/online است اما هر دو نوع پرداخت را مدیریت می‌کند
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/payment/online"))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+
+    public static ApiResponse updateFoodItem(long restaurantId, long itemId, UpdateFoodItemRequest itemData) {
+        String jsonBody = gson.toJson(itemData);
+        return sendPutRequestWithAuth("/restaurants/" + restaurantId + "/item/" + itemId, jsonBody);
     }
-    // --- متد جدید برای تاریخچه تراکنش‌ها ---
-    public static ApiResponse getTransactionHistory() {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/transactions"))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+
+    public static ApiResponse deleteFoodItem(long restaurantId, long itemId) {
+        return sendDeleteRequestWithAuth("/restaurants/" + restaurantId + "/item/" + itemId);
     }
-    /**
-     * لیستی از سفارشات موجود برای ارسال را از سرور دریافت می‌کند.
-     * @return ApiResponse شامل لیست سفارشات یا پیام خطا.
-     */
-    public static ApiResponse getAvailableDeliveries() {
+
+    public static ApiResponse removeItemFromMenu(long restaurantId, String menuTitle, long itemId) {
+        return sendDeleteRequestWithAuth("/restaurants/" + restaurantId + "/menu/" + menuTitle + "/" + itemId);
+    }
+
+    // --- متدهای ادمین ---
+    public static ApiResponse getAdminUsers() {
+        return sendGetRequestWithAuth("/admin/users");
+    }
+    public static ApiResponse updateUserStatus(long userId, String status) {
+        String jsonBody = gson.toJson(Map.of("status", status));
+        return sendPatchRequestWithAuth("/admin/users/" + userId + "/status", jsonBody);
+    }
+    public static ApiResponse getAdminOrders() {
+        return sendGetRequestWithAuth("/admin/orders");
+    }
+    public static ApiResponse getAdminTransactions() {
+        return sendGetRequestWithAuth("/admin/transactions");
+    }
+    public static ApiResponse getAdminCoupons() {
+        return sendGetRequestWithAuth("/admin/coupons");
+    }
+
+    public static ApiResponse createCoupon(CreateCouponRequest couponData) {
+        String jsonBody = gson.toJson(couponData);
+        return sendPostRequestWithAuth("/admin/coupons", jsonBody);
+    }
+    public static ApiResponse updateCoupon(long couponId, CreateCouponRequest couponData) {
+        String jsonBody = gson.toJson(couponData);
+        return sendPutRequestWithAuth("/admin/coupons/" + couponId, jsonBody);
+    }
+
+    public static ApiResponse deleteCoupon(long couponId) {
+        return sendDeleteRequestWithAuth("/admin/coupons/" + couponId);
+    }
+
+    // =======================================================================================
+    // --- متدهای کمکی برای ارسال درخواست‌ها ---
+    // =======================================================================================
+
+    private static ApiResponse sendGetRequestWithAuth(String path) {
         String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
+        if (token == null || token.isEmpty()) return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/deliveries/available"))
+                    .uri(URI.create(API_BASE_URL + path))
                     .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
+                    .GET().build();
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
         } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+            return new ApiResponse(503, "{\"error\":\"Could not connect to the server.\"}");
         }
     }
 
-    /**
-     * وضعیت یک سفارش را برای پیک به‌روزرسانی می‌کند (مثلاً قبول کردن سفارش).
-     * @param orderId شناسه سفارش
-     * @param status وضعیت جدید (مثلاً "accepted")
-     * @return ApiResponse از سرور.
-     */
-    public static ApiResponse updateDeliveryStatus(long orderId, String status) {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
+    private static ApiResponse sendPostRequest(String path, String jsonBody, boolean withAuth) {
         try {
-            // بک‌اند انتظار یک آبجکت JSON با کلید "status" را دارد.
-            String jsonBody = gson.toJson(Map.of("status", status));
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/deliveries/" + orderId))
+            HttpRequest.Builder builder = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + path))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonBody)) // متد PATCH است
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
+            if (withAuth) {
+                String token = SessionManager.getInstance().getToken();
+                if (token == null || token.isEmpty()) return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+                builder.header("Authorization", "Bearer " + token);
+            }
+            HttpResponse<String> httpResponse = client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
         } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+            return new ApiResponse(503, "{\"error\":\"Could not connect to the server.\"}");
         }
     }
-    /**
-     * تاریخچه ارسال‌های یک پیک را از سرور دریافت می‌کند.
-     * @return ApiResponse شامل لیست سفارشات یا پیام خطا.
-     */
-    public static ApiResponse getDeliveryHistory() {
-        String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/deliveries/history"))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
-        }
+
+    private static ApiResponse sendPostRequestWithAuth(String path, String jsonBody) {
+        return sendPostRequest(path, jsonBody, true);
     }
-    /**
-     * یک نظر و امتیاز جدید را برای یک سفارش به سرور ارسال می‌کند.
-     * @param ratingData داده‌های نظر شامل شناسه سفارش، امتیاز و متن نظر.
-     * @return ApiResponse از سرور.
-     */
-    public static ApiResponse submitRating(SubmitRatingRequest ratingData) {
+
+    private static ApiResponse sendPutRequestWithAuth(String path, String jsonBody) {
         String token = SessionManager.getInstance().getToken();
-        if (token == null || token.isEmpty()) {
-            return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
-        }
+        if (token == null || token.isEmpty()) return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
         try {
-            String jsonBody = gson.toJson(ratingData);
+            HttpRequest.BodyPublisher bodyPublisher = jsonBody.isEmpty() ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(jsonBody);
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/ratings"))
+                    .uri(URI.create(API_BASE_URL + path))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .build();
+                    .PUT(bodyPublisher).build();
             HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
             return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
         } catch (Exception e) {
-            e.printStackTrace();
-            return new ApiResponse(0, "{\"error\":\"خطا در اتصال به سرور.\"}");
+            return new ApiResponse(503, "{\"error\":\"Could not connect to the server.\"}");
+        }
+    }
+
+    private static ApiResponse sendPatchRequestWithAuth(String path, String jsonBody) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + path))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonBody)).build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            return new ApiResponse(503, "{\"error\":\"Could not connect to the server.\"}");
+        }
+    }
+
+    private static ApiResponse sendDeleteRequestWithAuth(String path) {
+        String token = SessionManager.getInstance().getToken();
+        if (token == null || token.isEmpty()) return new ApiResponse(401, "{\"error\":\"User not logged in.\"}");
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_BASE_URL + path))
+                    .header("Authorization", "Bearer " + token)
+                    .DELETE().build();
+            HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return new ApiResponse(httpResponse.statusCode(), httpResponse.body());
+        } catch (Exception e) {
+            return new ApiResponse(503, "{\"error\":\"Could not connect to the server.\"}");
         }
     }
 }

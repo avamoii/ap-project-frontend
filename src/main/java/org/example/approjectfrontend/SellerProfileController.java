@@ -62,7 +62,7 @@ public class SellerProfileController implements Initializable {
         }
 
         new Thread(() -> {
-            ApiResponse response = ApiService.getProfile();
+            ApiResponse response = ApiService.getUserProfile();
             Platform.runLater(() -> {
                 if (response.getStatusCode() == 200) {
                     Gson gson = new Gson();
@@ -119,7 +119,7 @@ public class SellerProfileController implements Initializable {
                     messageLabel.setText("پروفایل با موفقیت آپدیت شد!");
 
                     new Thread(() -> {
-                        ApiResponse profileResponse = ApiService.getProfile();
+                        ApiResponse profileResponse = ApiService.getUserProfile();
                         if (profileResponse.getStatusCode() == 200) {
                             UserDTO freshUser = new Gson().fromJson(profileResponse.getBody(), UserDTO.class);
                             SessionManager.getInstance().setCurrentUser(freshUser);

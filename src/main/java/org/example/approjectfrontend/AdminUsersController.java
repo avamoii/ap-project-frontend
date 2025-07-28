@@ -1,67 +1,74 @@
 package org.example.approjectfrontend;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import org.example.approjectfrontend.api.ApiResponse;
+import org.example.approjectfrontend.api.ApiService;
+import org.example.approjectfrontend.api.UserDTO;
+
+import java.util.List;
 
 public class AdminUsersController {
 
     @FXML
-    private TableView<User> usersTable;
+    private TableView<UserDTO> usersTable;
     @FXML
-    private TableColumn<User, Number> colSerial;
+    private TableColumn<UserDTO, Number> colSerial;
     @FXML
-    private TableColumn<User, Integer> colId;
+    private TableColumn<UserDTO, Long> colId;
     @FXML
-    private TableColumn<User, String> colName;
+    private TableColumn<UserDTO, String> colName;
     @FXML
-    private TableColumn<User, String> colEmail;
+    private TableColumn<UserDTO, String> colEmail;
     @FXML
-    private TableColumn<User, String> colStatus;
+    private TableColumn<UserDTO, String> colStatus;
     @FXML
-    private TableColumn<User, Void> colActions;
+    private TableColumn<UserDTO, Void> colActions;
 
-    // داده‌های نمونه برای نمایش
-    private final ObservableList<User> userList = FXCollections.observableArrayList(
-            new User(1, "علی", "ali@email.com", "فعال"),
-            new User(2, "زهرا", "zahra@email.com", "غیرفعال"),
-            new User(3, "سینا", "sina@email.com", "منتظر تایید")
-    );
+    private final ObservableList<UserDTO> userList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        // ست کردن شماره ردیف
-        colSerial.setCellValueFactory(col ->
-                new ReadOnlyObjectWrapper<>(usersTable.getItems().indexOf(col.getValue()) + 1)
-        );
-        colSerial.setSortable(false);
+        setupTableColumns();
+        usersTable.setItems(userList);
+        loadUsers();
+    }
 
+    private void setupTableColumns() {
+        colSerial.setCellValueFactory(col -> new ReadOnlyObjectWrapper<>(usersTable.getItems().indexOf(col.getValue()) + 1));
         colId.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getId()));
-        colName.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getName()));
-        colEmail.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getEmail()));
-        colStatus.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getStatus()));
+        colName.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getFullName()));
+        colEmail.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getEmail()));
+        colStatus.setCellValueFactory(cell -> new SimpleStringProperty(translateStatus(cell.getValue().getStatus())));
 
-        // ستون عملیات با دو دکمه (مثال: تایید و حذف)
+        // --- **تغییر اصلی اینجاست** ---
         colActions.setCellFactory(col -> new TableCell<>() {
             private final Button approveButton = new Button("تایید");
-            private final Button deleteButton = new Button("حذف");
-            private final HBox pane = new HBox(8, approveButton, deleteButton);
+            private final Button rejectButton = new Button("رد");
+            private final HBox pane = new HBox(8, approveButton, rejectButton);
 
             {
-                approveButton.setStyle("-fx-background-color: #44bfa3; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 8;");
-                deleteButton.setStyle("-fx-background-color: #f36b7f; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 8;");
+                approveButton.setStyle("-fx-background-color: #44bfa3; -fx-text-fill: white;");
+                rejectButton.setStyle("-fx-background-color: #f36b7f; -fx-text-fill: white;");
+
+                // افزودن رویداد کلیک برای دکمه تایید
                 approveButton.setOnAction(event -> {
-                    User user = getTableView().getItems().get(getIndex());
-                    // عملیات تایید کاربر
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "کاربر \"" + user.getName() + "\" تایید شد.");
-                    alert.showAndWait();
+                    UserDTO user = getTableView().getItems().get(getIndex());
+                    updateUserStatus(user, "approved");
                 });
-                deleteButton.setOnAction(event -> {
-                    User user = getTableView().getItems().get(getIndex());
-                    usersTable.getItems().remove(user);
+
+                // افزودن رویداد کلیک برای دکمه رد
+                rejectButton.setOnAction(event -> {
+                    UserDTO user = getTableView().getItems().get(getIndex());
+                    updateUserStatus(user, "rejected");
                 });
             }
 
@@ -71,30 +78,61 @@ public class AdminUsersController {
                 if (empty) {
                     setGraphic(null);
                 } else {
+                    UserDTO user = getTableView().getItems().get(getIndex());
+                    // فقط برای کاربران در انتظار، دکمه‌ها فعال باشند
+                    if ("PENDING".equalsIgnoreCase(user.getStatus())) {
+                        approveButton.setDisable(false);
+                        rejectButton.setDisable(false);
+                    } else {
+                        approveButton.setDisable(true);
+                        rejectButton.setDisable(true);
+                    }
                     setGraphic(pane);
                 }
             }
         });
-
-        usersTable.setItems(userList);
     }
 
-    // کلاس کاربر ساده برای تست (این رو یا با مدل واقعی خودت جایگزین کن یا گسترش بده)
-    public static class User {
-        private final int id;
-        private final String name;
-        private final String email;
-        private final String status;
+    private void loadUsers() {
+        usersTable.setPlaceholder(new ProgressIndicator());
+        new Thread(() -> {
+            ApiResponse response = ApiService.getAdminUsers();
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    List<UserDTO> users = new Gson().fromJson(response.getBody(), new TypeToken<List<UserDTO>>() {}.getType());
+                    userList.setAll(users);
+                } else {
+                    usersTable.setPlaceholder(new Label("خطا در دریافت لیست کاربران: " + response.getBody()));
+                }
+            });
+        }).start();
+    }
 
-        public User(int id, String name, String email, String status) {
-            this.id = id;
-            this.name = name;
-            this.email = email;
-            this.status = status;
-        }
-        public int getId() { return id; }
-        public String getName() { return name; }
-        public String getEmail() { return email; }
-        public String getStatus() { return status; }
+    // --- **متد جدید برای ارسال درخواست آپدیت** ---
+    private void updateUserStatus(UserDTO user, String newStatus) {
+        new Thread(() -> {
+            ApiResponse response = ApiService.updateUserStatus(user.getId(), newStatus);
+            Platform.runLater(() -> {
+                if (response.getStatusCode() == 200) {
+                    // پس از موفقیت، لیست کاربران را رفرش می‌کنیم تا وضعیت جدید نمایش داده شود
+                    loadUsers();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("خطا");
+                    alert.setContentText("خطا در تغییر وضعیت کاربر: " + response.getBody());
+                    alert.showAndWait();
+                }
+            });
+        }).start();
+    }
+
+    private String translateStatus(String status) {
+        if (status == null) return "نامشخص";
+        return switch (status.toUpperCase()) {
+            case "PENDING" -> "منتظر تایید";
+            case "APPROVED" -> "تایید شده";
+            case "REJECTED" -> "رد شده";
+            default -> status;
+        };
     }
 }

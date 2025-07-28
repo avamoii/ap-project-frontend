@@ -56,7 +56,7 @@ public class CourierProfileController implements Initializable {
         }
 
         new Thread(() -> {
-            ApiResponse response = ApiService.getProfile();
+            ApiResponse response = ApiService.getUserProfile();
             Platform.runLater(() -> {
                 if (response.getStatusCode() == 200) {
                     Gson gson = new Gson();

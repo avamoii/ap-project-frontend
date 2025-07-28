@@ -102,11 +102,12 @@ public class SellerHomeController implements Initializable {
 
     private void openRestaurantOrders(RestaurantDTO restaurant) {
         try {
-            // --- تغییر اصلی اینجاست: استفاده از مسیر مطلق ---
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/SellerOrder-view.fxml"));
             Parent root = loader.load();
 
-            SellerOrdersController controller = loader.getController();
+            // --- اصلاح اصلی: استفاده از نام صحیح کنترلر ---
+            // نام کنترلر از SellerOrdersController به SellerOrderController تغییر کرد تا با FXML مطابقت داشته باشد.
+            SellerOrderController controller = loader.getController();
             controller.setRestaurant(restaurant);
 
             Stage stage = (Stage) restaurantsVBox.getScene().getWindow();

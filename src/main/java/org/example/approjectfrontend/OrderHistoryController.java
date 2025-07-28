@@ -56,7 +56,6 @@ public class OrderHistoryController implements Initializable {
         ordersListView.setItems(orderList);
         itemsListView.setItems(itemNames);
 
-        // --- اصلاح اصلی: حذف آکولادهای اضافی و شرط تودرتو ---
         if (detailsPane != null) {
             detailsPane.setVisible(false);
             detailsPane.setManaged(false);
@@ -96,30 +95,42 @@ public class OrderHistoryController implements Initializable {
         content.setAlignment(Pos.CENTER_LEFT);
 
         if ("COMPLETED".equalsIgnoreCase(order.getStatus())) {
-            Button rateButton = new Button("ثبت نظر");
-            rateButton.setOnAction(e -> openRatingWindow(order));
-            content.getChildren().add(rateButton);
+            if (order.getRatingId() == null) {
+                Button rateButton = new Button("ثبت نظر");
+                rateButton.setOnAction(e -> openRatingWindow(order, null));
+                content.getChildren().add(rateButton);
+            } else {
+                Button editButton = new Button("ویرایش نظر");
+                editButton.setOnAction(e -> openRatingWindow(order, order.getRatingId()));
+
+                Button deleteButton = new Button("حذف نظر");
+                deleteButton.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white;");
+                deleteButton.setOnAction(e -> deleteRating(order.getRatingId()));
+
+                HBox buttons = new HBox(10, editButton, deleteButton);
+                content.getChildren().add(buttons);
+            }
         }
 
         content.setOnMouseClicked(e -> {
             if (!(e.getTarget() instanceof Button)) {
-                showOrderDetails(order.getId());
+                ordersListView.getSelectionModel().select(order);
             }
         });
 
         return content;
     }
 
-    private void openRatingWindow(OrderDTO order) {
+    private void openRatingWindow(OrderDTO order, Long ratingId) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("SubmitRating-view.fxml"));
             Parent root = loader.load();
 
             SubmitRatingController controller = loader.getController();
-            controller.setOrder(order);
+            controller.setOrderAndRating(order, ratingId);
 
             Stage stage = new Stage();
-            stage.setTitle("ثبت نظر برای سفارش #" + order.getId());
+            stage.setTitle("ثبت/ویرایش نظر برای سفارش #" + order.getId());
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
@@ -131,6 +142,24 @@ public class OrderHistoryController implements Initializable {
         }
     }
 
+    private void deleteRating(Long ratingId) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "آیا از حذف این نظر مطمئن هستید؟", ButtonType.YES, ButtonType.NO);
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.YES) {
+                new Thread(() -> {
+                    ApiResponse apiResponse = ApiService.deleteRating(ratingId);
+                    Platform.runLater(() -> {
+                        if (apiResponse.getStatusCode() == 200) {
+                            loadOrderHistory();
+                        } else {
+                            new Alert(Alert.AlertType.ERROR, "خطا در حذف نظر: " + apiResponse.getBody()).show();
+                        }
+                    });
+                }).start();
+            }
+        });
+    }
+
     private void displayOrderDetails(OrderDTO order) {
         if (detailsPane != null && mainSplitPane != null) {
             detailsPane.setVisible(true);
@@ -140,7 +169,7 @@ public class OrderHistoryController implements Initializable {
 
         orderIdLabel.setText(String.valueOf(order.getId()));
         statusLabel.setText(getStatusInPersian(order.getStatus()));
-        priceLabel.setText(order.getPayPrice() + " تومان");
+        priceLabel.setText(String.format("%,d تومان", order.getPayPrice()));
         addressLabel.setText(order.getDeliveryAddress());
 
         itemNames.clear();
