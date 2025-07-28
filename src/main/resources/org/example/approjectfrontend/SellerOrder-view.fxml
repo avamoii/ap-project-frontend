@@ -7,15 +7,15 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="600.0" prefWidth="733.0" spacing="15" style="-fx-padding: 22; -fx-background-color: linear-gradient(to bottom,#ededed,#f7f7f7); -fx-background-radius: 14;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.SellerOrderController">
+<VBox prefHeight="600.0" prefWidth="733.0" spacing="15" style="-fx-padding: 22; -fx-background-color: linear-gradient(to bottom,#ededed,#f7f7f7); -fx-background-radius: 14;"
+      xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.approjectfrontend.SellerOrdersController">
 
-    <!-- هدر رستوران -->
     <HBox alignment="CENTER_LEFT" spacing="16">
         <Label fx:id="restaurantNameLabel" style="-fx-font-size: 20px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-text-fill: #191919;" />
         <Button onAction="#backToHome" style="-fx-background-color: transparent; -fx-text-fill: #191919; -fx-border-color: #bbb; -fx-border-radius: 8; -fx-font-size: 14px; -fx-font-weight: bold; -fx-font-family: 'Vazirmatn', Tahoma, Arial;" text="بازگشت" />
     </HBox>
 
-    <!-- جدول سفارش‌های فروشنده -->
     <TableView fx:id="ordersTable" prefHeight="400" style="-fx-background-radius: 12; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-size: 14px; -fx-font-weight: bold;">
         <columns>
             <TableColumn fx:id="buyerColumn" prefWidth="122.40001714229584" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="خریدار" />

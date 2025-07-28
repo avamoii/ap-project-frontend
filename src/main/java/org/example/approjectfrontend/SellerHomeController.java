@@ -105,9 +105,9 @@ public class SellerHomeController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/approjectfrontend/SellerOrder-view.fxml"));
             Parent root = loader.load();
 
-            // --- اصلاح اصلی: استفاده از نام صحیح کنترلر ---
-            // نام کنترلر از SellerOrdersController به SellerOrderController تغییر کرد تا با FXML مطابقت داشته باشد.
-            SellerOrderController controller = loader.getController();
+            // **تغییر اصلی و کلیدی اینجاست**
+            // نام کلاس کنترلر باید با نام تعریف شده در FXML یکی باشد
+            SellerOrdersController controller = loader.getController();
             controller.setRestaurant(restaurant);
 
             Stage stage = (Stage) restaurantsVBox.getScene().getWindow();
