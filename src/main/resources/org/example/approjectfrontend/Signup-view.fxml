@@ -8,40 +8,54 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.VBox?>
-
 <VBox xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.approjectfrontend.SignupController"
-      alignment="CENTER" spacing="16"
-      style="-fx-background-color: #f3f6fa; -fx-min-height: 100vh;">
+      alignment="CENTER" spacing="18"
+      style="-fx-background-color: linear-gradient(to bottom, #f2f2f2, #e0e0e0); -fx-min-height: 100vh;">
 
-   <VBox alignment="CENTER" spacing="12"
-         style="-fx-background-color: white; -fx-padding: 34; -fx-border-radius: 18px; -fx-background-radius: 18px; -fx-effect: dropshadow(three-pass-box, #bbb, 16, 0.28, 0, 3);">
+   <VBox alignment="CENTER" spacing="14"
+         style="-fx-background-color: white; -fx-padding: 34; -fx-border-radius: 18px; -fx-background-radius: 18px; -fx-effect: dropshadow(three-pass-box, #bbb, 15, 0.16, 0, 4);">
 
-      <Label text="ایجاد حساب کاربری" textFill="#388e3c"
-             style="-fx-font-size: 30px; -fx-font-family: 'Yu Gothic UI Semilight'; -fx-font-weight: bold;" />
+      <Label text="ایجاد حساب کاربری"
+             style="-fx-font-size: 28px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-text-fill: #333;" />
 
-      <TextField fx:id="usernameField" promptText="نام کاربری" style="-fx-font-size: 16px;"/>
-      <TextField fx:id="emailField" promptText="ایمیل (اختیاری)" style="-fx-font-size: 16px;"/>
-      <PasswordField fx:id="passwordField" promptText="رمز عبور" style="-fx-font-size: 16px;"/>
-      <TextField fx:id="phoneField" promptText="شماره تلفن" style="-fx-font-size: 16px;"/>
+      <TextField fx:id="usernameField" promptText="نام کاربری"
+                 style="-fx-font-size: 16px; -fx-background-color: #fafafa; -fx-border-color: #bbb; -fx-border-radius: 7px; -fx-background-radius: 7px;"/>
 
-      <Label text="نقش خود را انتخاب کنید:"/>
+      <TextField fx:id="emailField" promptText="ایمیل (اختیاری)"
+                 style="-fx-font-size: 16px; -fx-background-color: #fafafa; -fx-border-color: #bbb; -fx-border-radius: 7px; -fx-background-radius: 7px;"/>
+
+      <PasswordField fx:id="passwordField" promptText="رمز عبور"
+                     style="-fx-font-size: 16px; -fx-background-color: #fafafa; -fx-border-color: #bbb; -fx-border-radius: 7px; -fx-background-radius: 7px;"/>
+
+      <TextField fx:id="phoneField" promptText="شماره تلفن"
+                 style="-fx-font-size: 16px; -fx-background-color: #fafafa; -fx-border-color: #bbb; -fx-border-radius: 7px; -fx-background-radius: 7px;"/>
+
+      <Label text="نقش خود را انتخاب کنید:"
+             style="-fx-text-fill: #444; -fx-font-size: 14px;"/>
+
       <VBox spacing="6">
-         <RadioButton fx:id="buyerRadio" text="خریدار">
+         <RadioButton fx:id="buyerRadio" text="خریدار"
+                      style="-fx-font-size: 15px; -fx-text-fill: #222;">
             <toggleGroup>
                <ToggleGroup fx:id="roleGroup" />
             </toggleGroup>
          </RadioButton>
-         <RadioButton fx:id="sellerRadio" text="فروشنده" toggleGroup="$roleGroup"/>
-         <RadioButton fx:id="courierRadio" text="پیک" toggleGroup="$roleGroup"/>
+         <RadioButton fx:id="sellerRadio" text="فروشنده"
+                      style="-fx-font-size: 15px; -fx-text-fill: #222;" toggleGroup="$roleGroup"/>
+         <RadioButton fx:id="courierRadio" text="پیک"
+                      style="-fx-font-size: 15px; -fx-text-fill: #222;" toggleGroup="$roleGroup"/>
       </VBox>
 
       <Button mnemonicParsing="false" onAction="#handleSignup" text="ثبت‌نام"
-              style="-fx-background-color: #388e3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8px; -fx-font-size: 15px;" prefWidth="130"/>
+              style="-fx-background-color: #111; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8px; -fx-font-size: 15px;" prefWidth="140"/>
 
-      <Label text="حساب کاربری دارید؟"/>
-      <Hyperlink onAction="#gotoLogin" text="وارد شوید" textFill="#388e3c" style="-fx-font-size: 15px;"/>
-      <Label fx:id="messageLabel" textFill="green" />
+      <Label text="حساب کاربری دارید؟"
+             style="-fx-text-fill: #444;"/>
 
+      <Hyperlink onAction="#gotoLogin" text="وارد شوید"
+                 style="-fx-font-size: 16px; -fx-text-fill: #111;"/>
+
+      <Label fx:id="messageLabel" style="-fx-text-fill: #388e3c;"/>
    </VBox>
 </VBox>

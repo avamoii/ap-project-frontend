@@ -7,26 +7,29 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-
 <VBox xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.example.approjectfrontend.LoginController"
       alignment="CENTER" spacing="18"
-      style="-fx-background-color: #f3f6fa; -fx-min-height: 100vh;">
+      style="-fx-background-color: linear-gradient(to bottom, #f4f4f4, #dadada); -fx-min-height: 100vh;">
 
     <VBox alignment="CENTER" spacing="15"
-          style="-fx-background-color: white; -fx-padding: 32 32 32 32; -fx-border-radius: 18px; -fx-background-radius: 18px; -fx-effect: dropshadow(three-pass-box, #bbb, 14, 0.37, 0, 3);">
+          style="-fx-background-color: white; -fx-padding: 32; -fx-border-radius: 18px; -fx-background-radius: 18px; -fx-effect: dropshadow(three-pass-box, #bdbdbd, 13, 0.25, 0, 4);">
 
-        <Label text="ورود به حساب" textFill="#388e3c"
-               style="-fx-font-size: 30px; -fx-font-family: 'Vazirmatn', 'Yu Gothic UI Semilight'; -fx-font-weight: bold;" />
+        <Label text="ورود به حساب"
+               style="-fx-font-size: 28px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-text-fill: #222;"/>
 
-        <TextField fx:id="phonenumberField" promptText="شماره تماس" style="-fx-font-size: 16px;"/>
-        <PasswordField fx:id="passwordField" promptText="رمز عبور" style="-fx-font-size: 16px;"/>
+        <TextField fx:id="phonenumberField" promptText="شماره تماس"
+                   style="-fx-font-size: 16px; -fx-background-color: #fafafa; -fx-border-color: #bababa; -fx-border-radius: 7px; -fx-background-radius: 7px; -fx-text-fill: #333;"/>
+        <PasswordField fx:id="passwordField" promptText="رمز عبور"
+                       style="-fx-font-size: 16px; -fx-background-color: #fafafa; -fx-border-color: #bababa; -fx-border-radius: 7px; -fx-background-radius: 7px; -fx-text-fill: #333;"/>
 
         <Button onAction="#handleLogin" text="ورود"
-                style="-fx-background-color: #388e3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px; -fx-background-radius: 8px;" prefWidth="120"/>
+                style="-fx-background-color: #111111; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px; -fx-background-radius: 8px; -fx-cursor: hand;" prefWidth="120"/>
 
-        <Label text="حساب کاربری ندارید؟" style="-fx-text-fill: #868686;"/>
-        <Hyperlink onAction="#goToSignUp" text="ثبت‌نام کنید" textFill="#388e3c" style="-fx-font-size: 15px;"/>
-        <Label fx:id="messageLabel" textFill="green" />
+        <Label text="حساب کاربری ندارید؟"
+               style="-fx-text-fill: #666;"/>
+        <Hyperlink onAction="#goToSignUp" text="ثبت‌نام کنید"
+                   style="-fx-font-size: 15px; -fx-text-fill: #111;"/>
+        <Label fx:id="messageLabel" style="-fx-text-fill: #388e3c;"/>
     </VBox>
 </VBox>

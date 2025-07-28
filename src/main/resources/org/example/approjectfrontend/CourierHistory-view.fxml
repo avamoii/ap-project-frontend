@@ -6,17 +6,36 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<AnchorPane prefHeight="600.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.approjectfrontend.CourierHistoryController">
 
-<AnchorPane prefHeight="600.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.approjectfrontend.CourierHistoryController">
-    <VBox spacing="10" style="-fx-padding: 10;" AnchorPane.bottomAnchor="50" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <Label text="تاریخچه ارسال‌ها" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-        <ListView fx:id="historyListView" VBox.vgrow="ALWAYS"/>
+    <!-- کادر/باکس اصلی -->
+    <VBox spacing="10"
+          style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 18px; -fx-effect: dropshadow(three-pass-box, #bdbdbd, 15, 0.14, 0, 4);"
+          AnchorPane.bottomAnchor="60" AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15" AnchorPane.topAnchor="20">
+        <Label text="تاریخچه ارسال‌ها"
+               style="-fx-font-size: 20px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-text-fill: #181818;"/>
+        <ListView fx:id="historyListView"
+                  VBox.vgrow="ALWAYS"
+                  style="-fx-background-color: #f9f9f9; -fx-border-color: #ddd; -fx-border-radius: 8px;"/>
     </VBox>
 
-    <HBox alignment="CENTER" prefHeight="40.0" spacing="0" style="-fx-background-color: #54C16E;" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-        <!-- onAction attributes are removed from these buttons -->
-        <Button fx:id="homeBtn" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;" text="خانه" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="historyBtn" style="-fx-background-color: #368a4a; -fx-text-fill: white; -fx-font-size: 18px;" text="تاریخچه" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="profileBtn" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;" text="پروفایل" HBox.hgrow="ALWAYS"/>
+    <!-- نوار پایین (navigation) سیاه و سفید -->
+    <HBox alignment="CENTER"
+          prefHeight="45.0"
+          style="-fx-background-color: linear-gradient(to top, #f2f2f2, #e1e1e1); -fx-border-color: #ccc; -fx-border-width: 1px 0 0 0;"
+          AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+
+        <Button fx:id="homeBtn"
+                style="-fx-background-color: transparent; -fx-text-fill: #222; -fx-font-size: 18px; -fx-font-family: 'Vazirmatn', Tahoma, Arial;"
+                text="خانه" HBox.hgrow="ALWAYS"/>
+
+        <Button fx:id="historyBtn"
+                style="-fx-background-color: #111; -fx-text-fill: white; -fx-font-size: 18px; -fx-font-family: 'Vazirmatn', Tahoma, Arial; -fx-font-weight: bold; -fx-background-radius: 7px;"
+                text="تاریخچه" HBox.hgrow="ALWAYS"/>
+
+        <Button fx:id="profileBtn"
+                style="-fx-background-color: transparent; -fx-text-fill: #222; -fx-font-size: 18px; -fx-font-family: 'Vazirmatn', Tahoma, Arial;"
+                text="پروفایل" HBox.hgrow="ALWAYS"/>
     </HBox>
 </AnchorPane>
