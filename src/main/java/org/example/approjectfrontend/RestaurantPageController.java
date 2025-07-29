@@ -298,6 +298,11 @@ public class RestaurantPageController {
         dialog.setTitle("انتخاب روش پرداخت");
         dialog.setHeaderText("سفارش شما با موفقیت ثبت شد.");
         dialog.setContentText("روش پرداخت:");
+        // تغییر سایز دیالوگ (مهم!)
+        DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.setPrefWidth(500);    // عرض دلخواه
+        dialogPane.setPrefHeight(400);   // ارتفاع دلخواه
+
         dialog.showAndWait().ifPresent(selected -> {
             String method = "پرداخت با کیف پول".equals(selected) ? "WALLET" : "ONLINE";
             processPayment(orderId, method);
